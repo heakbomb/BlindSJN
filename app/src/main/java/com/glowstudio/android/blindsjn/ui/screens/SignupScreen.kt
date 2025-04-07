@@ -22,7 +22,7 @@ import androidx.compose.ui.unit.dp
 
 
 import android.util.Log
-import com.glowstudio.android.blindsjn.network.RetrofitInstance
+import com.glowstudio.android.blindsjn.network.InternalServer
 import com.glowstudio.android.blindsjn.network.SignupRequest
 import kotlinx.coroutines.launch
 
@@ -33,7 +33,7 @@ suspend fun signup(phoneNumber: String, password: String): Boolean {
 
     return try {
         // 서버에 회원가입 요청
-        val response = RetrofitInstance.api.signup(request)
+        val response = InternalServer.api.signup(request)
 
         // 응답 처리
         if (response.isSuccessful) {

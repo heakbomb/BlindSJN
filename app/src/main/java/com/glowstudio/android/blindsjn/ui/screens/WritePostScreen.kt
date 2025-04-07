@@ -14,24 +14,42 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import androidx.navigation.NavController
+import com.glowstudio.android.blindsjn.ui.viewModel.PostViewModel
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun WritePostScreen(navController: NavController) {
-    // 입력 필드 상태
+fun WritePostScreen(
+    navController: NavController,
+    postViewModel: PostViewModel = viewModel()
+) {
     var title by remember { mutableStateOf("") }
     var content by remember { mutableStateOf("") }
-
-    // 체크박스 상태
     var isAnonymous by remember { mutableStateOf(false) }
     var isQuestion by remember { mutableStateOf(false) }
 
-    // 포커스 요청자
     val contentFocusRequester = remember { FocusRequester() }
+    val statusMessage by postViewModel.statusMessage.collectAsState()
+
+    LaunchedEffect(statusMessage) {
+        if (!statusMessage.isNullOrEmpty()) {
+            if (statusMessage!!.contains("성공") || statusMessage!!.contains("저장")) {
+                navController.navigateUp()
+            }
+        }
+    }
 
     Scaffold(
+        topBar = {
+            TopAppBar(title = { Text("게시글 작성") })
+        },
         content = { paddingValues ->
             Column(
                 modifier = Modifier
@@ -39,7 +57,6 @@ fun WritePostScreen(navController: NavController) {
                     .padding(paddingValues)
                     .padding(horizontal = 16.dp)
             ) {
-                // 제목 입력 필드
                 OutlinedTextField(
                     value = title,
                     onValueChange = { title = it },
@@ -49,12 +66,9 @@ fun WritePostScreen(navController: NavController) {
                         .fillMaxWidth()
                         .padding(vertical = 8.dp),
                     keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next),
-                    keyboardActions = KeyboardActions(
-                        onNext = { contentFocusRequester.requestFocus() } // 포커스를 내용 입력 필드로 이동
-                    )
+                    keyboardActions = KeyboardActions(onNext = { contentFocusRequester.requestFocus() })
                 )
 
-                // 내용 입력 필드
                 OutlinedTextField(
                     value = content,
                     onValueChange = { content = it },
@@ -63,11 +77,10 @@ fun WritePostScreen(navController: NavController) {
                         .fillMaxWidth()
                         .weight(1f)
                         .padding(vertical = 8.dp)
-                        .focusRequester(contentFocusRequester), // 포커스 요청자 연결
+                        .focusRequester(contentFocusRequester),
                     maxLines = Int.MAX_VALUE
                 )
 
-                // 하단 버튼들
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -75,24 +88,17 @@ fun WritePostScreen(navController: NavController) {
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // 이미지 및 파일 첨부 버튼
                     Row {
-                        IconButton(onClick = { /* TODO: 이미지 업로드 동작 */ }) {
-                            Icon(
-                                imageVector = Icons.Default.CameraAlt,
-                                contentDescription = "이미지 첨부"
-                            )
+                        IconButton(onClick = { /* 이미지 첨부 */ }) {
+                            Icon(Icons.Default.CameraAlt, contentDescription = "이미지 첨부")
                         }
-                        Spacer(modifier = Modifier.width(8.dp)) // 버튼 간 간격 추가
-                        IconButton(onClick = { /* TODO: 파일 업로드 동작 */ }) {
-                            Icon(
-                                imageVector = Icons.Default.AttachFile,
-                                contentDescription = "파일 첨부"
-                            )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        IconButton(onClick = { /* 파일 첨부 */ }) {
+                            Icon(Icons.Default.AttachFile, contentDescription = "파일 첨부")
                         }
                     }
 
-                    // 익명 및 질문 체크박스
+                    // 이전처럼 "질문"과 "익명" 체크박스를 오른쪽에
                     Row {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
@@ -112,20 +118,29 @@ fun WritePostScreen(navController: NavController) {
                     }
                 }
 
-                // 완료 버튼
                 Button(
                     onClick = {
                         if (title.isBlank() || content.isBlank()) {
-                            // TODO: 제목 또는 내용이 비어 있을 경우 처리
-                            println("제목과 내용을 모두 입력해야 합니다.")
+                            postViewModel.setStatusMessage("제목과 내용을 입력하세요.")
                         } else {
-                            // TODO: 입력 데이터 서버로 전송
-                            navController.navigateUp() // 완료 후 이전 화면으로 이동
+                            val userId = 1
+                            val industry = "카페"
+                            postViewModel.savePost(title, content, userId, industry)
                         }
                     },
                     modifier = Modifier.align(Alignment.End)
                 ) {
-                    Text("완료")
+                    Text("등록")
+                }
+
+                statusMessage?.let {
+                    if (it.isNotBlank()) {
+                        Text(
+                            text = it,
+                            color = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.padding(vertical = 8.dp)
+                        )
+                    }
                 }
             }
         }

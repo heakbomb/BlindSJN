@@ -39,9 +39,11 @@ fun AppNavHost(
         // 로그인 화면
         composable("login") {
             LoginScreen(
-                onLoginClick = { navController.navigate("main") },
+                onLoginClick = { success ->
+                    if (success) navController.navigate("main")
+                },
                 onSignupClick = { navController.navigate("signup") },
-                onForgotPasswordClick = { /* TODO: 비밀번호 찾기 화면 이동 */ }
+                onForgotPasswordClick = { navController.navigate("forgot") }
             )
         }
 

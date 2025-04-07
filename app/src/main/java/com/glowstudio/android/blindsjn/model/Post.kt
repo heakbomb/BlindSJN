@@ -1,14 +1,24 @@
 package com.glowstudio.android.blindsjn.model
 
+import com.google.gson.annotations.SerializedName
+
 data class Post(
-    val id: Int, // 게시글 ID 추가
-    val title: String, // 게시글 제목
-    val content: String, // 게시글 내용
-    val category: String, // 게시글 카테고리
-    val experience: String, // 작성자 경력
-    val time: String, // 게시글 작성 시간
-    val commentCount: Int, // 댓글 수
-    val likeCount: Int // 좋아요 수
+    @SerializedName("id") val id: Int,
+    @SerializedName("title") val title: String,
+    @SerializedName("content") val content: String,
+    @SerializedName("category") val category: String,
+    @SerializedName("experience") val experience: String,
+    @SerializedName("time") val time: String,
+    @SerializedName("commentCount") val commentCount: Int,
+    @SerializedName("likeCount") val likeCount: Int
 )
 
-// 다른 스크립트에서 import하여 사용
+
+
+// 게시글 목록 응답 모델
+data class PostListResponse(
+    @SerializedName("status") val status: String,
+    @SerializedName("message") val message: String,
+    @SerializedName("data") val data: List<Post>
+)
+

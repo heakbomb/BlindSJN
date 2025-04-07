@@ -79,7 +79,7 @@ object NewsServer {
 }
 
 // 내부 서버
-object RetrofitInstance {
+object InternalServer {
 
     private const val BASE_URL = "http://wonrdc.duckdns.org/"
 
@@ -103,22 +103,6 @@ object RetrofitInstance {
 
     val api: ApiService by lazy {
         retrofit.create(ApiService::class.java)
-    }
-}
-
-// 공공 API 서버용 Retrofit 인스턴스
-object PublicApiRetrofitInstance {
-    private const val BASE_URL = "https://api.odcloud.kr/api/" // 공공 API URL
-
-    private val retrofit by lazy {
-        Retrofit.Builder()
-            .baseUrl(BASE_URL)
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-    }
-
-    val api: BusinessApiService by lazy {
-        retrofit.create(BusinessApiService::class.java)
     }
 }
 
