@@ -24,9 +24,11 @@ fun AppNavHost(
     ) {
         composable("login") {
             LoginScreen(
-                onLoginClick = { navController.navigate("main") },
+                onLoginClick = { success ->
+                    if (success) navController.navigate("main")
+                },
                 onSignupClick = { navController.navigate("signup") },
-                onForgotPasswordClick = { /* TODO: 비밀번호 찾기 화면 이동 */ }
+                onForgotPasswordClick = { navController.navigate("forgot") }
             )
         }
 
@@ -131,18 +133,9 @@ fun AppNavHost(
                         launchSingleTop = true
                     }
                 },
-                onBusinessCertificationClick = {
-                    navController.navigate("certification")
-                },
-                onProfileEditClick = {
-                    navController.navigate("editProfile")
-                },
-                onContactEditClick = {
-                    navController.navigate("editContact")
-                },
-                onFoodCostCalculatorClick = {
-                    navController.navigate("foodCost")
-                }
+                onBusinessCertificationClick = { navController.navigate("certification") },
+                onProfileEditClick = { navController.navigate("editProfile") },
+                onContactEditClick = { navController.navigate("editContact") }
             )
         }
 

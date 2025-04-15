@@ -6,6 +6,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.glowstudio.android.blindsjn.ui.components.CommonButton
 
 @Composable
 fun RegisterRecipeScreen() {
@@ -78,14 +79,13 @@ fun RegisterRecipeScreen() {
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        Button(
+        CommonButton(
+            text = "등록",
             onClick = {
                 // TODO: 레시피 저장 로직 구현
             },
             modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("저장")
-        }
+        )
     }
 }
 

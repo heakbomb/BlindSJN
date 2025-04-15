@@ -10,6 +10,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.glowstudio.android.blindsjn.ui.components.CommonButton
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -74,14 +75,15 @@ fun EditProfileScreen(
         Spacer(modifier = Modifier.weight(1f))
 
         // 저장 버튼
-        Button(
-            onClick = onSave,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 16.dp)
-        ) {
-            Text("저장")
-        }
+        CommonButton(
+            text = "저장",
+            onClick = onSave
+        )
+
+        CommonButton(
+            text = "취소",
+            onClick = onBackClick
+        )
     }
 }
 

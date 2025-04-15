@@ -2,6 +2,7 @@ package com.glowstudio.android.blindsjn.ui.screens
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
@@ -35,6 +36,8 @@ import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import com.google.gson.Gson
 import java.net.URLEncoder
+import androidx.navigation.compose.rememberNavController
+import com.glowstudio.android.blindsjn.ui.theme.BlindSJNTheme
 
 @OptIn(ExperimentalPagerApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -51,7 +54,7 @@ fun HomeScreen(navController: NavHostController) {
         BannerSection()
 
         // 바로가기 섹션
-        ShortcutSection()
+        ShortcutSection(navController)
 
         // 새로운 소식 섹션
         NewsSection(navController)
@@ -97,7 +100,7 @@ fun BannerSection() {
 }
 
 @Composable
-fun ShortcutSection() {
+fun ShortcutSection(navController: NavHostController) {
     Column(modifier = Modifier.padding(16.dp)) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -113,29 +116,66 @@ fun ShortcutSection() {
         LazyRow(
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            items(4) {
+            items(shortcutItems) { item ->
                 Box(
                     modifier = Modifier
                         .size(80.dp)
                         .clip(RoundedCornerShape(8.dp))
-                        .background(Color(0xFFF5F5F5)),
+                        .border(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f), RoundedCornerShape(8.dp))
+                        .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(8.dp))
+                        .clickable { 
+                            when (item.title) {
+                                "푸드코스트" -> navController.navigate("foodCost")
+                                "캘린더" -> navController.navigate("message")
+                            }
+                        },
                     contentAlignment = Alignment.Center
                 ) {
-                    Image(
-                        painter = painterResource(id = R.drawable.login_image),
-                        contentDescription = "바로가기 아이콘",
-                        modifier = Modifier.size(40.dp)
-                    )
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(40.dp)
+                                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f), RoundedCornerShape(8.dp)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = item.emoji,
+                                style = MaterialTheme.typography.titleLarge
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = item.title,
+                            style = MaterialTheme.typography.bodySmall,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
                 }
             }
         }
     }
 }
 
+// 바로가기 아이템 데이터 클래스
+data class ShortcutItem(
+    val title: String,
+    val emoji: String
+)
+
+// 바로가기 아이템 목록
+private val shortcutItems = listOf(
+    ShortcutItem("푸드코스트", "🍴"),
+    ShortcutItem("캘린더", "📅")
+)
+
 @Composable
 fun NewsSection(navController: NavHostController) {
     val viewModel: NewsViewModel = viewModel()
-    val articles: List<NewsArticle> by viewModel.articles  // ✅ 타입 명시
+    val articles: List<NewsArticle> by viewModel.articles
     val isLoading by viewModel.isLoading
     val errorMessage by viewModel.errorMessage
 
@@ -161,27 +201,26 @@ fun NewsSection(navController: NavHostController) {
             else -> {
                 LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     items(articles.toList()) { article ->
-                        Card(
+                        Box(
                             modifier = Modifier
                                 .width(300.dp)
-                                .padding(8.dp)
+                                .height(120.dp)
+                                .clip(RoundedCornerShape(8.dp))
+                                .border(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f), RoundedCornerShape(8.dp))
+                                .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(8.dp))
                                 .clickable {
                                     val articleJson = URLEncoder.encode(Gson().toJson(article), "UTF-8")
                                     navController.navigate("newsDetail/$articleJson")
-                                },
-                            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                                }
                         ) {
-                            Row(modifier = Modifier
-                                .fillMaxWidth()
-                                .height(120.dp)) {
-
+                            Row(modifier = Modifier.fillMaxSize()) {
                                 AsyncImage(
                                     model = article.urlToImage,
                                     contentDescription = "기사 이미지",
                                     modifier = Modifier
                                         .fillMaxHeight()
                                         .weight(1f)
-                                        .clip(RoundedCornerShape(topStart = 4.dp, bottomStart = 4.dp)),
+                                        .clip(RoundedCornerShape(topStart = 8.dp, bottomStart = 8.dp)),
                                     contentScale = ContentScale.Crop
                                 )
 
@@ -240,5 +279,8 @@ fun SalesSection() {
 @Preview(showBackground = true)
 @Composable
 fun HomeScreenPreview() {
-//    HomeScreen()
+    val navController = rememberNavController()
+    BlindSJNTheme {
+        HomeScreen(navController = navController)
+    }
 }

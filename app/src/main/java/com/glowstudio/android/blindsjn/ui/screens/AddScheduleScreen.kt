@@ -14,6 +14,7 @@ import com.glowstudio.android.blindsjn.ui.dialog.CustomTimePickerDialog
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
+import com.glowstudio.android.blindsjn.ui.components.CommonButton
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -136,23 +137,25 @@ fun AddScheduleScreen(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.End
             ) {
-                Button(onClick = onCancel) {
-                    Text("취소")
-                }
+                CommonButton(
+                    text = "취소",
+                    onClick = onCancel
+                )
                 Spacer(modifier = Modifier.width(8.dp))
-                Button(onClick = {
-                    val schedule = ScheduleInput(
-                        title = title,
-                        startDate = startDate,
-                        endDate = endDate,
-                        startTime = startTime,
-                        endTime = endTime,
-                        memo = memo
-                    )
-                    onSave(schedule)
-                }) {
-                    Text("저장")
-                }
+                CommonButton(
+                    text = "저장",
+                    onClick = {
+                        val schedule = ScheduleInput(
+                            title = title,
+                            startDate = startDate,
+                            endDate = endDate,
+                            startTime = startTime,
+                            endTime = endTime,
+                            memo = memo
+                        )
+                        onSave(schedule)
+                    }
+                )
             }
         }
     }

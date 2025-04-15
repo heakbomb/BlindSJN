@@ -6,6 +6,10 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.layout.fillMaxWidth
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -33,10 +37,13 @@ fun TopBar(
             }
         },
         colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-            containerColor = MaterialTheme.colorScheme.primary, // 상단 바 배경색
-            titleContentColor = Color.White, // 제목 색상
-            navigationIconContentColor = Color.White, // 뒤로가기 아이콘 색상
-            actionIconContentColor = Color.White // 검색 아이콘 색상
-        )
+            containerColor = Color.White,
+            titleContentColor = Color.Black,
+            navigationIconContentColor = Color.Black,
+            actionIconContentColor = Color.Black
+        ),
+        modifier = Modifier
+            .fillMaxWidth()
+            .shadow(elevation = 4.dp)
     )
 }

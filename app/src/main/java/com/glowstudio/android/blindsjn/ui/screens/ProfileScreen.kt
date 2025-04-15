@@ -26,8 +26,7 @@ fun ProfileScreen(
     onLogoutClick: () -> Unit,
     onBusinessCertificationClick: () -> Unit,
     onProfileEditClick: () -> Unit,
-    onContactEditClick: () -> Unit,
-    onFoodCostCalculatorClick: () -> Unit
+    onContactEditClick: () -> Unit
 ) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
@@ -86,41 +85,12 @@ fun ProfileScreen(
                         when (item) {
                             "프로필 변경" -> onProfileEditClick()
                             "연락처 변경" -> onContactEditClick()
+                            "사업자 인증" -> onBusinessCertificationClick()
+                            "로그아웃" -> showLogoutPopup = true
                         }
                     }
                 )
             }
-        }
-
-        Spacer(modifier = Modifier.weight(1f))
-
-        // 푸드코스트 계산 버튼 추가
-        Button(
-            onClick = { onFoodCostCalculatorClick() },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 8.dp)
-        ) {
-            Text(text = "푸드코스트 계산")
-        }
-
-        // 기존 버튼들
-        Button(
-            onClick = { onBusinessCertificationClick() },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 8.dp)
-        ) {
-            Text(text = "사업자 인증")
-        }
-
-        Button(
-            onClick = { showLogoutPopup = true },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 8.dp)
-        ) {
-            Text(text = "로그아웃")
         }
     }
 
@@ -186,10 +156,12 @@ private fun MenuListItem(
     }
 }
 
-// 필요한 내용 여기에 넣으면 됨.
+// 메뉴 아이템 목록
 private val menuItems = listOf(
     "프로필 변경",
-    "연락처 변경"
+    "연락처 변경",
+    "사업자 인증",
+    "로그아웃"
 )
 
 @Preview(showBackground = true)
@@ -199,7 +171,6 @@ fun ScreenPreview_() {
         onLogoutClick = { },
         onBusinessCertificationClick = { },
         onProfileEditClick = { },
-        onContactEditClick = { },
-        onFoodCostCalculatorClick = { }
+        onContactEditClick = { }
     )
 }

@@ -14,31 +14,32 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.glowstudio.android.blindsjn.model.Post
+import com.glowstudio.android.blindsjn.ui.viewModel.PostViewModel
 
 @Composable
 fun BoardDetailScreen(navController: NavController, title: String) {
-    // 현재 선택된 카테고리 상태
-    // TODO: 서버에서 게시글을 가져올 때 이 값을 파라미터로 사용해야 함
+    val viewModel: PostViewModel = viewModel()
+
+    // ViewModel의 게시글 상태 관찰
+    val posts by viewModel.posts.collectAsState()
+    val statusMessage by viewModel.statusMessage.collectAsState()
+
     var selectedCategory by remember { mutableStateOf("모든 분야") }
 
-    // 카테고리와 게시글 데이터
-    // TODO: 아래는 더미 데이터. 서버 연동 시 API 호출로 대체 필요
     val categories = listOf("모든 분야", "카페", "식당", "배달 전문", "패스트푸드", "호텔")
-    val posts = listOf(
-        Post(4,"비수기네요...", "요즘 장사가 잘 안 되네요.", "카페", "/2년", "17분 전", 18,5),
-        Post(3,"오늘도 화이팅입니다.", "손님 줄어든 게 너무 힘드네요.", "식당", "/1년", "57분 전", 3,23),
-        Post(2,"봉어빵 메뉴 잘 나가나요?", "겨울 한정 메뉴를 추가하려 합니다.", "카페", "/1년", "11:27", 8,1),
-        Post(1,"배달 플랫폼 수수료 또 오른다네요;", "수수료 때문에 고민입니다.", "배달 전문", "/5년", "8:29", 48,0)
-    )
 
+    // 최초 로딩 시 게시글 불러오기
+    LaunchedEffect(Unit) {
+        viewModel.loadPosts()
+    }
 
     Scaffold(
         floatingActionButton = {
-            // 글쓰기 화면으로 이동
             FloatingActionButton(
                 onClick = {
-                    navController.navigate("writePost") // 글쓰기 화면으로 이동
+                    navController.navigate("writePost")
                 },
                 containerColor = MaterialTheme.colorScheme.primary
             ) {
@@ -51,19 +52,25 @@ fun BoardDetailScreen(navController: NavController, title: String) {
                     .fillMaxSize()
                     .padding(paddingValues)
             ) {
-                // 카테고리 필터
                 CategoryFilterRow(
                     categories = categories,
                     selectedCategory = selectedCategory,
                     onCategorySelected = { selectedCategory = it }
                 )
 
-                // 게시글 리스트
-                // TODO: 서버 연동 시, 아래 필터링 로직 대신 서버 쿼리에서 처리하는 방식 검토
                 val filteredPosts = posts.filter { post ->
                     selectedCategory == "모든 분야" || post.category.contains(selectedCategory)
                 }
-                PostList(navController, posts = filteredPosts)
+
+                if (statusMessage != null) {
+                    Text(
+                        text = statusMessage ?: "",
+                        color = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.padding(16.dp)
+                    )
+                }
+
+                PostList(navController = navController, posts = filteredPosts)
             }
         }
     )
@@ -75,7 +82,6 @@ fun CategoryFilterRow(
     selectedCategory: String,
     onCategorySelected: (String) -> Unit
 ) {
-    // 가로 스크롤 가능한 카테고리 필터
     LazyRow(
         modifier = Modifier
             .fillMaxWidth()
@@ -98,7 +104,6 @@ fun FilterChip(
     isSelected: Boolean,
     onClick: () -> Unit
 ) {
-    // 선택된 카테고리를 강조하는 버튼
     Box(
         modifier = Modifier
             .background(
@@ -119,7 +124,6 @@ fun FilterChip(
 
 @Composable
 fun PostList(navController: NavController, posts: List<Post>) {
-    // 게시글 리스트
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -138,15 +142,12 @@ fun PostItem(navController: NavController, post: Post) {
             .fillMaxWidth()
             .background(MaterialTheme.colorScheme.surface, MaterialTheme.shapes.medium)
             .clickable {
-                println("Navigating to postDetail/${post.id}") // 로그 확인용
-                navController.navigate("postDetail/${post.id.toString()}") } // 게시물 상세로 이동
+                navController.navigate("postDetail/${post.id}")
+            }
             .padding(16.dp)
     ) {
-        // 게시글 제목
         Text(text = post.title, style = MaterialTheme.typography.titleMedium)
         Spacer(modifier = Modifier.height(4.dp))
-
-        // 게시글 내용
         Text(
             text = post.content,
             style = MaterialTheme.typography.bodySmall,
@@ -154,20 +155,16 @@ fun PostItem(navController: NavController, post: Post) {
             maxLines = 2
         )
         Spacer(modifier = Modifier.height(8.dp))
-
-        // 카테고리, 작성자 경력, 시간, 댓글 수
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // 카테고리와 계정 데이터
             Text(
                 text = "${post.category} ${post.experience}",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
-            // 시간과 댓글 수
             Text(
                 text = "${post.time}   댓글 ${post.commentCount}",
                 style = MaterialTheme.typography.bodySmall,
@@ -176,4 +173,3 @@ fun PostItem(navController: NavController, post: Post) {
         }
     }
 }
-

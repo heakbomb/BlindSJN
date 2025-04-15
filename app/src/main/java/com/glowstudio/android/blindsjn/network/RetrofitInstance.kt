@@ -79,7 +79,7 @@ object NewsServer {
 }
 
 // 내부 서버
-object RetrofitInstance {
+object InternalServer {
 
     private const val BASE_URL = "http://wonrdc.duckdns.org/"
 
