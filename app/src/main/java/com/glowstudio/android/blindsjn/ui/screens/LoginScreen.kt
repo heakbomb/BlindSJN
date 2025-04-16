@@ -39,6 +39,7 @@ import java.io.IOException
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
+import com.glowstudio.android.blindsjn.ui.components.*
 
 // 로그인 함수 (서버 통신)
 suspend fun login(phoneNumber: String, password: String): Boolean {
@@ -67,7 +68,6 @@ fun LoginScreen(
 
     var phoneNumber by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
-    var passwordVisible by remember { mutableStateOf(false) }
     var autoLoginEnabled by remember { mutableStateOf(false) }
     var showEmptyFieldsPopup by remember { mutableStateOf(false) }
     var showInvalidCredentialsPopup by remember { mutableStateOf(false) }
@@ -134,101 +134,41 @@ fun LoginScreen(
         // 입력 필드들을 담을 Column
         Column(
             modifier = Modifier
-                .fillMaxWidth(0.85f),  // 전체 너비의 85%로 제한
+                .fillMaxWidth(0.85f),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             // 전화번호 입력
-            OutlinedTextField(
+            CommonTextField(
                 value = phoneNumber,
                 onValueChange = { input -> phoneNumber = input.filter { it.isDigit() } },
-                label = { Text("전화번호") },
-                placeholder = { Text("전화번호를 입력하세요") },
-                singleLine = true,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = MaterialTheme.colorScheme.primary,
-                    unfocusedBorderColor = MaterialTheme.colorScheme.outline,
-                    focusedLabelColor = MaterialTheme.colorScheme.primary,
-                    unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                label = "전화번호",
+                placeholder = "전화번호를 입력하세요",
+                keyboardType = KeyboardType.Number
             )
 
             Spacer(modifier = Modifier.height(16.dp))
 
             // 비밀번호 입력
-            OutlinedTextField(
+            CommonTextField(
                 value = password,
                 onValueChange = { password = it },
-                label = { Text("비밀번호") },
-                placeholder = { Text("비밀번호를 입력하세요") },
-                singleLine = true,
-                visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-                trailingIcon = {
-                    IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                        Icon(
-                            imageVector = if (passwordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff,
-                            contentDescription = if (passwordVisible) "비밀번호 숨기기" else "비밀번호 보기",
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                },
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = MaterialTheme.colorScheme.primary,
-                    unfocusedBorderColor = MaterialTheme.colorScheme.outline,
-                    focusedLabelColor = MaterialTheme.colorScheme.primary,
-                    unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                label = "비밀번호",
+                placeholder = "비밀번호를 입력하세요",
+                isPassword = true
             )
 
             // 자동 로그인과 비밀번호 찾기
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.padding(end = 8.dp)
-                ) {
-                    Checkbox(
-                        checked = autoLoginEnabled,
-                        onCheckedChange = { autoLoginEnabled = it },
-                        colors = CheckboxDefaults.colors(
-                            checkedColor = MaterialTheme.colorScheme.primary,
-                            uncheckedColor = MaterialTheme.colorScheme.onSurfaceVariant
-                        ),
-                        modifier = Modifier.size(20.dp)
-                    )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text(
-                        "자동 로그인",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-                
-                TextButton(
-                    onClick = onForgotPasswordClick,
-                    contentPadding = PaddingValues(0.dp)
-                ) {
-                    Text(
-                        "비밀번호를 잊어버리셨나요?",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                }
-            }
+            AutoLoginRow(
+                autoLoginEnabled = autoLoginEnabled,
+                onAutoLoginChange = { autoLoginEnabled = it },
+                onForgotPasswordClick = onForgotPasswordClick
+            )
 
             Spacer(modifier = Modifier.height(24.dp))
 
             // 로그인 버튼
-            Button(
+            CommonButton(
+                text = "로그인",
                 onClick = {
                     coroutineScope.launch {
                         if (phoneNumber.isEmpty() || password.isEmpty()) {
@@ -245,17 +185,8 @@ fun LoginScreen(
                             showNetworkErrorPopup = true
                         }
                     }
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(50.dp),
-                shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primary
-                )
-            ) {
-                Text("로그인")
-            }
+                }
+            )
         }
 
         Spacer(modifier = Modifier.height(16.dp))

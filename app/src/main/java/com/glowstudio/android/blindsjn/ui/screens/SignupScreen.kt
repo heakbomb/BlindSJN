@@ -23,7 +23,7 @@ import androidx.compose.ui.unit.dp
 
 import android.util.Log
 import com.glowstudio.android.blindsjn.network.InternalServer
-import com.glowstudio.android.blindsjn.network.SignupRequest
+import com.glowstudio.android.blindsjn.model.SignupRequest
 import kotlinx.coroutines.launch
 
 //서버 클라이언트 간 회원가입 실행 함수

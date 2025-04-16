@@ -11,11 +11,17 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.glowstudio.android.blindsjn.model.Comment
 import com.glowstudio.android.blindsjn.ui.viewModel.PostViewModel
+import com.glowstudio.android.blindsjn.ui.components.CommonButton
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 
 @Composable
 fun PostDetailScreen(navController: NavController, postId: String) {
@@ -25,9 +31,11 @@ fun PostDetailScreen(navController: NavController, postId: String) {
     var newComment by remember { mutableStateOf("") }
     var isLiked by remember { mutableStateOf(false) }
 
-    LaunchedEffect(postId) {
-        viewModel.loadPostById(postId.toInt())
-        viewModel.loadComments(postId.toInt())
+    val safePostId = postId.toIntOrNull() ?: 1
+
+    LaunchedEffect(safePostId) {
+        viewModel.loadPostById(safePostId)
+        viewModel.loadComments(safePostId)
     }
 
     Scaffold(
@@ -45,16 +53,13 @@ fun PostDetailScreen(navController: NavController, postId: String) {
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    // 좋아요 버튼
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.clickable {
-                                isLiked = !isLiked
-                            }
+                            modifier = Modifier.clickable { isLiked = !isLiked }
                         ) {
                             Icon(
                                 imageVector = if (isLiked) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
@@ -67,41 +72,66 @@ fun PostDetailScreen(navController: NavController, postId: String) {
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    // 댓글 리스트
                     Text("댓글", style = MaterialTheme.typography.titleMedium)
-                    LazyColumn {
-                        items(comments) { comment ->
-                            CommentItem(comment)
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    // 댓글 리스트 스크롤 가능하게 수정
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxWidth()
+                    ) {
+                        LazyColumn {
+                            items(comments) { comment ->
+                                CommentItem(comment)
+                            }
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
 
-                    // 댓글 입력
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 8.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalAlignment = Alignment.CenterHorizontally,
                     ) {
                         OutlinedTextField(
                             value = newComment,
                             onValueChange = { newComment = it },
-                            modifier = Modifier.weight(1f),
-                            placeholder = { Text("댓글을 입력하세요...") }
+                            modifier = Modifier
+                                .fillMaxWidth(0.9f),
+                            placeholder = { Text("댓글을 입력하세요...") },
+                            singleLine = false,
+                            keyboardOptions = KeyboardOptions.Default.copy(
+                                imeAction = ImeAction.Done
+                            ),
+                            keyboardActions = KeyboardActions(
+                                onDone = {
+                                    if (!newComment.isNullOrBlank()) {
+                                        viewModel.saveComment(
+                                            postId = safePostId,
+                                            userId = 1,
+                                            content = newComment
+                                        )
+                                        newComment = ""
+                                    }
+                                }
+                            )
                         )
-                        Button(onClick = {
-                            if (newComment.isNotBlank()) {
-                                viewModel.saveComment(
-                                    postId = postId.toInt(),
-                                    userId = 1, // 실제 사용자 ID로 교체 필요
-                                    content = newComment
-                                )
-                                newComment = ""
-                            }
-                        }) {
-                            Text("등록")
-                        }
+
+                        CommonButton(
+                            text = "등록",
+                            onClick = {
+                                if (newComment.isNotBlank()) {
+                                    viewModel.saveComment(
+                                        postId = safePostId,
+                                        userId = 1,
+                                        content = newComment
+                                    )
+                                    newComment = ""
+                                }
+                            },
+                            modifier = Modifier.padding(top = 8.dp)
+                        )
                     }
                 } ?: run {
                     Text("게시글을 불러오는 중입니다...", modifier = Modifier.padding(16.dp))
@@ -119,6 +149,10 @@ fun CommentItem(comment: Comment) {
             .padding(vertical = 4.dp)
     ) {
         Text(text = "익명", style = MaterialTheme.typography.bodyMedium)
-        //Text(text = comment.content, style = MaterialTheme.typography.bodySmall)
+        Text(
+            text = comment.content,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
     }
 }

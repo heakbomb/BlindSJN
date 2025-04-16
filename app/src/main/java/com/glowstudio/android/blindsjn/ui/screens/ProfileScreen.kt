@@ -59,9 +59,9 @@ fun ProfileScreen(
                         .clip(CircleShape)
                         .background(Color(0xFFE0E0E0))
                 )
-                
+
                 Spacer(modifier = Modifier.width(16.dp))
-                
+
                 Column {
                     Text(
                         text = "사용자",
@@ -85,31 +85,12 @@ fun ProfileScreen(
                         when (item) {
                             "프로필 변경" -> onProfileEditClick()
                             "연락처 변경" -> onContactEditClick()
+                            "사업자 인증" -> onBusinessCertificationClick()
+                            "로그아웃" -> showLogoutPopup = true
                         }
                     }
                 )
             }
-        }
-
-        Spacer(modifier = Modifier.weight(1f))
-
-        // 기존 버튼들
-        Button(
-            onClick = { onBusinessCertificationClick() },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 8.dp)
-        ) {
-            Text(text = "사업자 인증")
-        }
-
-        Button(
-            onClick = { showLogoutPopup = true },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 8.dp)
-        ) {
-            Text(text = "로그아웃")
         }
     }
 
@@ -175,10 +156,12 @@ private fun MenuListItem(
     }
 }
 
-// 필요한 내용 여기에 넣으면 됨.
+// 메뉴 아이템 목록
 private val menuItems = listOf(
     "프로필 변경",
-    "연락처 변경"
+    "연락처 변경",
+    "사업자 인증",
+    "로그아웃"
 )
 
 @Preview(showBackground = true)

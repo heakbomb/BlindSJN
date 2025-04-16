@@ -7,6 +7,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.glowstudio.android.blindsjn.ui.components.CommonButton
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -59,14 +60,13 @@ fun EditContactScreen(
         Spacer(modifier = Modifier.weight(1f))
 
         // 저장 버튼
-        Button(
+        CommonButton(
+            text = "저장",
             onClick = onSave,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(vertical = 16.dp)
-        ) {
-            Text("저장")
-        }
+        )
     }
 }
 

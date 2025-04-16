@@ -8,6 +8,17 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.navigation.NavController
 import androidx.navigation.NavGraph.Companion.findStartDestination
+import com.glowstudio.android.blindsjn.ui.theme.Blue
+import com.glowstudio.android.blindsjn.ui.theme.TextSecondary
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.Modifier
+import androidx.compose.foundation.layout.height
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.compose.rememberNavController
+import com.glowstudio.android.blindsjn.ui.theme.BlindSJNTheme
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.ui.draw.shadow
+import androidx.compose.foundation.layout.padding
 
 sealed class Screen(val route: String, val title: String, val icon: ImageVector) {
     object Home : Screen("home", "홈화면", Icons.Default.Home)
@@ -29,7 +40,15 @@ fun BottomNavigationBar(navController: NavController) {
         Screen.Profile
     )
 
-    NavigationBar {
+    NavigationBar(
+        containerColor = Color.White,
+        tonalElevation = 0.dp,
+        modifier = Modifier
+            .padding(top = 8.dp)
+            .shadow(elevation = 8.dp)
+            .fillMaxWidth()
+            .height(65.dp)
+    ) {
         items.forEach { screen ->
             NavigationBarItem(
                 icon = { Icon(imageVector = screen.icon, contentDescription = screen.title) },
@@ -45,12 +64,22 @@ fun BottomNavigationBar(navController: NavController) {
                     }
                 },
                 colors = NavigationBarItemDefaults.colors(
-                    selectedIconColor = Color.Blue,
-                    selectedTextColor = Color.Blue,
-                    unselectedIconColor = Color.Gray,
-                    unselectedTextColor = Color.Gray
-                )
+                    selectedIconColor = Blue,
+                    selectedTextColor = Blue,
+                    unselectedIconColor = TextSecondary,
+                    unselectedTextColor = TextSecondary,
+                    indicatorColor = Blue.copy(alpha = 0.1f)
+                ),
+                alwaysShowLabel = true
             )
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun BottomNavigationBarPreview() {
+    BlindSJNTheme {
+        BottomNavigationBar(navController = rememberNavController())
     }
 }

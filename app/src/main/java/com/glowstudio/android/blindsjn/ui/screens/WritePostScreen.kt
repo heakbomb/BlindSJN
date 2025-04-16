@@ -23,6 +23,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.navigation.NavController
 import com.glowstudio.android.blindsjn.ui.viewModel.PostViewModel
+import com.glowstudio.android.blindsjn.ui.components.CommonButton
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -118,7 +119,8 @@ fun WritePostScreen(
                     }
                 }
 
-                Button(
+                CommonButton(
+                    text = "작성",
                     onClick = {
                         if (title.isBlank() || content.isBlank()) {
                             postViewModel.setStatusMessage("제목과 내용을 입력하세요.")
@@ -129,9 +131,7 @@ fun WritePostScreen(
                         }
                     },
                     modifier = Modifier.align(Alignment.End)
-                ) {
-                    Text("등록")
-                }
+                )
 
                 statusMessage?.let {
                     if (it.isNotBlank()) {

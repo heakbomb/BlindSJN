@@ -4,6 +4,13 @@ import com.glowstudio.android.blindsjn.model.BasicResponse
 import com.glowstudio.android.blindsjn.model.PostListResponse
 import com.glowstudio.android.blindsjn.network.*
 import retrofit2.Response
+import com.glowstudio.android.blindsjn.model.PostRequest
+import com.glowstudio.android.blindsjn.model.EditPostRequest
+import com.glowstudio.android.blindsjn.model.DeleteRequest
+import com.glowstudio.android.blindsjn.model.CommentRequest
+import com.glowstudio.android.blindsjn.model.EditCommentRequest
+import com.glowstudio.android.blindsjn.model.DeleteCommentRequest
+
 
 object PostRepository {
 
