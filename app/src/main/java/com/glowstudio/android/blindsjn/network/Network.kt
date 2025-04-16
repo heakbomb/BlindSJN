@@ -7,14 +7,6 @@ import com.glowstudio.android.blindsjn.model.*
 import retrofit2.Response
 import retrofit2.http.*
 
-// ✅ 요청 데이터 클래스
-data class SignupRequest(val phoneNumber: String, val password: String)
-data class PostRequest(val title: String, val content: String, val user_id: Int, val industry: String)
-data class EditPostRequest(val id: Int, val title: String, val content: String)
-data class DeleteRequest(val id: Int)
-data class CommentRequest(val post_id: Int, val user_id: Int, val content: String)
-data class EditCommentRequest(val id: Int, val content: String)
-data class DeleteCommentRequest(val id: Int)
 // ✅ 네트워크 상태 확인 함수
 fun isNetworkAvailable(context: Context): Boolean {
     val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
