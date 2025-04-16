@@ -7,6 +7,10 @@ import com.glowstudio.android.blindsjn.network.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import com.glowstudio.android.blindsjn.model.CommentRequest
+import com.glowstudio.android.blindsjn.model.DeleteCommentRequest
+import com.glowstudio.android.blindsjn.model.EditCommentRequest
+
 
 class PostViewModel : ViewModel() {
     private val _posts = MutableStateFlow<List<Post>>(emptyList())
@@ -42,6 +46,17 @@ class PostViewModel : ViewModel() {
             }
         }
     }
+
+    fun incrementLike(postId: Int) {
+        _posts.value = _posts.value.map { post ->
+            if (post.id == postId) {
+                post.copy(likeCount = post.likeCount + 1)
+            } else {
+                post
+            }
+        }
+    }
+
 
     fun loadPopularPosts() {
         viewModelScope.launch {
@@ -122,8 +137,6 @@ class PostViewModel : ViewModel() {
         }
     }
 
-
-
     fun loadComments(postId: Int) {
         viewModelScope.launch {
             try {
@@ -131,7 +144,7 @@ class PostViewModel : ViewModel() {
                 if (response.isSuccessful) {
                     _comments.value = response.body()?.data ?: emptyList()
                 } else {
-                    _statusMessage.value = "댓글 불러오기 실패"
+                    _statusMessage.value = "댓글 불러오기 실패: ${response.message()}"
                 }
             } catch (e: Exception) {
                 _statusMessage.value = "댓글 에러: ${e.message}"
@@ -139,11 +152,12 @@ class PostViewModel : ViewModel() {
         }
     }
 
+
     fun saveComment(postId: Int, userId: Int, content: String) {
         viewModelScope.launch {
             try {
                 val response = InternalServer.api.saveComment(
-                    com.glowstudio.android.blindsjn.network.CommentRequest(postId, userId, content)
+                    CommentRequest(postId, userId, content)
                 )
                 _statusMessage.value = response.body()?.message
                 loadComments(postId)
@@ -157,7 +171,7 @@ class PostViewModel : ViewModel() {
         viewModelScope.launch {
             try {
                 val response = InternalServer.api.deleteComment(
-                    com.glowstudio.android.blindsjn.network.DeleteCommentRequest(commentId)
+                    DeleteCommentRequest(commentId)
                 )
                 _statusMessage.value = response.body()?.message
                 loadComments(postId)
@@ -171,7 +185,7 @@ class PostViewModel : ViewModel() {
         viewModelScope.launch {
             try {
                 val response = InternalServer.api.editComment(
-                    com.glowstudio.android.blindsjn.network.EditCommentRequest(commentId, content)
+                    EditCommentRequest(commentId, content)
                 )
                 _statusMessage.value = response.body()?.message
                 loadComments(postId)
