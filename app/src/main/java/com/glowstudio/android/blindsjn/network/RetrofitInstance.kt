@@ -17,64 +17,53 @@ import java.util.concurrent.TimeUnit
 import retrofit2.http.GET
 import retrofit2.http.Query
 
-// 뉴스 기사 데이터 모델
-data class NewsArticle(
+// 네이버 뉴스 응답 모델
+data class NaverNewsItem(
     val title: String,
-    val description: String?,
-    val author: String?, // 추가
-    val url: String?,
-    val urlToImage: String?,
-    val publishedAt: String? // 추가
+    val originallink: String,
+    val link: String,
+    val description: String,
+    val pubDate: String
 )
 
-// 뉴스 API 응답 모델
-data class NewsResponse(
-    val status: String,
-    val totalResults: Int,
-    val articles: List<NewsArticle>
+data class NaverNewsResponse(
+    val items: List<NaverNewsItem>
 )
 
-// 뉴스 API Retrofit 인터페이스
-interface NewsApiService {
-    @GET("v2/everything")
-    suspend fun getEverything(
-        @Query("q") query: String,
-        @Query("from") from: String,
-        @Query("sortBy") sortBy: String,
-        @Query("apiKey") apiKey: String
-    ): Response<NewsResponse>
+interface NaverNewsApiService {
+    @GET("v1/search/news.json")
+    suspend fun searchNews(
+        @Query("query") query: String,
+        @Query("display") display: Int = 20,
+        @Query("start") start: Int = 1,
+        @Query("sort") sort: String = "date"
+    ): Response<NaverNewsResponse>
 }
 
-// 뉴스 데이터를 가져오는 Repository 예시
-class NewsRepository {
-    suspend fun fetchEverything(query: String, from: String, sortBy: String, apiKey: String): Response<NewsResponse> {
-        return NewsServer.apiService.getEverything(query, from, sortBy, apiKey)
-    }
-}
+// 네이버 뉴스 서버용 Retrofit 인스턴스
+object NaverNewsServer {
+    private const val BASE_URL = "https://openapi.naver.com/"
 
-/**
- *
- *
- *
- *
- **/
-// Retrofit 인스턴스를 생성하는 싱글톤 객체
-object NewsServer {
-    private const val BASE_URL = "https://newsapi.org/"
-
-    private val okHttpClient = OkHttpClient.Builder()
+    private val client = OkHttpClient.Builder()
+        .addInterceptor { chain ->
+            val request = chain.request().newBuilder()
+                .addHeader("X-Naver-Client-Id", "ztMJBFDCJqlNxnax0Hrj")
+                .addHeader("X-Naver-Client-Secret", "GrIMlIGxdu")
+                .build()
+            chain.proceed(request)
+        }
         .connectTimeout(30, TimeUnit.SECONDS)
         .readTimeout(30, TimeUnit.SECONDS)
         .writeTimeout(30, TimeUnit.SECONDS)
         .build()
 
-    val apiService: NewsApiService by lazy {
+    val apiService: NaverNewsApiService by lazy {
         Retrofit.Builder()
             .baseUrl(BASE_URL)
-            .client(okHttpClient)
+            .client(client)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
-            .create(NewsApiService::class.java)
+            .create(NaverNewsApiService::class.java)
     }
 }
 

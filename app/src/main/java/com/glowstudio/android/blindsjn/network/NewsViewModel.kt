@@ -1,58 +1,49 @@
 package com.glowstudio.android.blindsjn.ui
 
-import android.util.Log
+import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.glowstudio.android.blindsjn.network.NewsArticle
-import com.glowstudio.android.blindsjn.network.NewsResponse
-import com.glowstudio.android.blindsjn.network.NewsRepository
+import com.glowstudio.android.blindsjn.network.NaverNewsItem
+import com.glowstudio.android.blindsjn.network.NaverNewsServer
 import kotlinx.coroutines.launch
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
-import retrofit2.Response
+import android.util.Log
+
+data class NaverNewsUiState(
+    val newsList: List<NaverNewsItem> = emptyList(),
+    val isLoading: Boolean = false,
+    val error: String? = null
+)
 
 class NewsViewModel : ViewModel() {
-    var articles = mutableStateOf<List<NewsArticle>>(emptyList())
-        private set
 
-    var isLoading = mutableStateOf(true)
-        private set
+    private val _uiState = mutableStateOf(NaverNewsUiState())
+    val uiState: State<NaverNewsUiState> = _uiState
 
-    var errorMessage = mutableStateOf("")
-        private set
-
-    init {
-        fetchNews()
-    }
-
-    private fun fetchNews() {
+    fun searchNews(query: String) {
         viewModelScope.launch {
-            try {
-                val today = LocalDate.now().minusDays(2)
-                val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-                val formattedDate = today.format(formatter)
+            _uiState.value = _uiState.value.copy(isLoading = true, error = null)
 
-                val response: Response<NewsResponse> = NewsRepository().fetchEverything(
-                    query = "Apple",
-                    from = formattedDate, // 오늘 날짜로 자동 설정
-                    sortBy = "popularity",
-                    apiKey = "6c4ce8bc6bbb4379aa2c94db1e3fa6f7"
-                )
+            try {
+                Log.d("NewsViewModel", "네이버 뉴스 요청 시작: $query")
+                val response = NaverNewsServer.apiService.searchNews(query)
+
                 if (response.isSuccessful) {
-                    articles.value = response.body()?.articles ?: emptyList()
-                    Log.d("NewsViewModel", "API 호출 성공: ${response.code()} / ${response.message()}")
-                    val articlesList = response.body()?.articles
-                    Log.d("NewsViewModel", "응답 받은 기사 수: ${articlesList?.size}")
+                    val items = response.body()?.items ?: emptyList()
+                    _uiState.value = NaverNewsUiState(newsList = items)
+                    Log.d("NewsViewModel", "뉴스 요청 성공 - 결과 수: ${items.size}")
                 } else {
-                    errorMessage.value = "API 호출 실패: ${response.message()}"
-                    Log.e("NewsViewModel", "API 호출 실패: ${response.code()} / ${response.message()}")
+                    Log.e(
+                        "NewsViewModel",
+                        "뉴스 요청 실패 - 코드: ${response.code()} / 메시지: ${response.message()}"
+                    )
+                    _uiState.value = _uiState.value.copy(error = "응답 실패: ${response.code()}")
                 }
             } catch (e: Exception) {
-                errorMessage.value = "에러 발생: ${e.localizedMessage}"
-                Log.e("NewsViewModel", "Exception: ${e.localizedMessage}", e)
+                Log.e("NewsViewModel", "뉴스 요청 예외 발생", e)
+                _uiState.value = _uiState.value.copy(error = "예외 발생: ${e.localizedMessage}")
             } finally {
-                isLoading.value = false
+                _uiState.value = _uiState.value.copy(isLoading = false)
             }
         }
     }
