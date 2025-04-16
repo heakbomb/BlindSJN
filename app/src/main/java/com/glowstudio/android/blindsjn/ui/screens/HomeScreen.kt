@@ -24,7 +24,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.glowstudio.android.blindsjn.R
-import com.glowstudio.android.blindsjn.network.NewsArticle
 import com.glowstudio.android.blindsjn.ui.NewsViewModel
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
@@ -38,6 +37,7 @@ import com.google.gson.Gson
 import java.net.URLEncoder
 import androidx.navigation.compose.rememberNavController
 import com.glowstudio.android.blindsjn.ui.theme.BlindSJNTheme
+import androidx.core.text.HtmlCompat
 
 @OptIn(ExperimentalPagerApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -56,8 +56,8 @@ fun HomeScreen(navController: NavHostController) {
         // 바로가기 섹션
         ShortcutSection(navController)
 
-        // 새로운 소식 섹션
-        NewsSection(navController)
+        // 네이버 뉴스 섹션
+        NaverNewsSection(navController)
 
         // 오늘의 매출 관리 섹션
         SalesSection()
@@ -123,7 +123,7 @@ fun ShortcutSection(navController: NavHostController) {
                         .clip(RoundedCornerShape(8.dp))
                         .border(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f), RoundedCornerShape(8.dp))
                         .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(8.dp))
-                        .clickable { 
+                        .clickable {
                             when (item.title) {
                                 "푸드코스트" -> navController.navigate("foodCost")
                                 "캘린더" -> navController.navigate("message")
@@ -173,11 +173,14 @@ private val shortcutItems = listOf(
 )
 
 @Composable
-fun NewsSection(navController: NavHostController) {
+fun NaverNewsSection(navController: NavHostController) {
     val viewModel: NewsViewModel = viewModel()
-    val articles: List<NewsArticle> by viewModel.articles
-    val isLoading by viewModel.isLoading
-    val errorMessage by viewModel.errorMessage
+    val uiState by viewModel.uiState
+
+    // 화면 진입 시 기본 검색어로 뉴스 검색
+    LaunchedEffect(Unit) {
+        viewModel.searchNews("자영업")
+    }
 
     Column(modifier = Modifier.padding(16.dp)) {
         Row(
@@ -192,15 +195,15 @@ fun NewsSection(navController: NavHostController) {
         Spacer(modifier = Modifier.height(8.dp))
 
         when {
-            isLoading -> {
+            uiState.isLoading -> {
                 CircularProgressIndicator()
             }
-            errorMessage.isNotEmpty() -> {
-                Text(errorMessage, color = Color.Red)
+            uiState.error != null -> {
+                Text(uiState.error ?: "오류", color = Color.Red)
             }
             else -> {
                 LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    items(articles.toList()) { article ->
+                    items(uiState.newsList) { article ->
                         Box(
                             modifier = Modifier
                                 .width(300.dp)
@@ -214,16 +217,6 @@ fun NewsSection(navController: NavHostController) {
                                 }
                         ) {
                             Row(modifier = Modifier.fillMaxSize()) {
-                                AsyncImage(
-                                    model = article.urlToImage,
-                                    contentDescription = "기사 이미지",
-                                    modifier = Modifier
-                                        .fillMaxHeight()
-                                        .weight(1f)
-                                        .clip(RoundedCornerShape(topStart = 8.dp, bottomStart = 8.dp)),
-                                    contentScale = ContentScale.Crop
-                                )
-
                                 Column(
                                     modifier = Modifier
                                         .weight(1f)
@@ -231,14 +224,14 @@ fun NewsSection(navController: NavHostController) {
                                     verticalArrangement = Arrangement.SpaceBetween
                                 ) {
                                     Text(
-                                        text = article.title ?: "제목 없음",
+                                        text = HtmlCompat.fromHtml(article.title, HtmlCompat.FROM_HTML_MODE_LEGACY).toString(),
                                         fontWeight = FontWeight.Bold,
                                         maxLines = 2,
                                         overflow = TextOverflow.Ellipsis
                                     )
                                     Spacer(modifier = Modifier.height(4.dp))
                                     Text(
-                                        text = article.description ?: "설명 없음",
+                                        text = HtmlCompat.fromHtml(article.description, HtmlCompat.FROM_HTML_MODE_LEGACY).toString(),
                                         maxLines = 3,
                                         overflow = TextOverflow.Ellipsis
                                     )

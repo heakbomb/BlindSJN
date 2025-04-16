@@ -14,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import androidx.core.text.HtmlCompat
 
 @Composable
 fun NewsDetailScreen(title: String, content: String?, description: String?, imageUrl: String?) {
@@ -35,15 +36,21 @@ fun NewsDetailScreen(title: String, content: String?, description: String?, imag
         }
 
         Text(
-            text = title,
+            text = HtmlCompat.fromHtml(title, HtmlCompat.FROM_HTML_MODE_LEGACY).toString(),
             style = MaterialTheme.typography.titleLarge,
             fontSize = 24.sp
         )
 
         Spacer(modifier = Modifier.height(24.dp))
 
+        val bodyText = when {
+            !content.isNullOrBlank() -> content
+            !description.isNullOrBlank() -> description
+            else -> "내용이 없습니다."
+        }
+
         Text(
-            text = if (!content.isNullOrBlank()) content else description ?: "내용이 없습니다.",
+            text = HtmlCompat.fromHtml(bodyText, HtmlCompat.FROM_HTML_MODE_LEGACY).toString(),
             style = MaterialTheme.typography.bodyLarge
         )
     }
