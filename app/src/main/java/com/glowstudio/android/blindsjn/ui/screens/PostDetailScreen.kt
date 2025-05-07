@@ -15,7 +15,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.glowstudio.android.blindsjn.model.Comment
+import com.glowstudio.android.blindsjn.data.model.Comment
 import com.glowstudio.android.blindsjn.ui.viewModel.PostViewModel
 import com.glowstudio.android.blindsjn.ui.components.CommonButton
 import androidx.compose.foundation.rememberScrollState

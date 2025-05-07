@@ -193,7 +193,7 @@ fun HotPostsSection(navController: NavHostController) {
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text("인기글글", fontWeight = FontWeight.Bold)
+            Text("인기글", fontWeight = FontWeight.Bold)
             TextButton(onClick = { navController.navigate("popular") }) {
                 Text("더 보기")
             }

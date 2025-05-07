@@ -2,14 +2,20 @@ package com.glowstudio.android.blindsjn.ui.viewModel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.glowstudio.android.blindsjn.data.model.Comment
+import com.glowstudio.android.blindsjn.data.model.DeleteRequest
+import com.glowstudio.android.blindsjn.data.model.Post
 import com.glowstudio.android.blindsjn.model.*
 import com.glowstudio.android.blindsjn.network.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import com.glowstudio.android.blindsjn.model.CommentRequest
-import com.glowstudio.android.blindsjn.model.DeleteCommentRequest
-import com.glowstudio.android.blindsjn.model.EditCommentRequest
+import com.glowstudio.android.blindsjn.data.model.CommentRequest
+import com.glowstudio.android.blindsjn.data.model.DeleteCommentRequest
+import com.glowstudio.android.blindsjn.data.model.EditCommentRequest
+import com.glowstudio.android.blindsjn.data.model.EditPostRequest
+import com.glowstudio.android.blindsjn.data.model.PostRequest
+import com.glowstudio.android.blindsjn.data.network.InternalServer
 
 
 class PostViewModel : ViewModel() {

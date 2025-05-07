@@ -4,14 +4,19 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.glowstudio.android.blindsjn.ui.MainScreen
+import com.glowstudio.android.blindsjn.feature.main.MainScreen
 import com.glowstudio.android.blindsjn.ui.screens.*
 import com.glowstudio.android.blindsjn.ui.viewModel.TopBarState
 import com.glowstudio.android.blindsjn.ui.viewModel.TopBarViewModel
-import com.glowstudio.android.blindsjn.model.Article
+import com.glowstudio.android.blindsjn.data.model.Article
 import com.google.gson.Gson
 import java.net.URLDecoder
 import androidx.compose.material.Text
+import com.glowstudio.android.blindsjn.feature.board.BoardDetailScreen
+import com.glowstudio.android.blindsjn.feature.board.BoardScreen
+import com.glowstudio.android.blindsjn.feature.board.WritePostScreen
+import com.glowstudio.android.blindsjn.feature.login.LoginScreen
+import com.glowstudio.android.blindsjn.feature.login.SignupScreen
 
 @Composable
 fun AppNavHost(

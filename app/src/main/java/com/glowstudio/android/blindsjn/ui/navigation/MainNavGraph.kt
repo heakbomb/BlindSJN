@@ -1,14 +1,16 @@
 package com.glowstudio.android.blindsjn.ui.navigation
 
-import androidx.compose.runtime.Composable
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
+import com.glowstudio.android.blindsjn.feature.board.BoardDetailScreen
+import com.glowstudio.android.blindsjn.feature.board.BoardScreen
+import com.glowstudio.android.blindsjn.feature.board.WritePostScreen
 import com.glowstudio.android.blindsjn.ui.screens.*
 import com.glowstudio.android.blindsjn.ui.viewModel.TopBarState
 import com.glowstudio.android.blindsjn.ui.viewModel.TopBarViewModel
-import com.glowstudio.android.blindsjn.model.Article
+import com.glowstudio.android.blindsjn.data.model.Article
 import com.google.gson.Gson
 import java.net.URLDecoder
 

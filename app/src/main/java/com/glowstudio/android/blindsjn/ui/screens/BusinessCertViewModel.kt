@@ -3,7 +3,7 @@ package com.glowstudio.android.blindsjn.ui.screens
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.glowstudio.android.blindsjn.network.BusinessCertRepository
+import com.glowstudio.android.blindsjn.data.network.BusinessCertRepository
 import kotlinx.coroutines.launch
 
 class BusinessCertViewModel : ViewModel() {
