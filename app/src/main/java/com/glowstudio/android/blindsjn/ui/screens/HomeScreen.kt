@@ -202,8 +202,8 @@ fun HotPostsSection(navController: NavHostController) {
 
         // 라운드 사각형 카드로 전체 감싸기
         Surface(
+
             shape = RoundedCornerShape(20.dp),
-            color = Color(0xFFF8F8F8),
             tonalElevation = 1.dp,
             modifier = Modifier.fillMaxWidth()
         ) {
