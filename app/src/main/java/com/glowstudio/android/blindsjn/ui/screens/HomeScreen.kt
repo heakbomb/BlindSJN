@@ -38,6 +38,8 @@ import java.net.URLEncoder
 import androidx.navigation.compose.rememberNavController
 import com.glowstudio.android.blindsjn.ui.theme.BlindSJNTheme
 import androidx.core.text.HtmlCompat
+import androidx.compose.material.icons.filled.ThumbUp
+import androidx.compose.material.icons.filled.ChatBubbleOutline
 
 @OptIn(ExperimentalPagerApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -58,6 +60,9 @@ fun HomeScreen(navController: NavHostController) {
 
         // 네이버 뉴스 섹션
         NaverNewsSection(navController)
+
+        // 인기글 섹션
+        HotPostsSection(navController)
 
         // 오늘의 매출 관리 섹션
         SalesSection()
@@ -171,6 +176,85 @@ private val shortcutItems = listOf(
     ShortcutItem("푸드코스트", "🍴"),
     ShortcutItem("캘린더", "📅")
 )
+
+@Composable
+fun HotPostsSection(navController: NavHostController) {
+    // 예시 데이터
+    val hotPosts = listOf(
+        HotPost("인기글 1", "05/07", 11, 4),
+        HotPost("인기글 2", "04/29", 10, 0),
+        HotPost("인기글 3", "04/29", 13, 0),
+        HotPost("인기글 4", "04/28", 25, 8)
+    )
+
+    Column(modifier = Modifier.padding(16.dp)) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text("인기글글", fontWeight = FontWeight.Bold)
+            TextButton(onClick = { navController.navigate("popular") }) {
+                Text("더 보기")
+            }
+        }
+        Spacer(modifier = Modifier.height(8.dp))
+
+        // 라운드 사각형 카드로 전체 감싸기
+        Surface(
+            shape = RoundedCornerShape(20.dp),
+            color = Color(0xFFF8F8F8),
+            tonalElevation = 1.dp,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Column {
+                hotPosts.forEachIndexed { idx, post ->
+                    HotPostListItem(post)
+                    // 마지막 아이템이 아니면 Divider 추가
+                    if (idx != hotPosts.lastIndex) {
+                        Divider(
+                            color = Color(0xFFE0E0E0),
+                            thickness = 1.dp,
+                            modifier = Modifier.padding(horizontal = 12.dp)
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+data class HotPost(
+    val title: String,
+    val date: String,
+    val likeCount: Int,
+    val commentCount: Int
+)
+
+@Composable
+fun HotPostListItem(post: HotPost) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 18.dp, vertical = 14.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column(modifier = Modifier.weight(1f)) {
+            Text(post.title, style = MaterialTheme.typography.bodyLarge, maxLines = 1)
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(post.date, style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+        }
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(Icons.Filled.ThumbUp, contentDescription = "좋아요", tint = Color.Red, modifier = Modifier.size(18.dp))
+            Spacer(modifier = Modifier.width(4.dp))
+            Text("${post.likeCount}", color = Color.Red, style = MaterialTheme.typography.bodySmall)
+            Spacer(modifier = Modifier.width(12.dp))
+            Icon(Icons.Filled.ChatBubbleOutline, contentDescription = "댓글", tint = Color(0xFF00B8D9), modifier = Modifier.size(18.dp))
+            Spacer(modifier = Modifier.width(4.dp))
+            Text("${post.commentCount}", color = Color(0xFF00B8D9), style = MaterialTheme.typography.bodySmall)
+        }
+    }
+}
 
 @Composable
 fun NaverNewsSection(navController: NavHostController) {
