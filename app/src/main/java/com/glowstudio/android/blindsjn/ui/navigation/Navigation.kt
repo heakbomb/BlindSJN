@@ -60,7 +60,8 @@ fun AppNavHost(
                     title = article.title ?: "제목 없음",
                     content = article.content,
                     description = article.description,
-                    imageUrl = article.urlToImage
+                    imageUrl = article.urlToImage,
+                    link = article.link
                 )
             } else {
                 Text("기사를 불러오는 데 실패했습니다.")
@@ -94,9 +95,9 @@ fun AppNavHost(
             PostDetailScreen(navController = navController, postId = postId)
         }
 
-        composable("popular") {
-            topBarViewModel.updateState(TopBarState("인기글", false, false))
-            PopularScreen()
+        composable("management") {
+            topBarViewModel.updateState(TopBarState("매출관리", false, false))
+            ManagementScreen()
         }
 
         composable("message") {
