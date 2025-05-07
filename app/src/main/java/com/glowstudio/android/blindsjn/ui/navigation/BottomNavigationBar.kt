@@ -23,7 +23,7 @@ import androidx.compose.foundation.layout.padding
 sealed class Screen(val route: String, val title: String, val icon: ImageVector) {
     object Home : Screen("home", "홈화면", Icons.Default.Home)
     object Posts : Screen("board", "게시판 목록", Icons.Default.GridView)
-    object Popular : Screen("popular", "인기글", Icons.Default.ThumbUp)
+    object Managerment : Screen("management", "매출관리", Icons.Default.ShoppingCart)
     object Messages : Screen("message", "캘린더", Icons.Default.CalendarToday)
     object Profile : Screen("profile", "프로필", Icons.Default.Person)
     // 아이콘은 material design에서 제공하는 기본 이미지를 사용하여 제작함
@@ -35,7 +35,7 @@ fun BottomNavigationBar(navController: NavController) {
     val items = listOf(
         Screen.Home,
         Screen.Posts,
-        Screen.Popular,
+        Screen.Managerment,
         Screen.Messages,
         Screen.Profile
     )

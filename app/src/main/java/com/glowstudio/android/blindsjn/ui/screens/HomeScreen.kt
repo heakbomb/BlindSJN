@@ -38,8 +38,15 @@ import java.net.URLEncoder
 import androidx.navigation.compose.rememberNavController
 import com.glowstudio.android.blindsjn.ui.theme.BlindSJNTheme
 import androidx.core.text.HtmlCompat
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 
-@OptIn(ExperimentalPagerApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(navController: NavHostController) {
     val scrollState = rememberScrollState()
@@ -235,6 +242,11 @@ fun NaverNewsSection(navController: NavHostController) {
                                         maxLines = 3,
                                         overflow = TextOverflow.Ellipsis
                                     )
+//                                    Text(
+//                                        text = HtmlCompat.fromHtml(article.link, HtmlCompat.FROM_HTML_MODE_LEGACY).toString(),
+//                                        maxLines = 3,
+//                                        overflow = TextOverflow.Ellipsis
+//                                    )
                                 }
                             }
                         }
@@ -256,18 +268,54 @@ fun SalesSection() {
             Text("오늘의 매출 관리", fontWeight = FontWeight.Bold)
             Icon(Icons.Default.KeyboardArrowRight, contentDescription = "더보기")
         }
-        
+
         Spacer(modifier = Modifier.height(8.dp))
-        
+
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-           // 여기에 뭐 넣을지 고민 좀 해봐야 함
-
+            CircularSalesChart(percentage = 0.65f, label = "65%")
         }
     }
 }
+
+@Composable
+//샘플용 원형 그래프
+fun CircularSalesChart(percentage: Float, label: String) {
+    Box(
+        modifier = Modifier
+            .size(100.dp)
+            .padding(8.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Canvas(modifier = Modifier.size(100.dp)) {
+            val sweepAngle = percentage * 360f
+
+            drawArc(
+                color = Color.LightGray,
+                startAngle = 0f,
+                sweepAngle = 360f,
+                useCenter = false,
+                style = Stroke(width = 16f, cap = StrokeCap.Round)
+            )
+            drawArc(
+                color = Color.Blue,
+                startAngle = -90f,
+                sweepAngle = sweepAngle,
+                useCenter = false,
+                style = Stroke(width = 16f, cap = StrokeCap.Round)
+            )
+        }
+
+        Text(
+            text = label,
+            fontWeight = FontWeight.Bold,
+            fontSize = 16.sp
+        )
+    }
+}
+
 
 @Preview(showBackground = true)
 @Composable
