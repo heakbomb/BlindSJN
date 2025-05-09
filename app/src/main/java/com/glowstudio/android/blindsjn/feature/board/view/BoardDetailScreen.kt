@@ -8,6 +8,8 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.ThumbUp
+import androidx.compose.material.icons.filled.ChatBubbleOutline
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -17,6 +19,7 @@ import androidx.navigation.NavController
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.glowstudio.android.blindsjn.feature.board.model.Post
 import com.glowstudio.android.blindsjn.feature.board.viewmodel.*
+import androidx.compose.ui.graphics.Color
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -80,14 +83,14 @@ fun CategoryFilterRow(
     LazyRow(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp),
+            .padding(horizontal = 8.dp, vertical = 8.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         items(categories) { category ->
             FilterChip(
-                selected = category == selectedCategory,
-                onClick = { onCategorySelected(category) },
-                label = { Text(category) }
+                text = category,
+                isSelected = category == selectedCategory,
+                onClick = { onCategorySelected(category) }
             )
         }
     }
@@ -95,21 +98,25 @@ fun CategoryFilterRow(
 
 @Composable
 fun FilterChip(
-    selected: Boolean,
-    onClick: () -> Unit,
-    label: @Composable () -> Unit
+    text: String,
+    isSelected: Boolean,
+    onClick: () -> Unit
 ) {
     Box(
         modifier = Modifier
             .background(
-                color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface,
+                color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface,
                 shape = MaterialTheme.shapes.small
             )
             .clickable(onClick = onClick)
             .padding(horizontal = 16.dp, vertical = 8.dp),
         contentAlignment = Alignment.Center
     ) {
-        label()
+        Text(
+            text = text,
+            style = MaterialTheme.typography.bodySmall,
+            color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface
+        )
     }
 }
 
@@ -121,56 +128,84 @@ fun PostList(
 ) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(16.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 8.dp)
     ) {
         items(posts) { post ->
-            PostItem(
-                post = post,
-                onClick = { navController.navigate("postDetail/${post.id}") },
-                onLikeClick = { viewModel.incrementLike(post.id) }
-            )
+            PostItem(navController, post, viewModel)
         }
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PostItem(
+    navController: NavController,
     post: Post,
-    onClick: () -> Unit,
-    onLikeClick: () -> Unit
+    viewModel: PostViewModel
 ) {
-    Card(
-        onClick = onClick,
-        modifier = Modifier.fillMaxWidth()
+    var isLiked by remember { mutableStateOf(false) }
+    var likeCount by remember { mutableStateOf(post.likeCount) }
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.surface, MaterialTheme.shapes.medium)
+            .clickable { navController.navigate("postDetail/${post.id}") }
+            .padding(16.dp)
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
+        Text(text = post.title, style = MaterialTheme.typography.titleMedium)
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(
+            text = post.content,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            maxLines = 2
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = post.title,
-                style = MaterialTheme.typography.titleMedium
+                text = "${post.category} ${post.experience}",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = post.content,
-                style = MaterialTheme.typography.bodyMedium,
-                maxLines = 2
-            )
-            Spacer(modifier = Modifier.height(8.dp))
             Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
+                verticalAlignment = Alignment.CenterVertically
             ) {
+                Icon(
+                    imageVector = Icons.Filled.ThumbUp,
+                    contentDescription = "좋아요",
+                    tint = if (isLiked) Color.Red else Color.Gray,
+                    modifier = Modifier
+                        .size(18.dp)
+                        .clickable {
+                            if (!isLiked) {
+                                likeCount++
+                                isLiked = true
+                                viewModel.incrementLike(post.id)
+                            }
+                        }
+                )
+                Spacer(modifier = Modifier.width(4.dp))
                 Text(
-                    text = "좋아요 ${post.likeCount}",
+                    text = "$likeCount",
+                    color = if (isLiked) Color.Red else Color.Gray,
                     style = MaterialTheme.typography.bodySmall
                 )
+                Spacer(modifier = Modifier.width(12.dp))
+                Icon(
+                    imageVector = Icons.Filled.ChatBubbleOutline,
+                    contentDescription = "댓글",
+                    tint = Color(0xFF00B8D9),
+                    modifier = Modifier.size(18.dp)
+                )
+                Spacer(modifier = Modifier.width(4.dp))
                 Text(
-                    text = "댓글 ${post.commentCount}",
+                    text = "${post.commentCount}",
+                    color = Color(0xFF00B8D9),
                     style = MaterialTheme.typography.bodySmall
                 )
             }

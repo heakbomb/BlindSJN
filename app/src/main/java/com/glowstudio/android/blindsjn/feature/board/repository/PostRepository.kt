@@ -21,12 +21,20 @@ object PostRepository {
         return InternalServer.api.getAllPosts()
     }
 
+    suspend fun loadPostById(postId: Int): Response<PostDetailResponse> {
+        return InternalServer.api.getPostById(postId)
+    }
+
     suspend fun editPost(request: EditPostRequest): Response<BasicResponse> {
         return InternalServer.api.editPost(request)
     }
 
     suspend fun deletePost(request: DeleteRequest): Response<BasicResponse> {
         return InternalServer.api.deletePost(request)
+    }
+
+    suspend fun loadComments(postId: Int): Response<CommentListResponse> {
+        return InternalServer.api.getComments(postId)
     }
 
     suspend fun saveComment(request: CommentRequest): Response<BasicResponse> {

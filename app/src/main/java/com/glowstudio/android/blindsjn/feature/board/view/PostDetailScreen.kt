@@ -2,28 +2,40 @@ package com.glowstudio.android.blindsjn.feature.board.view
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ThumbUp
+import androidx.compose.material.icons.filled.ChatBubbleOutline
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.glowstudio.android.blindsjn.feature.board.model.Comment
 import com.glowstudio.android.blindsjn.feature.board.viewmodel.*
+import com.glowstudio.android.blindsjn.ui.components.CommonButton
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.graphics.Color
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PostDetailScreen(navController: NavController, postId: String) {
-    val viewModel: PostViewModel = viewModel()
-    val post by viewModel.selectedPost.collectAsState()
-    val comments by viewModel.comments.collectAsState()
+    val postViewModel: PostViewModel = viewModel()
+    val commentViewModel: CommentViewModel = viewModel()
+    val post by postViewModel.selectedPost.collectAsState()
+    val comments by commentViewModel.comments.collectAsState()
     var newComment by remember { mutableStateOf("") }
     var isLiked by remember { mutableStateOf(false) }
 
     val safePostId = postId.toIntOrNull() ?: 1
 
     LaunchedEffect(safePostId) {
-        viewModel.loadPostById(safePostId)
-        viewModel.loadComments(safePostId)
+        postViewModel.loadPostById(safePostId)
+        commentViewModel.loadComments(safePostId)
     }
 
     Scaffold(
@@ -35,21 +47,112 @@ fun PostDetailScreen(navController: NavController, postId: String) {
                     .padding(horizontal = 16.dp)
             ) {
                 post?.let {
-                    PostContent(
-                        post = it,
-                        isLiked = isLiked,
-                        onLikeClick = { isLiked = !isLiked }
-                    )
-                    
-                    CommentSection(
-                        comments = comments,
-                        newComment = newComment,
-                        onNewCommentChange = { newComment = it },
-                        onCommentSubmit = {
-                            viewModel.saveComment(safePostId, 1, newComment)
-                            newComment = ""
+                    Text(text = it.title, style = MaterialTheme.typography.headlineMedium)
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(text = it.content, style = MaterialTheme.typography.bodyMedium)
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.clickable { isLiked = !isLiked }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.ThumbUp,
+                                contentDescription = "좋아요",
+                                tint = if (isLiked) Color.Red else Color.Gray,
+                                modifier = Modifier.size(18.dp)
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(
+                                "${it.likeCount + if (isLiked) 1 else 0}",
+                                color = if (isLiked) Color.Red else Color.Gray,
+                                style = MaterialTheme.typography.bodySmall
+                            )
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Icon(
+                                imageVector = Icons.Filled.ChatBubbleOutline,
+                                contentDescription = "댓글",
+                                tint = Color(0xFF00B8D9),
+                                modifier = Modifier.size(18.dp)
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(
+                                "${it.commentCount}",
+                                color = Color(0xFF00B8D9),
+                                style = MaterialTheme.typography.bodySmall
+                            )
                         }
-                    )
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Text("댓글", style = MaterialTheme.typography.titleMedium)
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxWidth()
+                    ) {
+                        LazyColumn {
+                            items(comments) { comment ->
+                                CommentItem(comment)
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                    ) {
+                        OutlinedTextField(
+                            value = newComment,
+                            onValueChange = { newComment = it },
+                            modifier = Modifier
+                                .fillMaxWidth(0.9f),
+                            placeholder = { Text("댓글을 입력하세요...") },
+                            singleLine = false,
+                            keyboardOptions = KeyboardOptions.Default.copy(
+                                imeAction = ImeAction.Done
+                            ),
+                            keyboardActions = KeyboardActions(
+                                onDone = {
+                                    if (!newComment.isNullOrBlank()) {
+                                        commentViewModel.saveComment(
+                                            postId = safePostId,
+                                            userId = 1,
+                                            content = newComment
+                                        )
+                                        newComment = ""
+                                    }
+                                }
+                            )
+                        )
+
+                        CommonButton(
+                            text = "등록",
+                            onClick = {
+                                if (newComment.isNotBlank()) {
+                                    commentViewModel.saveComment(
+                                        postId = safePostId,
+                                        userId = 1,
+                                        content = newComment
+                                    )
+                                    newComment = ""
+                                }
+                            },
+                            modifier = Modifier.padding(top = 8.dp)
+                        )
+                    }
+                } ?: run {
+                    Text("게시글을 불러오는 중입니다...", modifier = Modifier.padding(16.dp))
                 }
             }
         }
@@ -57,119 +160,17 @@ fun PostDetailScreen(navController: NavController, postId: String) {
 }
 
 @Composable
-fun PostContent(
-    post: com.glowstudio.android.blindsjn.feature.board.model.Post,
-    isLiked: Boolean,
-    onLikeClick: () -> Unit
-) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp)
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-        ) {
-            Text(
-                text = post.title,
-                style = MaterialTheme.typography.headlineSmall
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = post.content,
-                style = MaterialTheme.typography.bodyLarge
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(
-                    text = "${post.category} ${post.experience}",
-                    style = MaterialTheme.typography.bodyMedium
-                )
-                Row {
-                    Text(
-                        text = "❤️ ${post.likeCount}",
-                        style = MaterialTheme.typography.bodyMedium,
-                        modifier = Modifier.clickable(onClick = onLikeClick)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = "💬 ${post.commentCount}",
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun CommentSection(
-    comments: List<com.glowstudio.android.blindsjn.feature.board.model.Comment>,
-    newComment: String,
-    onNewCommentChange: (String) -> Unit,
-    onCommentSubmit: () -> Unit
-) {
+fun CommentItem(comment: Comment) {
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp)
-    ) {
-        Text(
-            text = "댓글",
-            style = MaterialTheme.typography.titleMedium,
-            modifier = Modifier.padding(bottom = 8.dp)
-        )
-        
-        comments.forEach { comment ->
-            CommentItem(comment = comment)
-        }
-        
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 8.dp)
-        ) {
-            TextField(
-                value = newComment,
-                onValueChange = onNewCommentChange,
-                modifier = Modifier.weight(1f),
-                placeholder = { Text("댓글을 입력하세요") }
-            )
-            Button(
-                onClick = onCommentSubmit,
-                modifier = Modifier.padding(start = 8.dp)
-            ) {
-                Text("작성")
-            }
-        }
-    }
-}
-
-@Composable
-fun CommentItem(comment: com.glowstudio.android.blindsjn.feature.board.model.Comment) {
-    Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 4.dp)
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp)
-        ) {
-            Text(
-                text = "사용자 ${comment.userId}",
-                style = MaterialTheme.typography.bodySmall
-            )
-            Text(
-                text = comment.content,
-                style = MaterialTheme.typography.bodyMedium
-            )
-        }
+        Text(text = "익명", style = MaterialTheme.typography.bodyMedium)
+        Text(
+            text = comment.content,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
     }
 }
