@@ -1,17 +1,15 @@
-package com.glowstudio.android.blindsjn.data.repository
+package com.glowstudio.android.blindsjn.feature.board.repository
 
 import com.glowstudio.android.blindsjn.data.model.BasicResponse
-import com.glowstudio.android.blindsjn.data.model.PostListResponse
-import com.glowstudio.android.blindsjn.network.*
+import com.glowstudio.android.blindsjn.feature.board.model.*
 import retrofit2.Response
-import com.glowstudio.android.blindsjn.data.model.PostRequest
-import com.glowstudio.android.blindsjn.data.model.EditPostRequest
-import com.glowstudio.android.blindsjn.data.model.DeleteRequest
-import com.glowstudio.android.blindsjn.data.model.CommentRequest
-import com.glowstudio.android.blindsjn.data.model.EditCommentRequest
-import com.glowstudio.android.blindsjn.data.model.DeleteCommentRequest
+import com.glowstudio.android.blindsjn.feature.board.model.PostRequest
+import com.glowstudio.android.blindsjn.feature.board.model.EditPostRequest
+import com.glowstudio.android.blindsjn.feature.board.model.DeleteRequest
+import com.glowstudio.android.blindsjn.feature.board.model.CommentRequest
+import com.glowstudio.android.blindsjn.feature.board.model.EditCommentRequest
+import com.glowstudio.android.blindsjn.feature.board.model.DeleteCommentRequest
 import com.glowstudio.android.blindsjn.data.network.InternalServer
-
 
 object PostRepository {
 

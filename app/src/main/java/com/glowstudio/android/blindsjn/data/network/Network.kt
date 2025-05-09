@@ -5,18 +5,9 @@ import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import com.glowstudio.android.blindsjn.data.model.ApiResponse
 import com.glowstudio.android.blindsjn.data.model.BasicResponse
-import com.glowstudio.android.blindsjn.data.model.CommentListResponse
-import com.glowstudio.android.blindsjn.data.model.CommentRequest
-import com.glowstudio.android.blindsjn.data.model.DeleteCommentRequest
-import com.glowstudio.android.blindsjn.data.model.DeleteRequest
-import com.glowstudio.android.blindsjn.data.model.EditCommentRequest
-import com.glowstudio.android.blindsjn.data.model.EditPostRequest
+import com.glowstudio.android.blindsjn.feature.board.model.*
 import com.glowstudio.android.blindsjn.data.model.LoginRequest
-import com.glowstudio.android.blindsjn.data.model.PostDetailResponse
-import com.glowstudio.android.blindsjn.data.model.PostListResponse
-import com.glowstudio.android.blindsjn.data.model.PostRequest
 import com.glowstudio.android.blindsjn.data.model.SignupRequest
-import com.glowstudio.android.blindsjn.model.*
 import retrofit2.Response
 import retrofit2.http.*
 

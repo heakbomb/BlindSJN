@@ -1,4 +1,4 @@
-package com.glowstudio.android.blindsjn.ui.screens
+package com.glowstudio.android.blindsjn.feature.home
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -32,7 +32,6 @@ import com.google.accompanist.pager.rememberPagerState
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
-import coil.compose.AsyncImage
 import com.google.gson.Gson
 import java.net.URLEncoder
 import androidx.navigation.compose.rememberNavController

@@ -4,13 +4,17 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
-import com.glowstudio.android.blindsjn.feature.board.BoardDetailScreen
-import com.glowstudio.android.blindsjn.feature.board.BoardScreen
-import com.glowstudio.android.blindsjn.feature.board.WritePostScreen
+import com.glowstudio.android.blindsjn.feature.board.view.BoardDetailScreen
+import com.glowstudio.android.blindsjn.feature.board.view.BoardScreen
+import com.glowstudio.android.blindsjn.feature.board.view.WritePostScreen
 import com.glowstudio.android.blindsjn.ui.screens.*
 import com.glowstudio.android.blindsjn.ui.viewModel.TopBarState
 import com.glowstudio.android.blindsjn.ui.viewModel.TopBarViewModel
 import com.glowstudio.android.blindsjn.data.model.Article
+import com.glowstudio.android.blindsjn.feature.board.view.PostDetailScreen
+import com.glowstudio.android.blindsjn.feature.certification.BusinessCertificationScreen
+import com.glowstudio.android.blindsjn.feature.home.HomeScreen
+import com.glowstudio.android.blindsjn.feature.home.NewsDetailScreen
 import com.google.gson.Gson
 import java.net.URLDecoder
 

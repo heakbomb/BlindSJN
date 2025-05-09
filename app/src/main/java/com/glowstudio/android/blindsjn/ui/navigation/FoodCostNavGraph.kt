@@ -4,7 +4,9 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
-import com.glowstudio.android.blindsjn.ui.screens.*
+import com.glowstudio.android.blindsjn.feature.foodcoast.FoodCostScreen
+import com.glowstudio.android.blindsjn.feature.foodcoast.RegisterIngredientScreen
+import com.glowstudio.android.blindsjn.feature.foodcoast.RegisterRecipeScreen
 import com.glowstudio.android.blindsjn.ui.viewModel.TopBarState
 import com.glowstudio.android.blindsjn.ui.viewModel.TopBarViewModel
 

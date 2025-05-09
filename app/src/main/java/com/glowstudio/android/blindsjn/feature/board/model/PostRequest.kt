@@ -1,4 +1,4 @@
-package com.glowstudio.android.blindsjn.data.model
+package com.glowstudio.android.blindsjn.feature.board.model
 
 import com.google.gson.annotations.SerializedName
 

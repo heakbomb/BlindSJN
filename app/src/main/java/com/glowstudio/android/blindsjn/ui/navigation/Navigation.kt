@@ -12,9 +12,16 @@ import com.glowstudio.android.blindsjn.data.model.Article
 import com.google.gson.Gson
 import java.net.URLDecoder
 import androidx.compose.material.Text
-import com.glowstudio.android.blindsjn.feature.board.BoardDetailScreen
-import com.glowstudio.android.blindsjn.feature.board.BoardScreen
-import com.glowstudio.android.blindsjn.feature.board.WritePostScreen
+import com.glowstudio.android.blindsjn.feature.board.view.BoardDetailScreen
+import com.glowstudio.android.blindsjn.feature.board.view.BoardScreen
+import com.glowstudio.android.blindsjn.feature.board.view.PostDetailScreen
+import com.glowstudio.android.blindsjn.feature.board.view.WritePostScreen
+import com.glowstudio.android.blindsjn.feature.certification.BusinessCertificationScreen
+import com.glowstudio.android.blindsjn.feature.foodcoast.FoodCostScreen
+import com.glowstudio.android.blindsjn.feature.foodcoast.RegisterIngredientScreen
+import com.glowstudio.android.blindsjn.feature.foodcoast.RegisterRecipeScreen
+import com.glowstudio.android.blindsjn.feature.home.HomeScreen
+import com.glowstudio.android.blindsjn.feature.home.NewsDetailScreen
 import com.glowstudio.android.blindsjn.feature.login.LoginScreen
 import com.glowstudio.android.blindsjn.feature.login.SignupScreen
 

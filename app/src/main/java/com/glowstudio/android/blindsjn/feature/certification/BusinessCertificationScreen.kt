@@ -1,4 +1,4 @@
-package com.glowstudio.android.blindsjn.ui.screens
+package com.glowstudio.android.blindsjn.feature.certification
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*

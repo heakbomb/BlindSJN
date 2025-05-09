@@ -1,4 +1,4 @@
-package com.glowstudio.android.blindsjn.ui.screens
+package com.glowstudio.android.blindsjn.feature.foodcoast
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
