@@ -3,14 +3,12 @@ package com.glowstudio.android.blindsjn.model
 import com.google.gson.annotations.SerializedName
 
 data class Comment(
-    @SerializedName("comment_id") val commentId: Int,
-    @SerializedName("post_id") val postId: Int,
-    @SerializedName("user_id") val userId: Int,
+    @SerializedName("id") val id: Int,
+    @SerializedName("postId") val postId: Int,
+    @SerializedName("userId") val userId: Int,
     @SerializedName("content") val content: String,
-    @SerializedName("created_at") val createdAt: String
+    @SerializedName("time") val time: String
 )
-
-
 
 data class CommentListResponse(
     @SerializedName("status") val status: String,

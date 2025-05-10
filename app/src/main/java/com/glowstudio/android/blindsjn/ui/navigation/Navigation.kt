@@ -12,6 +12,9 @@ import com.glowstudio.android.blindsjn.model.Article
 import com.google.gson.Gson
 import java.net.URLDecoder
 import androidx.compose.material.Text
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.glowstudio.android.blindsjn.screens.BoardDetailScreen
+import com.glowstudio.android.blindsjn.ui.viewModel.PostViewModel
 
 @Composable
 fun AppNavHost(
@@ -80,8 +83,17 @@ fun AppNavHost(
 
         composable("boardDetail/{title}") { backStackEntry ->
             val postTitle = backStackEntry.arguments?.getString("title") ?: "게시글"
+            val postViewModel: PostViewModel = viewModel() // 👈 추가
+
             topBarViewModel.updateState(TopBarState(postTitle, true, true))
-            BoardDetailScreen(navController = navController, title = postTitle)
+            BoardDetailScreen(
+                category = postTitle,
+                onBackClick = { navController.popBackStack() },
+                onPostClick = { postId ->
+                    navController.navigate("postDetail/$postId")
+                },
+                postViewModel = postViewModel  // 👈 전달
+            )
         }
 
         composable("writePost") {
@@ -160,7 +172,6 @@ fun AppNavHost(
             )
         }
 
-        // 푸드코스트 계산 메인 화면
         composable("foodCost") {
             topBarViewModel.updateState(TopBarState("푸드코스트 계산", true, false))
             FoodCostScreen(
@@ -169,13 +180,11 @@ fun AppNavHost(
             )
         }
 
-        // 레시피 등록 화면
         composable("registerRecipe") {
             topBarViewModel.updateState(TopBarState("레시피 등록", true, false))
             RegisterRecipeScreen()
         }
 
-        // 재료 등록 화면
         composable("registerIngredient") {
             topBarViewModel.updateState(TopBarState("재료 등록", true, false))
             RegisterIngredientScreen()

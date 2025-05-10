@@ -56,4 +56,7 @@ interface ApiService {
 
     @PUT("Edit_comment.php")
     suspend fun editComment(@Body request: EditCommentRequest): Response<BasicResponse>
+    @POST("increment_like.php")
+    suspend fun incrementLike(@Query("post_id") postId: Int): Response<BasicResponse>
+
 }

@@ -7,10 +7,6 @@ import com.glowstudio.android.blindsjn.network.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import com.glowstudio.android.blindsjn.model.CommentRequest
-import com.glowstudio.android.blindsjn.model.DeleteCommentRequest
-import com.glowstudio.android.blindsjn.model.EditCommentRequest
-
 
 class PostViewModel : ViewModel() {
     private val _posts = MutableStateFlow<List<Post>>(emptyList())
@@ -48,15 +44,30 @@ class PostViewModel : ViewModel() {
     }
 
     fun incrementLike(postId: Int) {
-        _posts.value = _posts.value.map { post ->
-            if (post.id == postId) {
-                post.copy(likeCount = post.likeCount + 1)
-            } else {
-                post
+        viewModelScope.launch {
+            try {
+                val currentPost = _posts.value.find { it.id == postId }
+                currentPost?.let { post ->
+                    val updatedPost = post.copy(
+                        likeCount = if (post.isLiked) post.likeCount - 1 else post.likeCount + 1,
+                        isLiked = !post.isLiked
+                    )
+                    _posts.value = _posts.value.map {
+                        if (it.id == postId) updatedPost else it
+                    }
+                    val response = InternalServer.api.incrementLike(postId)
+                    if (!response.isSuccessful) {
+                        _posts.value = _posts.value.map {
+                            if (it.id == postId) post else it
+                        }
+                        _statusMessage.value = "좋아요 실패: ${response.message()}"
+                    }
+                }
+            } catch (e: Exception) {
+                _statusMessage.value = "좋아요 오류: ${e.message}"
             }
         }
     }
-
 
     fun loadPopularPosts() {
         viewModelScope.launch {
@@ -151,7 +162,6 @@ class PostViewModel : ViewModel() {
             }
         }
     }
-
 
     fun saveComment(postId: Int, userId: Int, content: String) {
         viewModelScope.launch {
