@@ -39,6 +39,7 @@ import com.glowstudio.android.blindsjn.ui.theme.BlindSJNTheme
 import androidx.core.text.HtmlCompat
 import androidx.compose.material.icons.filled.ThumbUp
 import androidx.compose.material.icons.filled.ChatBubbleOutline
+import com.glowstudio.android.blindsjn.ui.theme.*
 
 @OptIn(ExperimentalPagerApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -201,9 +202,9 @@ fun HotPostsSection(navController: NavHostController) {
 
         // 라운드 사각형 카드로 전체 감싸기
         Surface(
-
             shape = RoundedCornerShape(20.dp),
-            tonalElevation = 1.dp,
+            tonalElevation = 0.dp,
+            color = CardWhite,
             modifier = Modifier.fillMaxWidth()
         ) {
             Column {
@@ -212,7 +213,7 @@ fun HotPostsSection(navController: NavHostController) {
                     // 마지막 아이템이 아니면 Divider 추가
                     if (idx != hotPosts.lastIndex) {
                         Divider(
-                            color = Color(0xFFE0E0E0),
+                            color = DividerGray,
                             thickness = 1.dp,
                             modifier = Modifier.padding(horizontal = 12.dp)
                         )
@@ -244,13 +245,13 @@ fun HotPostListItem(post: HotPost) {
             Text(post.date, style = MaterialTheme.typography.bodySmall, color = Color.Gray)
         }
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(Icons.Filled.ThumbUp, contentDescription = "좋아요", tint = Color.Red, modifier = Modifier.size(18.dp))
+            Icon(Icons.Filled.ThumbUp, contentDescription = "좋아요", tint = Error, modifier = Modifier.size(18.dp))
             Spacer(modifier = Modifier.width(4.dp))
             Text("${post.likeCount}", color = Color.Red, style = MaterialTheme.typography.bodySmall)
             Spacer(modifier = Modifier.width(12.dp))
-            Icon(Icons.Filled.ChatBubbleOutline, contentDescription = "댓글", tint = Color(0xFF00B8D9), modifier = Modifier.size(18.dp))
+            Icon(Icons.Filled.ChatBubbleOutline, contentDescription = "댓글", tint = ChatBlue, modifier = Modifier.size(18.dp))
             Spacer(modifier = Modifier.width(4.dp))
-            Text("${post.commentCount}", color = Color(0xFF00B8D9), style = MaterialTheme.typography.bodySmall)
+            Text("${post.commentCount}", color = ChatBlue, style = MaterialTheme.typography.bodySmall)
         }
     }
 }
@@ -292,8 +293,8 @@ fun NaverNewsSection(navController: NavHostController) {
                                 .width(300.dp)
                                 .height(120.dp)
                                 .clip(RoundedCornerShape(8.dp))
-                                .border(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f), RoundedCornerShape(8.dp))
-                                .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(8.dp))
+                                .border(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f), RoundedCornerShape(20.dp))
+                                .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(20.dp))
                                 .clickable {
                                     val articleJson = URLEncoder.encode(Gson().toJson(article), "UTF-8")
                                     navController.navigate("newsDetail/$articleJson")

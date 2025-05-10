@@ -21,6 +21,7 @@ import com.glowstudio.android.blindsjn.ui.components.CommonButton
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.graphics.Color
+import com.glowstudio.android.blindsjn.ui.theme.*
 
 @Composable
 fun PostDetailScreen(navController: NavController, postId: String) {
@@ -77,13 +78,13 @@ fun PostDetailScreen(navController: NavController, postId: String) {
                             Icon(
                                 imageVector = Icons.Filled.ChatBubbleOutline,
                                 contentDescription = "댓글",
-                                tint = Color(0xFF00B8D9),
+                                tint = ChatBlue,
                                 modifier = Modifier.size(18.dp)
                             )
                             Spacer(modifier = Modifier.width(4.dp))
                             Text(
                                 "${it.commentCount}",
-                                color = Color(0xFF00B8D9),
+                                color = ChatBlue,
                                 style = MaterialTheme.typography.bodySmall
                             )
                         }

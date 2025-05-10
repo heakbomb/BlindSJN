@@ -8,8 +8,8 @@ import com.glowstudio.android.blindsjn.feature.board.view.BoardDetailScreen
 import com.glowstudio.android.blindsjn.feature.board.view.BoardScreen
 import com.glowstudio.android.blindsjn.feature.board.view.WritePostScreen
 import com.glowstudio.android.blindsjn.ui.screens.*
-import com.glowstudio.android.blindsjn.ui.viewModel.TopBarState
-import com.glowstudio.android.blindsjn.ui.viewModel.TopBarViewModel
+import com.glowstudio.android.blindsjn.feature.main.viewmodel.TopBarState
+import com.glowstudio.android.blindsjn.feature.main.viewmodel.TopBarViewModel
 import com.glowstudio.android.blindsjn.data.model.Article
 import com.glowstudio.android.blindsjn.feature.board.view.PostDetailScreen
 import com.glowstudio.android.blindsjn.feature.certification.BusinessCertificationScreen

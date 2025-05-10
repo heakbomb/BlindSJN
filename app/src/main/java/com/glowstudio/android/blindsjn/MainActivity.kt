@@ -9,7 +9,7 @@ import androidx.compose.material3.Surface
 import androidx.navigation.compose.rememberNavController
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.glowstudio.android.blindsjn.ui.navigation.AppNavHost
-import com.glowstudio.android.blindsjn.ui.viewModel.TopBarViewModel
+import com.glowstudio.android.blindsjn.feature.main.viewmodel.TopBarViewModel
 import com.glowstudio.android.blindsjn.ui.theme.BlindSJNTheme
 
 class MainActivity : ComponentActivity() {

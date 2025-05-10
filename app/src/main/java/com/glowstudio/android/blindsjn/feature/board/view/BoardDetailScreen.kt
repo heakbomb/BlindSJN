@@ -20,6 +20,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.glowstudio.android.blindsjn.feature.board.model.Post
 import com.glowstudio.android.blindsjn.feature.board.viewmodel.*
 import androidx.compose.ui.graphics.Color
+import com.glowstudio.android.blindsjn.ui.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -178,7 +179,7 @@ fun PostItem(
                 Icon(
                     imageVector = Icons.Filled.ThumbUp,
                     contentDescription = "좋아요",
-                    tint = if (isLiked) Color.Red else Color.Gray,
+                    tint = if (isLiked) Error else DividerGray,
                     modifier = Modifier
                         .size(18.dp)
                         .clickable {
@@ -192,20 +193,20 @@ fun PostItem(
                 Spacer(modifier = Modifier.width(4.dp))
                 Text(
                     text = "$likeCount",
-                    color = if (isLiked) Color.Red else Color.Gray,
+                    color = if (isLiked) Error else DividerGray,
                     style = MaterialTheme.typography.bodySmall
                 )
                 Spacer(modifier = Modifier.width(12.dp))
                 Icon(
                     imageVector = Icons.Filled.ChatBubbleOutline,
                     contentDescription = "댓글",
-                    tint = Color(0xFF00B8D9),
+                    tint = ChatBlue,
                     modifier = Modifier.size(18.dp)
                 )
                 Spacer(modifier = Modifier.width(4.dp))
                 Text(
                     text = "${post.commentCount}",
-                    color = Color(0xFF00B8D9),
+                    color = ChatBlue,
                     style = MaterialTheme.typography.bodySmall
                 )
             }

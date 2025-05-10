@@ -1,13 +1,16 @@
-package com.glowstudio.android.blindsjn.ui.navigation
+package com.glowstudio.android.blindsjn.feature.main.view
 
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.navigation.NavController
 import androidx.navigation.NavGraph.Companion.findStartDestination
+import com.glowstudio.android.blindsjn.feature.main.viewmodel.NavigationViewModel
 import com.glowstudio.android.blindsjn.ui.theme.Blue
 import com.glowstudio.android.blindsjn.ui.theme.TextSecondary
 import androidx.compose.ui.unit.dp
@@ -31,25 +34,19 @@ sealed class Screen(val route: String, val title: String, val icon: ImageVector)
 }
 
 @Composable
-fun BottomNavigationBar(navController: NavController) {
-    val items = listOf(
-        Screen.Home,
-        Screen.Posts,
-        Screen.Popular,
-        Screen.Messages,
-        Screen.Profile
-    )
+fun BottomNavigationBar(
+    navController: NavController,
+    viewModel: NavigationViewModel
+) {
+    val navigationState by viewModel.navigationState.collectAsState()
 
     NavigationBar(
         containerColor = Color.White,
         tonalElevation = 0.dp,
         modifier = Modifier
-            .padding(top = 8.dp)
-            .shadow(elevation = 8.dp)
             .fillMaxWidth()
-            .height(65.dp)
     ) {
-        items.forEach { screen ->
+        navigationState.items.forEach { screen ->
             NavigationBarItem(
                 icon = { Icon(imageVector = screen.icon, contentDescription = screen.title) },
                 label = { Text(screen.title) },
@@ -62,15 +59,15 @@ fun BottomNavigationBar(navController: NavController) {
                         launchSingleTop = true
                         restoreState = true
                     }
+                    viewModel.navigateToScreen(screen.route)
                 },
                 colors = NavigationBarItemDefaults.colors(
                     selectedIconColor = Blue,
                     selectedTextColor = Blue,
                     unselectedIconColor = TextSecondary,
                     unselectedTextColor = TextSecondary,
-                    indicatorColor = Blue.copy(alpha = 0.1f)
-                ),
-                alwaysShowLabel = true
+                    indicatorColor = Blue.copy(alpha = 0f)
+                )
             )
         }
     }
@@ -80,6 +77,6 @@ fun BottomNavigationBar(navController: NavController) {
 @Composable
 fun BottomNavigationBarPreview() {
     BlindSJNTheme {
-        BottomNavigationBar(navController = rememberNavController())
+        BottomNavigationBar(navController = rememberNavController(), viewModel = NavigationViewModel())
     }
 }

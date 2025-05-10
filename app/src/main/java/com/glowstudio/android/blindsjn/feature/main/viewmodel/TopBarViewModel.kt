@@ -1,4 +1,4 @@
-package com.glowstudio.android.blindsjn.ui.viewModel
+package com.glowstudio.android.blindsjn.feature.main.viewmodel
 
 import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.flow.MutableStateFlow

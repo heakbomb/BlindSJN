@@ -19,6 +19,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.glowstudio.android.blindsjn.data.network.AutoLoginManager
 import kotlinx.coroutines.launch
+import com.glowstudio.android.blindsjn.ui.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -43,7 +44,7 @@ fun ProfileScreen(
                 .fillMaxWidth()
                 .padding(vertical = 8.dp),
             colors = CardDefaults.cardColors(
-                containerColor = Color(0xFFF5F5F5)
+                containerColor = CardWhite
             )
         ) {
             Row(
@@ -57,7 +58,7 @@ fun ProfileScreen(
                     modifier = Modifier
                         .size(60.dp)
                         .clip(CircleShape)
-                        .background(Color(0xFFE0E0E0))
+                        .background(DividerGray)
                 )
 
                 Spacer(modifier = Modifier.width(16.dp))

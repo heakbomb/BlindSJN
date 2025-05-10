@@ -1,4 +1,4 @@
-package com.glowstudio.android.blindsjn.feature.main
+package com.glowstudio.android.blindsjn.feature.main.view
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
@@ -7,9 +7,8 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.rememberNavController
 import com.glowstudio.android.blindsjn.ui.navigation.AppNavHost
-import com.glowstudio.android.blindsjn.ui.navigation.BottomNavigationBar
-import com.glowstudio.android.blindsjn.ui.navigation.TopBar
-import com.glowstudio.android.blindsjn.ui.viewModel.TopBarViewModel
+import com.glowstudio.android.blindsjn.feature.main.viewmodel.TopBarViewModel
+import com.glowstudio.android.blindsjn.feature.main.viewmodel.NavigationViewModel
 import androidx.compose.foundation.layout.Box
 import androidx.compose.ui.tooling.preview.Preview
 
@@ -19,7 +18,10 @@ import androidx.compose.ui.tooling.preview.Preview
 
 @Preview
 @Composable
-fun MainScreen(topBarViewModel: TopBarViewModel = viewModel()) {
+fun MainScreen(
+    topBarViewModel: TopBarViewModel = viewModel(),
+    navigationViewModel: NavigationViewModel = viewModel()
+) {
     // 하나의 NavController 생성
     val navController = rememberNavController()
     // TopBarViewModel에서 상단바 상태를 관찰
@@ -38,7 +40,10 @@ fun MainScreen(topBarViewModel: TopBarViewModel = viewModel()) {
         },
         // 하단 네비게이션 바
         bottomBar = {
-            BottomNavigationBar(navController)
+            BottomNavigationBar(
+                navController = navController,
+                viewModel = navigationViewModel
+            )
         },
         // 내부 컨텐츠: AppNavHost에 navController와 TopBarViewModel 전달
         content = { paddingValues ->

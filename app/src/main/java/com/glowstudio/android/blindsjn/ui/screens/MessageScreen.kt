@@ -21,6 +21,7 @@ import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.YearMonth
 import androidx.navigation.NavController
+import com.glowstudio.android.blindsjn.ui.theme.BackgroundWhite
 
 /**
  * 이벤트 데이터 클래스
@@ -238,7 +239,7 @@ fun EventItem(event: CalendarEvent) {
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 4.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFFF0F0F0))
+        colors = CardDefaults.cardColors(containerColor = BackgroundWhite)
     ) {
         Column(modifier = Modifier.padding(8.dp)) {
             Text(text = event.title, style = MaterialTheme.typography.titleMedium)

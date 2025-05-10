@@ -7,8 +7,8 @@ import androidx.navigation.compose.navigation
 import com.glowstudio.android.blindsjn.feature.foodcoast.FoodCostScreen
 import com.glowstudio.android.blindsjn.feature.foodcoast.RegisterIngredientScreen
 import com.glowstudio.android.blindsjn.feature.foodcoast.RegisterRecipeScreen
-import com.glowstudio.android.blindsjn.ui.viewModel.TopBarState
-import com.glowstudio.android.blindsjn.ui.viewModel.TopBarViewModel
+import com.glowstudio.android.blindsjn.feature.main.viewmodel.TopBarState
+import com.glowstudio.android.blindsjn.feature.main.viewmodel.TopBarViewModel
 
 fun NavGraphBuilder.foodCostNavGraph(
     navController: NavHostController,

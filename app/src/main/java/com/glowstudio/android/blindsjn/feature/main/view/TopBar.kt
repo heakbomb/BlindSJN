@@ -1,4 +1,4 @@
-package com.glowstudio.android.blindsjn.ui.navigation
+package com.glowstudio.android.blindsjn.feature.main.view
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -44,6 +44,5 @@ fun TopBar(
         ),
         modifier = Modifier
             .fillMaxWidth()
-            .shadow(elevation = 4.dp)
     )
 }
