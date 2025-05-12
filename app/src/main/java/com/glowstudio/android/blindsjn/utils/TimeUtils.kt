@@ -4,29 +4,30 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 object TimeUtils {
+    // String 형태의 날짜를 파싱해서 “~ 전” 표시를 돌려줍니다.
     fun getTimeAgo(dateStr: String): String {
         val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
-        val date = dateFormat.parse(dateStr) ?: return dateStr
+        val date = try {
+            dateFormat.parse(dateStr)
+        } catch (e: Exception) {
+            null
+        } ?: return dateStr
 
-        val now = Calendar.getInstance().time
-        val diffInMillis = now.time - date.time
+        val now = Date()
+        val diff = now.time - date.time
 
-        val seconds: Long = diffInMillis / 1000
-        val minutes: Long = seconds / 60
-        val hours: Long = minutes / 60
-        val days: Long = hours / 24
-        val weeks: Long = days / 7
-        val months: Long = days / 30
-        val years: Long = days / 365
+        val seconds = diff / 1000
+        val minutes = seconds / 60
+        val hours   = minutes / 60
+        val days    = hours / 24
 
         return when {
-            seconds < 60L -> "방금 전"
-            minutes < 60L -> "${minutes}분 전"
-            hours < 24L -> "${hours}시간 전"
-            days < 7L -> "${days}일 전"
-            weeks < 4L -> "${weeks}주 전"
-            months < 12L -> "${months}달 전"
-            else -> "${years}년 전"
+            seconds < 60       -> "방금 전"
+            minutes < 60       -> "${minutes}분 전"
+            hours < 24         -> "${hours}시간 전"
+            days < 7           -> "${days}일 전"
+            else               -> SimpleDateFormat("yyyy.MM.dd", Locale.getDefault())
+                .format(date)
         }
     }
 }

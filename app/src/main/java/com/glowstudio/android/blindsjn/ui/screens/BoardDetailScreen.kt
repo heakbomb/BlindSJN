@@ -7,10 +7,21 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Comment
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Sort
 import androidx.compose.material.icons.outlined.FavoriteBorder
-import androidx.compose.material3.*
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.*
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -19,9 +30,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.glowstudio.android.blindsjn.model.Post
-import com.glowstudio.android.blindsjn.utils.TimeUtils.getTimeAgo
 import com.glowstudio.android.blindsjn.ui.viewModel.PostViewModel
+import java.text.SimpleDateFormat
+import java.util.Locale
+import java.util.Date
 
+/**
+ * 게시판 상세 화면을 표시합니다.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BoardDetailScreen(
@@ -34,25 +50,33 @@ fun BoardDetailScreen(
     var selectedCategory by remember { mutableStateOf(category) }
     val posts by postViewModel.posts.collectAsState()
 
+    // 화면에 진입할 때 한 번만 호출하여 게시글을 불러옵니다.
+    LaunchedEffect(Unit) {
+        postViewModel.loadPosts()
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.White)
     ) {
+        // 상단 앱바
         CenterAlignedTopAppBar(
             title = { Text("게시판") },
             navigationIcon = {
                 IconButton(onClick = onBackClick) {
-                    Icon(Icons.Default.ArrowBack, contentDescription = "뒤로가기")
+                    Icon(Icons.Filled.ArrowBack, contentDescription = "뒤로가기")
                 }
             }
         )
 
+        // 카테고리 필터
         CategoryFilterRow(
             selectedCategory = selectedCategory,
             onCategorySelected = { selectedCategory = it }
         )
 
+        // 정렬 표시 및 버튼
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -65,11 +89,12 @@ fun BoardDetailScreen(
                 fontSize = 14.sp,
                 color = Color.Gray
             )
-            IconButton(onClick = { /* 정렬 옵션 표시 */ }) {
-                Icon(Icons.Default.Sort, contentDescription = "정렬")
+            IconButton(onClick = { /* TODO: 정렬 옵션 표시 */ }) {
+                Icon(Icons.Filled.Sort, contentDescription = "정렬")
             }
         }
 
+        // 게시글 리스트
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(16.dp),
@@ -86,6 +111,9 @@ fun BoardDetailScreen(
     }
 }
 
+/**
+ * 카테고리 필터 Row
+ */
 @Composable
 fun CategoryFilterRow(
     selectedCategory: String,
@@ -109,6 +137,9 @@ fun CategoryFilterRow(
     }
 }
 
+/**
+ * 단일 카테고리 칩
+ */
 @Composable
 fun CategoryChip(
     category: String,
@@ -130,24 +161,28 @@ fun CategoryChip(
     }
 }
 
+/**
+ * 게시글 아이템
+ */
 @Composable
 fun PostItem(
     post: Post,
     onClick: () -> Unit,
     postViewModel: PostViewModel
 ) {
+    // 날짜를 "yyyy.MM.dd HH:mm" 형식으로 변환하기 위한 포맷터
+    val dateFormatter = remember {
+        SimpleDateFormat("yyyy.MM.dd HH:mm", Locale.getDefault())
+    }
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-        ) {
-            // 제목과 시간을 한 줄에 표시
+        Column(modifier = Modifier.padding(16.dp)) {
+            // 제목과 작성 시간
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -160,7 +195,8 @@ fun PostItem(
                     modifier = Modifier.weight(1f)
                 )
                 Text(
-                    text = getTimeAgo(post.createdAt),
+                    // Date → String 변환하여 전달
+                    text = dateFormatter.format(post.createdAt),
                     fontSize = 12.sp,
                     color = Color.Gray,
                     modifier = Modifier.padding(start = 8.dp)
@@ -169,22 +205,16 @@ fun PostItem(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // 좋아요와 댓글 수를 오른쪽 정렬
+            // 좋아요·댓글 수 표시
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.End,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // 좋아요 버튼
-                IconButton(
-                    onClick = {
-                        postViewModel.incrementLike(post.id)
-                    }
-                ) {
+                IconButton(onClick = { postViewModel.incrementLike(post.id) }) {
                     Icon(
                         imageVector = if (post.isLiked) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
-                        contentDescription = "좋아요",
-                        tint = if (post.isLiked) Color.Red else Color.Gray
+                        contentDescription = "좋아요"
                     )
                 }
                 Text(
@@ -194,11 +224,9 @@ fun PostItem(
                     modifier = Modifier.padding(end = 8.dp)
                 )
 
-                // 댓글 아이콘과 수
                 Icon(
-                    imageVector = Icons.Default.Comment,
+                    imageVector = Icons.Filled.Comment,
                     contentDescription = "댓글",
-                    tint = Color.Gray,
                     modifier = Modifier.size(16.dp)
                 )
                 Text(

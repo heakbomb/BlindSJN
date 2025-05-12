@@ -1,148 +1,94 @@
+// WritePostScreen.kt
 package com.glowstudio.android.blindsjn.ui.screens
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import android.widget.Toast
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AttachFile
-import androidx.compose.material.icons.filled.CameraAlt
-import androidx.compose.material3.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalLifecycleOwner
-import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
 import androidx.navigation.NavController
-import com.glowstudio.android.blindsjn.ui.viewModel.PostViewModel
-import com.glowstudio.android.blindsjn.ui.components.CommonButton
+import com.glowstudio.android.blindsjn.model.BoardCategory
+import com.glowstudio.android.blindsjn.ui.viewModel.BoardViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WritePostScreen(
     navController: NavController,
-    postViewModel: PostViewModel = viewModel()
+    category: BoardCategory
 ) {
-    var title by remember { mutableStateOf("") }
-    var content by remember { mutableStateOf("") }
-    var isAnonymous by remember { mutableStateOf(false) }
-    var isQuestion by remember { mutableStateOf(false) }
+    // ViewModel에서 사용자 정보 수집
+    val vm: BoardViewModel = viewModel()
+    val user by vm.user.collectAsState()
 
-    val contentFocusRequester = remember { FocusRequester() }
-    val statusMessage by postViewModel.statusMessage.collectAsState()
+    // Composable 컨텍스트에서 Context를 미리 꺼냅니다
+    val context = LocalContext.current
 
-    LaunchedEffect(statusMessage) {
-        if (!statusMessage.isNullOrEmpty()) {
-            if (statusMessage!!.contains("성공") || statusMessage!!.contains("저장")) {
-                navController.navigateUp()
-            }
+    // 업종게시판 접근 제한
+    LaunchedEffect(category, user) {
+        if (category == BoardCategory.INDUSTRY && user.certifiedIndustries.isEmpty()) {
+            Toast.makeText(
+                context,
+                "사업자 인증 후 업종게시판을 이용할 수 있습니다.",
+                Toast.LENGTH_LONG
+            ).show()
+            navController.popBackStack()
         }
     }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(title = { Text("게시글 작성") })
-        },
-        content = { paddingValues ->
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-                    .padding(horizontal = 16.dp)
-            ) {
-                OutlinedTextField(
-                    value = title,
-                    onValueChange = { title = it },
-                    placeholder = { Text("제목을 입력해주세요.") },
-                    singleLine = true,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 8.dp),
-                    keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next),
-                    keyboardActions = KeyboardActions(onNext = { contentFocusRequester.requestFocus() })
-                )
+    // 입력 상태 변수
+    var title by remember { mutableStateOf("") }
+    var content by remember { mutableStateOf("") }
 
-                OutlinedTextField(
-                    value = content,
-                    onValueChange = { content = it },
-                    placeholder = { Text("자유롭게 얘기해보세요.\n#질문 #고민") },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(1f)
-                        .padding(vertical = 8.dp)
-                        .focusRequester(contentFocusRequester),
-                    maxLines = Int.MAX_VALUE
-                )
+    // 화면 레이아웃
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        verticalArrangement = Arrangement.Top
+    ) {
+        Text(
+            text = category.displayName,
+            style = MaterialTheme.typography.titleLarge,
+            modifier = Modifier
+                .align(Alignment.CenterHorizontally)
+                .padding(bottom = 16.dp)
+        )
 
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 16.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Row {
-                        IconButton(onClick = { /* 이미지 첨부 */ }) {
-                            Icon(Icons.Default.CameraAlt, contentDescription = "이미지 첨부")
-                        }
-                        Spacer(modifier = Modifier.width(8.dp))
-                        IconButton(onClick = { /* 파일 첨부 */ }) {
-                            Icon(Icons.Default.AttachFile, contentDescription = "파일 첨부")
-                        }
-                    }
+        OutlinedTextField(
+            value = title,
+            onValueChange = { title = it },
+            label = { Text("제목") },
+            singleLine = true,
+            modifier = Modifier.fillMaxWidth()
+        )
 
-                    // 이전처럼 "질문"과 "익명" 체크박스를 오른쪽에
-                    Row {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.clickable { isQuestion = !isQuestion }
-                        ) {
-                            Checkbox(checked = isQuestion, onCheckedChange = null)
-                            Text("질문")
-                        }
-                        Spacer(modifier = Modifier.width(16.dp))
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.clickable { isAnonymous = !isAnonymous }
-                        ) {
-                            Checkbox(checked = isAnonymous, onCheckedChange = null)
-                            Text("익명")
-                        }
-                    }
-                }
+        Spacer(Modifier.height(8.dp))
 
-                CommonButton(
-                    text = "작성",
-                    onClick = {
-                        if (title.isBlank() || content.isBlank()) {
-                            postViewModel.setStatusMessage("제목과 내용을 입력하세요.")
-                        } else {
-                            val userId = 1
-                            val industry = "카페"
-                            postViewModel.savePost(title, content, userId, industry)
-                        }
-                    },
-                    modifier = Modifier.align(Alignment.End)
-                )
+        OutlinedTextField(
+            value = content,
+            onValueChange = { content = it },
+            label = { Text("내용") },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(200.dp)
+        )
 
-                statusMessage?.let {
-                    if (it.isNotBlank()) {
-                        Text(
-                            text = it,
-                            color = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.padding(vertical = 8.dp)
-                        )
-                    }
-                }
-            }
+        Spacer(Modifier.height(16.dp))
+
+        Button(
+            onClick = {
+                // TODO: vm.createPost(PostRequest(...)) 등 실제 저장 로직 추가
+                navController.popBackStack()
+            },
+            modifier = Modifier.align(Alignment.End)
+        ) {
+            Text("등록")
         }
-    )
+    }
 }
