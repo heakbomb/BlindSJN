@@ -5,23 +5,19 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.glowstudio.android.blindsjn.model.Comment
-import com.glowstudio.android.blindsjn.ui.viewModel.PostViewModel
 import com.glowstudio.android.blindsjn.ui.components.CommonButton
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.verticalScroll
+import com.glowstudio.android.blindsjn.ui.viewModel.PostViewModel
 
 @Composable
 fun PostDetailScreen(navController: NavController, postId: String) {
@@ -30,6 +26,7 @@ fun PostDetailScreen(navController: NavController, postId: String) {
     val comments by viewModel.comments.collectAsState()
     var newComment by remember { mutableStateOf("") }
     var isLiked by remember { mutableStateOf(false) }
+    var isEditingComment by remember { mutableStateOf<Comment?>(null) }
 
     val safePostId = postId.toIntOrNull() ?: 1
 
@@ -59,11 +56,15 @@ fun PostDetailScreen(navController: NavController, postId: String) {
                     ) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.clickable { isLiked = !isLiked }
+                            modifier = Modifier.clickable {
+                                isLiked = !isLiked
+                                viewModel.incrementLike(safePostId)
+                            }
                         ) {
                             Icon(
                                 imageVector = if (isLiked) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
-                                contentDescription = "좋아요"
+                                contentDescription = "좋아요",
+                                tint = if (isLiked) Color.Red else MaterialTheme.colorScheme.onSurfaceVariant
                             )
                             Spacer(modifier = Modifier.width(4.dp))
                             Text("${it.likeCount + if (isLiked) 1 else 0}")
@@ -75,66 +76,58 @@ fun PostDetailScreen(navController: NavController, postId: String) {
                     Text("댓글", style = MaterialTheme.typography.titleMedium)
                     Spacer(modifier = Modifier.height(8.dp))
 
-                    // 댓글 리스트 스크롤 가능하게 수정
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .fillMaxWidth()
-                    ) {
-                        LazyColumn {
-                            items(comments) { comment ->
-                                CommentItem(comment)
-                            }
+                    LazyColumn {
+                        items(comments) { comment ->
+                            CommentItem(
+                                comment = comment,
+                                isAuthor = comment.userId == 1,
+                                onEdit = {
+                                    isEditingComment = comment
+                                    newComment = comment.content
+                                },
+                                onDelete = {
+                                    viewModel.deleteComment(comment.id, safePostId)
+                                }
+                            )
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(8.dp))
-
                     Column(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalAlignment = Alignment.CenterHorizontally,
+                        horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         OutlinedTextField(
                             value = newComment,
                             onValueChange = { newComment = it },
-                            modifier = Modifier
-                                .fillMaxWidth(0.9f),
-                            placeholder = { Text("댓글을 입력하세요...") },
-                            singleLine = false,
-                            keyboardOptions = KeyboardOptions.Default.copy(
-                                imeAction = ImeAction.Done
-                            ),
-                            keyboardActions = KeyboardActions(
-                                onDone = {
-                                    if (!newComment.isNullOrBlank()) {
+                            modifier = Modifier.fillMaxWidth(0.9f),
+                            placeholder = { Text(if (isEditingComment != null) "댓글을 수정하세요..." else "댓글을 입력하세요...") },
+                            singleLine = false
+                        )
+
+                        CommonButton(
+                            text = if (isEditingComment != null) "수정" else "등록",
+                            onClick = {
+                                if (newComment.isNotBlank()) {
+                                    if (isEditingComment != null) {
+                                        viewModel.editComment(
+                                            commentId = isEditingComment!!.id,
+                                            content = newComment,
+                                            postId = safePostId
+                                        )
+                                        isEditingComment = null
+                                    } else {
                                         viewModel.saveComment(
                                             postId = safePostId,
                                             userId = 1,
                                             content = newComment
                                         )
-                                        newComment = ""
                                     }
-                                }
-                            )
-                        )
-
-                        CommonButton(
-                            text = "등록",
-                            onClick = {
-                                if (newComment.isNotBlank()) {
-                                    viewModel.saveComment(
-                                        postId = safePostId,
-                                        userId = 1,
-                                        content = newComment
-                                    )
                                     newComment = ""
                                 }
                             },
                             modifier = Modifier.padding(top = 8.dp)
                         )
                     }
-                } ?: run {
-                    Text("게시글을 불러오는 중입니다...", modifier = Modifier.padding(16.dp))
                 }
             }
         }
@@ -142,13 +135,36 @@ fun PostDetailScreen(navController: NavController, postId: String) {
 }
 
 @Composable
-fun CommentItem(comment: Comment) {
+fun CommentItem(
+    comment: Comment,
+    isAuthor: Boolean,
+    onEdit: () -> Unit,
+    onDelete: () -> Unit
+) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 4.dp)
     ) {
-        Text(text = "익명", style = MaterialTheme.typography.bodyMedium)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(text = "익명", style = MaterialTheme.typography.bodyMedium)
+
+            if (isAuthor) {
+                Row {
+                    IconButton(onClick = onEdit) {
+                        Icon(Icons.Default.Edit, contentDescription = "수정")
+                    }
+                    IconButton(onClick = onDelete) {
+                        Icon(Icons.Default.Delete, contentDescription = "삭제")
+                    }
+                }
+            }
+        }
+
         Text(
             text = comment.content,
             style = MaterialTheme.typography.bodySmall,
