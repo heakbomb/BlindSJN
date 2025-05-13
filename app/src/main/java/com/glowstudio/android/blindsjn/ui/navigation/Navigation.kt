@@ -19,14 +19,24 @@ fun AppNavHost(
     ) {
         composable("login") {
             LoginScreen(
-                onLoginClick = { success -> if (success) navController.navigate("main") },
+                onLoginClick = { success -> 
+                    if (success) {
+                        navController.navigate("main") {
+                            popUpTo("login") { inclusive = true }
+                        }
+                    }
+                },
                 onSignupClick = { navController.navigate("signup") },
                 onForgotPasswordClick = { navController.navigate("forgot") }
             )
         }
         composable("signup") {
             SignupScreen(
-                onSignupClick = { _, _ -> navController.navigate("main") },
+                onSignupClick = { _, _ -> 
+                    navController.navigate("main") {
+                        popUpTo("login") { inclusive = true }
+                    }
+                },
                 onBackToLoginClick = { navController.navigateUp() }
             )
         }
