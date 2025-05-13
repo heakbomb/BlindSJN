@@ -1,6 +1,5 @@
 package com.glowstudio.android.blindsjn.feature.board.view
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardActions
@@ -19,7 +18,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.glowstudio.android.blindsjn.feature.board.viewmodel.PostViewModel
-import com.glowstudio.android.blindsjn.ui.components.CommonButton
+import com.glowstudio.android.blindsjn.ui.components.common.CommonButton
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -42,9 +41,6 @@ fun WritePostScreen(navController: NavController) {
     }
 
     Scaffold(
-        topBar = {
-            TopAppBar(title = { Text("게시글 작성") })
-        },
         content = { paddingValues ->
             Column(
                 modifier = Modifier

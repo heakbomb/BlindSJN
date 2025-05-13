@@ -21,14 +21,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.glowstudio.android.blindsjn.data.model.LoginRequest
 import com.glowstudio.android.blindsjn.data.network.InternalServer
-import com.glowstudio.android.blindsjn.data.network.AuthRepository
 import com.glowstudio.android.blindsjn.R
-import com.glowstudio.android.blindsjn.data.network.AutoLoginManager
-import com.glowstudio.android.blindsjn.data.network.isNetworkAvailable
-import kotlinx.coroutines.launch
 import androidx.compose.ui.text.font.FontWeight
-import com.glowstudio.android.blindsjn.ui.components.*
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.glowstudio.android.blindsjn.ui.components.common.AutoLoginRow
+import com.glowstudio.android.blindsjn.ui.components.common.CommonButton
+import com.glowstudio.android.blindsjn.ui.components.common.CommonTextField
 
 // 로그인 함수 (서버 통신)
 suspend fun login(phoneNumber: String, password: String): Boolean {

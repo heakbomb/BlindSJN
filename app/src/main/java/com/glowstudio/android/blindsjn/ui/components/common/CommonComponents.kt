@@ -1,4 +1,4 @@
-package com.glowstudio.android.blindsjn.ui.components
+package com.glowstudio.android.blindsjn.ui.components.common
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape

@@ -14,7 +14,7 @@ import com.glowstudio.android.blindsjn.ui.dialog.CustomTimePickerDialog
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
-import com.glowstudio.android.blindsjn.ui.components.CommonButton
+import com.glowstudio.android.blindsjn.ui.components.common.CommonButton
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

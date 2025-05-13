@@ -12,12 +12,15 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.glowstudio.android.blindsjn.feature.board.model.Comment
+import com.glowstudio.android.blindsjn.feature.board.model.Post
 import com.glowstudio.android.blindsjn.feature.board.viewmodel.*
-import com.glowstudio.android.blindsjn.ui.components.CommonButton
+import com.glowstudio.android.blindsjn.ui.components.common.CommonButton
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.graphics.Color
@@ -172,6 +175,31 @@ fun CommentItem(comment: Comment) {
             text = comment.content,
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PostDetailScreenPreview() {
+    BlindSJNTheme {
+        val navController = rememberNavController()
+        PostDetailScreen(navController = navController, postId = "1")
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun CommentItemPreview() {
+    BlindSJNTheme {
+        CommentItem(
+            comment = Comment(
+                commentId = 1,
+                postId = 1,
+                userId = 1,
+                content = "이것은 예시 댓글입니다. 댓글 내용이 길어지면 어떻게 보이는지 확인하기 위한 텍스트입니다.",
+                createdAt = "2024-03-20"
+            )
         )
     }
 }
