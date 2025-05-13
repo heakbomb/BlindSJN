@@ -2,6 +2,7 @@ package com.glowstudio.android.blindsjn.feature.board.view
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.border
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -18,16 +19,26 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.glowstudio.android.blindsjn.feature.board.viewmodel.PostViewModel
+import com.glowstudio.android.blindsjn.feature.board.viewmodel.BoardViewModel
+import com.glowstudio.android.blindsjn.feature.board.model.BoardCategory
 import com.glowstudio.android.blindsjn.ui.components.common.CommonButton
+import com.glowstudio.android.blindsjn.feature.board.viewmodel.WritePostViewModel
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.compose.rememberNavController
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WritePostScreen(navController: NavController) {
     val viewModel: PostViewModel = viewModel()
+    val boardViewModel: BoardViewModel = viewModel()
+    val writePostViewModel = remember { WritePostViewModel(boardViewModel) }
+    val categories by writePostViewModel.categories.collectAsState()
+    val selectedCategory by writePostViewModel.selectedCategory.collectAsState()
     var title by remember { mutableStateOf("") }
     var content by remember { mutableStateOf("") }
     var isAnonymous by remember { mutableStateOf(false) }
     var isQuestion by remember { mutableStateOf(false) }
+    var expanded by remember { mutableStateOf(false) }
 
     val contentFocusRequester = remember { FocusRequester() }
     val statusMessage by viewModel.statusMessage.collectAsState()
@@ -48,17 +59,56 @@ fun WritePostScreen(navController: NavController) {
                     .padding(paddingValues)
                     .padding(horizontal = 16.dp)
             ) {
-                OutlinedTextField(
-                    value = title,
-                    onValueChange = { title = it },
-                    placeholder = { Text("제목을 입력해주세요.") },
-                    singleLine = true,
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 8.dp),
-                    keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next),
-                    keyboardActions = KeyboardActions(onNext = { contentFocusRequester.requestFocus() })
-                )
+                        .padding(vertical = 8.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(55.dp)
+                            .clickable { expanded = true }
+                            .border(
+                                width = 1.dp,
+                                color = MaterialTheme.colorScheme.outline,
+                                shape = MaterialTheme.shapes.small
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = selectedCategory.emoji,
+                            style = MaterialTheme.typography.titleLarge
+                        )
+                        DropdownMenu(
+                            expanded = expanded,
+                            onDismissRequest = { expanded = false }
+                        ) {
+                            categories.forEach { category ->
+                                DropdownMenuItem(
+                                    text = { Text(category.title) },
+                                    onClick = {
+                                        writePostViewModel.selectCategory(category)
+                                        expanded = false
+                                    },
+                                    leadingIcon = { Text(category.emoji) }
+                                )
+                            }
+                        }
+                    }
+                    Spacer(modifier = Modifier.width(8.dp))
+                    OutlinedTextField(
+                        value = title,
+                        onValueChange = { title = it },
+                        placeholder = { Text("제목을 입력해주세요.") },
+                        singleLine = true,
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(55.dp),
+                        keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next),
+                        keyboardActions = KeyboardActions(onNext = { contentFocusRequester.requestFocus() })
+                    )
+                }
 
                 OutlinedTextField(
                     value = content,
@@ -132,4 +182,10 @@ fun WritePostScreen(navController: NavController) {
             }
         }
     )
+}
+
+@Preview(showBackground = true)
+@Composable
+fun WritePostScreenPreview() {
+    WritePostScreen(navController = rememberNavController())
 }
