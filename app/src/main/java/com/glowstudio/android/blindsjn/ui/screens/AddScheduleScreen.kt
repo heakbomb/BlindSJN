@@ -14,8 +14,16 @@ import com.glowstudio.android.blindsjn.ui.dialog.CustomTimePickerDialog
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
-import com.glowstudio.android.blindsjn.ui.components.CommonButton
+import com.glowstudio.android.blindsjn.ui.components.common.CommonButton
 
+/**
+ * 스케줄을 추가하는 UI 화면을 표시합니다.
+ *
+ * 사용자가 제목, 시작일, 종료일, 시작 시간, 종료 시간, 메모를 입력할 수 있으며, 저장 또는 취소 동작을 선택할 수 있습니다.
+ *
+ * @param onCancel 사용자가 취소를 선택할 때 호출됩니다.
+ * @param onSave 사용자가 입력한 스케줄 정보를 저장할 때 호출되며, 입력된 정보를 포함한 ScheduleInput 객체가 전달됩니다.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddScheduleScreen(

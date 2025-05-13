@@ -7,8 +7,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.glowstudio.android.blindsjn.ui.components.CommonButton
+import com.glowstudio.android.blindsjn.ui.components.common.CommonButton
 
+/**
+ * 연락처 정보를 수정할 수 있는 UI 화면을 표시합니다.
+ *
+ * 전화번호, 이메일, 주소를 입력받아 수정할 수 있는 입력 필드와 저장 버튼을 제공합니다.
+ *
+ * @param onBackClick 뒤로 가기 동작을 처리하는 콜백입니다.
+ * @param onSave 저장 버튼 클릭 시 호출되는 콜백입니다.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditContactScreen(
