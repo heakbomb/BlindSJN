@@ -1,4 +1,4 @@
-package com.glowstudio.android.blindsjn.ui.screens
+package com.glowstudio.android.blindsjn.feature.calendar
 // 기존에 메시지로 만들려던 것을 캘린더로 바꾼거라 이름이 이따구임. 헷갈리지 말 것.
 // 루트 값 또한 message로 작용하고 있다.
 

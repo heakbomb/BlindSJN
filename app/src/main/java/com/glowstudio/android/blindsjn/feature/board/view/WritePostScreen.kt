@@ -28,7 +28,10 @@ import androidx.navigation.compose.rememberNavController
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun WritePostScreen(navController: NavController) {
+fun WritePostScreen(
+    navController: NavController,
+    tags: String? = null
+) {
     val viewModel: PostViewModel = viewModel()
     val boardViewModel: BoardViewModel = viewModel()
     val writePostViewModel = remember { WritePostViewModel(boardViewModel) }
@@ -48,6 +51,13 @@ fun WritePostScreen(navController: NavController) {
             if (message.contains("성공") || message.contains("저장")) {
                 navController.navigateUp()
             }
+        }
+    }
+
+    LaunchedEffect(tags) {
+        tags?.let { tagString ->
+            val tagList = tagString.split(",")
+            writePostViewModel.setSelectedTags(tagList)
         }
     }
 

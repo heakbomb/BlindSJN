@@ -44,7 +44,7 @@ fun PostBottomSheet(
                     enabled = enabled,
                     onClick = {
                         if (enabled) {
-                            if (selected) selectedTags.remove(tag)
+                            if (selected) selectedTags.remove(tag)  
                             else selectedTags.add(tag)
                         }
                     }

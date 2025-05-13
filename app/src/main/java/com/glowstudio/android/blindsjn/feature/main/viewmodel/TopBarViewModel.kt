@@ -4,6 +4,8 @@ import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
+enum class TopBarType { MAIN, DETAIL }
+
 /**
  * 상단바 상태 데이터 클래스
  * title: 상단바에 표시할 제목
@@ -11,19 +13,31 @@ import kotlinx.coroutines.flow.asStateFlow
  * showSearchButton: 검색 버튼 표시 여부
  */
 data class TopBarState(
-    val title: String,
-    val showBackButton: Boolean,
-    val showSearchButton: Boolean
+    val type: TopBarType = TopBarType.MAIN,
+    val title: String = "",
+    val showBackButton: Boolean = false,
+    val showSearchButton: Boolean = false,
+    val showMoreButton: Boolean = false
 )
 
 /**
  * 상단바 상태를 관리하는 ViewModel
  */
 class TopBarViewModel : ViewModel() {
-    private val _topBarState = MutableStateFlow(TopBarState("홈 화면", false, false))
+    private val _topBarState = MutableStateFlow(TopBarState())
     val topBarState = _topBarState.asStateFlow()
 
-    fun updateState(newState: TopBarState) {
-        _topBarState.value = newState
+    fun setMainBar() {
+        _topBarState.value = TopBarState(type = TopBarType.MAIN)
+    }
+
+    fun setDetailBar(title: String) {
+        _topBarState.value = TopBarState(
+            type = TopBarType.DETAIL,
+            title = title,
+            showBackButton = true,
+            showSearchButton = true,
+            showMoreButton = true
+        )
     }
 }

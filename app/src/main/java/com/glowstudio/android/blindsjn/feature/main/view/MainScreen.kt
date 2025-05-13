@@ -11,6 +11,24 @@ import com.glowstudio.android.blindsjn.feature.main.viewmodel.TopBarViewModel
 import com.glowstudio.android.blindsjn.feature.main.viewmodel.NavigationViewModel
 import androidx.compose.foundation.layout.Box
 import androidx.compose.ui.tooling.preview.Preview
+import com.glowstudio.android.blindsjn.feature.main.view.TopBarMain
+import com.glowstudio.android.blindsjn.feature.main.view.TopBarDetail
+import com.glowstudio.android.blindsjn.feature.main.viewmodel.TopBarType
+import com.glowstudio.android.blindsjn.feature.board.view.BoardScreen
+import com.glowstudio.android.blindsjn.feature.board.view.BoardDetailScreen
+import com.glowstudio.android.blindsjn.feature.board.view.WritePostScreen
+import com.glowstudio.android.blindsjn.feature.board.view.PostDetailScreen
+import com.glowstudio.android.blindsjn.feature.home.HomeScreen
+import com.glowstudio.android.blindsjn.feature.profile.ProfileScreen
+import com.glowstudio.android.blindsjn.feature.popular.PopularScreen
+import com.glowstudio.android.blindsjn.feature.calendar.MessageScreen
+import com.glowstudio.android.blindsjn.ui.screens.AddScheduleScreen
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.NavType
+import androidx.navigation.navArgument
+import java.net.URLDecoder
+import java.net.URLEncoder
 
 /**
  * 메인 스크린: 상단바, 하단 네비게이션 바, 내부 컨텐츠(AppNavHost)를 포함하여 전체 화면 전환을 관리합니다.
@@ -30,13 +48,19 @@ fun MainScreen(
     Scaffold(
         // 상단바: TopBarViewModel의 상태를 기반으로 동적으로 업데이트됨
         topBar = {
-            TopBar(
-                title = topBarState.title,
-                showBackButton = topBarState.showBackButton,
-                showSearchButton = topBarState.showSearchButton,
-                onBackClick = { navController.navigateUp() },
-                onSearchClick = { /* TODO: 검색 동작 구현 */ }
-            )
+            when (topBarState.type) {
+                TopBarType.MAIN -> TopBarMain(
+                    rightContent = {
+                        // 예시: IconButton 등 원하는 컴포넌트 추가
+                    }
+                )
+                TopBarType.DETAIL -> TopBarDetail(
+                    title = topBarState.title,
+                    onBackClick = { navController.navigateUp() },
+                    onSearchClick = { /* TODO: 검색 동작 구현 */ },
+                    onMoreClick = { /* TODO: 더보기 동작 구현 */ }
+                )
+            }
         },
         // 하단 네비게이션 바
         bottomBar = {
@@ -49,10 +73,59 @@ fun MainScreen(
         content = { paddingValues ->
             // paddingValues에 추가 top padding(예: 16.dp)을 더해 상단바와의 여백을 확보합니다.
             Box(modifier = Modifier.padding(paddingValues)) {
-                AppNavHost(
+                NavHost(
                     navController = navController,
-                    topBarViewModel = topBarViewModel
-                )
+                    startDestination = "home"
+                ) {
+                    composable("home") { HomeScreen(navController) }
+                    composable("board") { BoardScreen(navController) }
+                    composable("popular") { PopularScreen() }
+                    composable("message") { MessageScreen(navController) }
+                    composable("profile") { ProfileScreen(
+                        onLogoutClick = { /* ... */ },
+                        onBusinessCertificationClick = { /* ... */ },
+                        onProfileEditClick = { /* ... */ },
+                        onContactEditClick = { /* ... */ }
+                    ) }
+                    composable("boardDetail/{title}") { backStackEntry ->
+                        val encodedTitle = backStackEntry.arguments?.getString("title") ?: ""
+                        val title = URLDecoder.decode(encodedTitle, "UTF-8")
+                        BoardDetailScreen(navController, title)
+                    }
+                    composable(
+                        route = "writePost?tags={tags}",
+                        arguments = listOf(
+                            navArgument("tags") {
+                                type = NavType.StringType
+                                nullable = true
+                                defaultValue = null
+                            }
+                        )
+                    ) { backStackEntry ->
+                        val tags = backStackEntry.arguments?.getString("tags")
+                        WritePostScreen(navController, tags)
+                    }
+                    composable(
+                        route = "postDetail/{postId}",
+                        arguments = listOf(
+                            navArgument("postId") {
+                                type = NavType.StringType
+                            }
+                        )
+                    ) { backStackEntry ->
+                        val postId = backStackEntry.arguments?.getString("postId") ?: ""
+                        PostDetailScreen(navController, postId)
+                    }
+                    composable("addSchedule") {
+                        AddScheduleScreen(
+                            onCancel = { navController.navigateUp() },
+                            onSave = { schedule ->
+                                // TODO: 일정 저장 로직 구현
+                                navController.navigateUp()
+                            }
+                        )
+                    }
+                }
             }
         }
     )

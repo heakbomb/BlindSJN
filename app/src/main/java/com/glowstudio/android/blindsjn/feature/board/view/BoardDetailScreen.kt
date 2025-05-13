@@ -23,6 +23,7 @@ import androidx.compose.ui.graphics.Color
 import com.glowstudio.android.blindsjn.ui.theme.*
 import com.glowstudio.android.blindsjn.feature.board.view.PostBottomSheet
 import com.glowstudio.android.blindsjn.feature.board.viewmodel.PostBottomSheetViewModel
+import java.net.URLEncoder
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -53,7 +54,8 @@ fun BoardDetailScreen(navController: NavController, title: String) {
                 enabledTags = enabledTags,
                 onDone = {
                     showSheet = false
-                    navController.navigate("writePost?tags=" + it.joinToString(","))
+                    val encodedTags = URLEncoder.encode(it.joinToString(","), "UTF-8")
+                    navController.navigate("writePost?tags=$encodedTags")
                     postBottomSheetViewModel.clearSelection()
                 }
             )
@@ -200,7 +202,7 @@ fun PostItem(
             Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(
+                Icon(   
                     imageVector = Icons.Filled.ThumbUp,
                     contentDescription = "좋아요",
                     tint = if (isLiked) Error else DividerGray,

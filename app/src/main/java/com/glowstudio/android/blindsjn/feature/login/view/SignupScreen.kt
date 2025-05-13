@@ -1,4 +1,4 @@
-package com.glowstudio.android.blindsjn.feature.login
+package com.glowstudio.android.blindsjn.feature.login.view
 
 /**
  * 회원가입 스크린 로직

@@ -3,6 +3,7 @@ package com.glowstudio.android.blindsjn.feature.main.view
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
@@ -10,30 +11,61 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.RowScope
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.tooling.preview.Preview
+import com.glowstudio.android.blindsjn.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TopBar(
-    title: String, // 상단 바의 제목
-    showBackButton: Boolean = true, // 뒤로가기 버튼 표시 여부
-    showSearchButton: Boolean = true, // 검색 버튼 표시 여부
-    onBackClick: () -> Unit = {}, // 뒤로가기 버튼 클릭 이벤트
-    onSearchClick: () -> Unit = {} // 검색 버튼 클릭 이벤트
+fun TopBarMain(
+    modifier: Modifier = Modifier,
+    onLogoClick: () -> Unit = {},
+    rightContent: @Composable RowScope.() -> Unit = {}
 ) {
     CenterAlignedTopAppBar(
-        title = { Text(title) }, // 제목 표시
+        title = {},
         navigationIcon = {
-            if (showBackButton) { // 뒤로가기 버튼 표시 여부
-                IconButton(onClick = onBackClick) {
-                    Icon(Icons.Filled.ArrowBack, contentDescription = "뒤로가기")
-                }
+            IconButton(onClick = onLogoClick) {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_logo), // 실제 로고 리소스 사용
+                    contentDescription = "로고"
+                )
+            }
+        },
+        actions = rightContent,
+        colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+            containerColor = Color.White,
+            titleContentColor = Color.Black,
+            navigationIconContentColor = Color.Black,
+            actionIconContentColor = Color.Black
+        ),
+        modifier = modifier.fillMaxWidth()
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun TopBarDetail(
+    title: String,
+    onBackClick: () -> Unit = {},
+    onSearchClick: () -> Unit = {},
+    onMoreClick: () -> Unit = {},
+    modifier: Modifier = Modifier
+) {
+    CenterAlignedTopAppBar(
+        title = { Text(title) },
+        navigationIcon = {
+            IconButton(onClick = onBackClick) {
+                Icon(Icons.Filled.ArrowBack, contentDescription = "뒤로가기")
             }
         },
         actions = {
-            if (showSearchButton) { // 검색 버튼 표시 여부
-                IconButton(onClick = onSearchClick) {
-                    Icon(Icons.Filled.Search, contentDescription = "검색")
-                }
+            IconButton(onClick = onSearchClick) {
+                Icon(Icons.Filled.Search, contentDescription = "검색")
+            }
+            IconButton(onClick = onMoreClick) {
+                Icon(Icons.Filled.MoreVert, contentDescription = "더보기")
             }
         },
         colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
@@ -42,7 +74,29 @@ fun TopBar(
             navigationIconContentColor = Color.Black,
             actionIconContentColor = Color.Black
         ),
-        modifier = Modifier
-            .fillMaxWidth()
+        modifier = modifier.fillMaxWidth()
+    )
+}
+
+@Preview(showBackground = true)
+@Composable
+fun TopBarMainPreview() {
+    TopBarMain(
+        rightContent = {
+            IconButton(onClick = {}) { Icon(Icons.Filled.Search, contentDescription = "검색") }
+            IconButton(onClick = {}) { Icon(Icons.Filled.MoreVert, contentDescription = "더보기") }
+            IconButton(onClick = {}) { Icon(Icons.Filled.ArrowBack, contentDescription = "임시") }
+        }
+    )
+}
+
+@Preview(showBackground = true)
+@Composable
+fun TopBarDetailPreview() {
+    TopBarDetail(
+        title = "상세화면",
+        onBackClick = {},
+        onSearchClick = {},
+        onMoreClick = {}
     )
 }

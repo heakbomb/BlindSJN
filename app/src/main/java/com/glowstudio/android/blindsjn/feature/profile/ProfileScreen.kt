@@ -1,4 +1,4 @@
-package com.glowstudio.android.blindsjn.ui.screens
+package com.glowstudio.android.blindsjn.feature.profile
 
 import android.util.Log
 import androidx.compose.foundation.background

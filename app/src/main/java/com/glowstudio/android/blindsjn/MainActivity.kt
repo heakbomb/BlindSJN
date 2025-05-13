@@ -22,8 +22,7 @@ class MainActivity : ComponentActivity() {
                     val navController = rememberNavController()
                     val topBarViewModel: TopBarViewModel = viewModel()
                     AppNavHost(
-                        navController = navController,
-                        topBarViewModel = topBarViewModel
+                        navController = navController
                     )
                 }
             }

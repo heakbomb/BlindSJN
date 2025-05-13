@@ -9,14 +9,31 @@
     <option name="autoReloadType" value="NONE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="825fe6b4-d9fb-46a3-80f8-bedc4e376b40" name="Changes" comment="글쓰기 바텀 시트 (카테고리 선택 기능)">
+    <list default="true" id="825fe6b4-d9fb-46a3-80f8-bedc4e376b40" name="Changes" comment="글 작성 화면 뱃지 선택 드롭박스 추가 (실제로 뱃지 적용되는 프로세스 필요)">
       <change beforePath="$PROJECT_DIR$/.gradle/8.11.1/executionHistory/executionHistory.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/8.11.1/executionHistory/executionHistory.lock" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/8.11.1/fileHashes/fileHashes.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/8.11.1/fileHashes/fileHashes.bin" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/8.11.1/fileHashes/fileHashes.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/8.11.1/fileHashes/fileHashes.lock" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/8.11.1/fileHashes/resourceHashesCache.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/8.11.1/fileHashes/resourceHashesCache.bin" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/buildOutputCleanup/buildOutputCleanup.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/buildOutputCleanup/buildOutputCleanup.lock" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/glowstudio/android/blindsjn/feature/board/view/WritePostScreen.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/glowstudio/android/blindsjn/feature/board/view/WritePostScreen.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/_BlindSJN_" beforeDir="false" afterPath="$PROJECT_DIR$/_BlindSJN_" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/_BlindSJN_/app/src/main/java/com/glowstudio/android/blindsjn/ui/navigation/MainNavGraph.kt" beforeDir="false" afterPath="$PROJECT_DIR$/_BlindSJN_/app/src/main/java/com/glowstudio/android/blindsjn/ui/navigation/MainNavGraph.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/_BlindSJN_/app/src/main/java/com/glowstudio/android/blindsjn/ui/navigation/Navigation.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/glowstudio/android/blindsjn/MainActivity.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/glowstudio/android/blindsjn/MainActivity.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/glowstudio/android/blindsjn/feature/board/view/BoardDetailScreen.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/glowstudio/android/blindsjn/feature/board/view/BoardDetailScreen.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/glowstudio/android/blindsjn/feature/board/view/PostBottomSheet.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/glowstudio/android/blindsjn/feature/board/view/PostBottomSheet.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/glowstudio/android/blindsjn/feature/login/LoginScreen.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/glowstudio/android/blindsjn/feature/login/view/LoginScreen.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/glowstudio/android/blindsjn/feature/login/SignupScreen.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/glowstudio/android/blindsjn/feature/login/view/SignupScreen.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/glowstudio/android/blindsjn/feature/main/view/MainScreen.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/glowstudio/android/blindsjn/feature/main/view/MainScreen.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/glowstudio/android/blindsjn/feature/main/view/TopBar.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/glowstudio/android/blindsjn/feature/main/view/TopBar.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/glowstudio/android/blindsjn/feature/main/viewmodel/TopBarViewModel.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/glowstudio/android/blindsjn/feature/main/viewmodel/TopBarViewModel.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/glowstudio/android/blindsjn/ui/navigation/AuthNavGraph.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/glowstudio/android/blindsjn/ui/navigation/AuthNavGraph.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/glowstudio/android/blindsjn/ui/navigation/FoodCostNavGraph.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/glowstudio/android/blindsjn/ui/navigation/MainNavGraph.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/glowstudio/android/blindsjn/ui/navigation/MainNavGraph.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/glowstudio/android/blindsjn/ui/navigation/Navigation.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/glowstudio/android/blindsjn/ui/navigation/Navigation.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/glowstudio/android/blindsjn/ui/screens/MessageScreen.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/glowstudio/android/blindsjn/feature/calendar/MessageScreen.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/glowstudio/android/blindsjn/ui/screens/PopularScreen.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/glowstudio/android/blindsjn/feature/popular/PopularScreen.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/glowstudio/android/blindsjn/ui/screens/ProfileScreen.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/glowstudio/android/blindsjn/feature/profile/ProfileScreen.kt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -131,11 +148,11 @@
 }]]></component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\gyshim1\StudioProjects\BlindSJN\app\src\main\java\com\glowstudio\android\blindsjn\feature\calendar" />
+      <recent name="C:\Users\gyshim1\StudioProjects\BlindSJN\app\src\main\java\com\glowstudio\android\blindsjn\feature\profile" />
+      <recent name="C:\Users\gyshim1\StudioProjects\BlindSJN\app\src\main\java\com\glowstudio\android\blindsjn\feature\popular" />
+      <recent name="C:\Users\gyshim1\StudioProjects\BlindSJN\app\src\main\java\com\glowstudio\android\blindsjn\feature\login\view" />
       <recent name="C:\Users\gyshim1\StudioProjects\BlindSJN\app\src\main\java\com\glowstudio\android\blindsjn\ui\components\common" />
-      <recent name="C:\Users\gyshim1\StudioProjects\BlindSJN\app\src\main\java\com\glowstudio\android\blindsjn\feature\main\view" />
-      <recent name="C:\Users\gyshim1\StudioProjects\BlindSJN\app\src\main\java\com\glowstudio\android\blindsjn\feature\main\viewmodel" />
-      <recent name="C:\Users\gyshim1\StudioProjects\BlindSJN\app\src\main\java\com\glowstudio\android\blindsjn\feature\main\model" />
-      <recent name="C:\Users\gyshim1\StudioProjects\BlindSJN\app\src\main\java\com\glowstudio\android\blindsjn\feature\board\model" />
     </key>
     <key name="android.template.-1899000762">
       <recent name="com.glowstudio.android.blindsjn.feature.board" />
@@ -426,7 +443,15 @@
       <option name="project" value="LOCAL" />
       <updated>1747117875619</updated>
     </task>
-    <option name="localTasksCounter" value="16" />
+    <task id="LOCAL-00016" summary="글 작성 화면 뱃지 선택 드롭박스 추가 (실제로 뱃지 적용되는 프로세스 필요)">
+      <option name="closed" value="true" />
+      <created>1747119526882</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1747119526882</updated>
+    </task>
+    <option name="localTasksCounter" value="17" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -468,7 +493,8 @@
     <MESSAGE value="UI 일부 변경" />
     <MESSAGE value="컴포넌트 모듈 분리" />
     <MESSAGE value="글쓰기 바텀 시트 (카테고리 선택 기능)" />
-    <option name="LAST_COMMIT_MESSAGE" value="글쓰기 바텀 시트 (카테고리 선택 기능)" />
+    <MESSAGE value="글 작성 화면 뱃지 선택 드롭박스 추가 (실제로 뱃지 적용되는 프로세스 필요)" />
+    <option name="LAST_COMMIT_MESSAGE" value="글 작성 화면 뱃지 선택 드롭박스 추가 (실제로 뱃지 적용되는 프로세스 필요)" />
   </component>
   <component name="play_dynamic_filters_status">
     <option name="appIdToCheckInfo">

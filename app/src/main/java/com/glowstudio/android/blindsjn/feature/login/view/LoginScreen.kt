@@ -1,4 +1,4 @@
-package com.glowstudio.android.blindsjn.feature.login
+package com.glowstudio.android.blindsjn.feature.login.view
 
 /**
  * 로그인 스크린 로직
@@ -24,6 +24,7 @@ import com.glowstudio.android.blindsjn.data.network.InternalServer
 import com.glowstudio.android.blindsjn.R
 import androidx.compose.ui.text.font.FontWeight
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.glowstudio.android.blindsjn.feature.login.LoginViewModel
 import com.glowstudio.android.blindsjn.ui.components.common.AutoLoginRow
 import com.glowstudio.android.blindsjn.ui.components.common.CommonButton
 import com.glowstudio.android.blindsjn.ui.components.common.CommonTextField

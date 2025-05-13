@@ -8,13 +8,15 @@ import com.glowstudio.android.blindsjn.feature.board.view.BoardDetailScreen
 import com.glowstudio.android.blindsjn.feature.board.view.BoardScreen
 import com.glowstudio.android.blindsjn.feature.board.view.WritePostScreen
 import com.glowstudio.android.blindsjn.ui.screens.*
-import com.glowstudio.android.blindsjn.feature.main.viewmodel.TopBarState
 import com.glowstudio.android.blindsjn.feature.main.viewmodel.TopBarViewModel
 import com.glowstudio.android.blindsjn.data.model.Article
 import com.glowstudio.android.blindsjn.feature.board.view.PostDetailScreen
+import com.glowstudio.android.blindsjn.feature.calendar.MessageScreen
 import com.glowstudio.android.blindsjn.feature.certification.BusinessCertificationScreen
 import com.glowstudio.android.blindsjn.feature.home.HomeScreen
 import com.glowstudio.android.blindsjn.feature.home.NewsDetailScreen
+import com.glowstudio.android.blindsjn.feature.popular.PopularScreen
+import com.glowstudio.android.blindsjn.feature.profile.ProfileScreen
 import com.google.gson.Gson
 import java.net.URLDecoder
 
@@ -28,7 +30,7 @@ fun NavGraphBuilder.mainNavGraph(
     ) {
         // 홈 화면
         composable("home_screen") {
-            topBarViewModel.updateState(TopBarState("홈 화면", false, false))
+            topBarViewModel.setMainBar()
             HomeScreen(navController = navController)
         }
 
@@ -40,7 +42,7 @@ fun NavGraphBuilder.mainNavGraph(
                 null
             }
 
-            topBarViewModel.updateState(TopBarState("뉴스 상세", true, false))
+            topBarViewModel.setDetailBar("뉴스 상세")
 
             if (article != null) {
                 NewsDetailScreen(
@@ -75,25 +77,25 @@ fun NavGraphBuilder.boardNavGraph(
         route = "board_root"
     ) {
         composable("board_list_screen") {
-            topBarViewModel.updateState(TopBarState("게시판 목록", false, true))
+            topBarViewModel.setMainBar()
             BoardScreen(navController = navController)
         }
 
         
         composable("board_detail/{title}") { backStackEntry ->
             val postTitle = backStackEntry.arguments?.getString("title") ?: "게시글"
-            topBarViewModel.updateState(TopBarState(postTitle, true, true))
+            topBarViewModel.setDetailBar("게시판 상세")
             BoardDetailScreen(navController = navController, title = postTitle)
         }
 
         composable("write_post_screen") {
-            topBarViewModel.updateState(TopBarState("게시글 작성", true, false))
+            topBarViewModel.setDetailBar("게시글 작성")
             WritePostScreen(navController = navController)
         }
 
         composable("post_detail/{postId}") { backStackEntry ->
             val postId = backStackEntry.arguments?.getString("postId") ?: "1"
-            topBarViewModel.updateState(TopBarState("게시글 상세", true, false))
+            topBarViewModel.setDetailBar("게시글 상세")
             PostDetailScreen(navController = navController, postId = postId)
         }
     }
@@ -108,7 +110,7 @@ fun NavGraphBuilder.popularNavGraph(
         route = "popular_root"
     ) {
         composable("popular_list_screen") {
-            topBarViewModel.updateState(TopBarState("인기글", false, false))
+            topBarViewModel.setMainBar()
             PopularScreen()
         }
     }
@@ -123,12 +125,12 @@ fun NavGraphBuilder.messageNavGraph(
         route = "message_root"
     ) {
         composable("calendar_screen") {
-            topBarViewModel.updateState(TopBarState("캘린더", false, true))
+            topBarViewModel.setMainBar()
             MessageScreen(navController = navController)
         }
 
         composable("add_schedule_screen") {
-            topBarViewModel.updateState(TopBarState("일정 추가", true, false))
+            topBarViewModel.setDetailBar("일정 추가")
             AddScheduleScreen(
                 onCancel = { navController.navigateUp() },
                 onSave = { schedule ->
@@ -148,7 +150,7 @@ fun NavGraphBuilder.profileNavGraph(
         route = "profile_root"
     ) {
         composable("profile_main_screen") {
-            topBarViewModel.updateState(TopBarState("프로필", false, false))
+            topBarViewModel.setMainBar()
             ProfileScreen(
                 onLogoutClick = {
                     navController.navigate("auth") {
@@ -163,7 +165,7 @@ fun NavGraphBuilder.profileNavGraph(
         }
 
         composable("certification_screen") {
-            topBarViewModel.updateState(TopBarState("사업자 인증", true, false))
+            topBarViewModel.setDetailBar("사업자 인증")
             BusinessCertificationScreen(
                 navController = navController,
                 onConfirm = { phone, certNumber, industry ->
@@ -173,7 +175,7 @@ fun NavGraphBuilder.profileNavGraph(
         }
 
         composable("edit_profile_screen") {
-            topBarViewModel.updateState(TopBarState("프로필 변경", true, false))
+            topBarViewModel.setDetailBar("프로필 변경")
             EditProfileScreen(
                 onBackClick = { navController.navigateUp() },
                 onSave = {
@@ -183,7 +185,7 @@ fun NavGraphBuilder.profileNavGraph(
         }
 
         composable("edit_contact_screen") {
-            topBarViewModel.updateState(TopBarState("연락처 변경", true, false))
+            topBarViewModel.setDetailBar("연락처 변경")
             EditContactScreen(
                 onBackClick = { navController.navigateUp() },
                 onSave = {
