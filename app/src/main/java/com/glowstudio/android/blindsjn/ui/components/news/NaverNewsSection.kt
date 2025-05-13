@@ -66,7 +66,7 @@ fun NaverNewsSection(navController: NavHostController) {
                                     .background(MaterialTheme.colorScheme.surface)
                                     .clickable {
                                         val articleJson = URLEncoder.encode(Gson().toJson(article), "UTF-8")
-                                        navController.navigate("newsDetail/$articleJson")
+                                        navController.navigate("news_detail/$articleJson")
                                     }
                             ) {
                                 Column(

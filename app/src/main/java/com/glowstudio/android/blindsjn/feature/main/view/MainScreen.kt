@@ -1,7 +1,9 @@
 package com.glowstudio.android.blindsjn.feature.main.view
 
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -29,6 +31,15 @@ import androidx.navigation.NavType
 import androidx.navigation.navArgument
 import java.net.URLDecoder
 import java.net.URLEncoder
+import com.google.gson.Gson
+import com.glowstudio.android.blindsjn.ui.theme.BlindSJNTheme
+import com.glowstudio.android.blindsjn.ui.components.banner.BannerSection
+import com.glowstudio.android.blindsjn.ui.components.shortcut.ShortcutSection
+import com.glowstudio.android.blindsjn.ui.components.news.NaverNewsSection
+import com.glowstudio.android.blindsjn.ui.components.hotpost.HotPostsSection
+import com.glowstudio.android.blindsjn.ui.components.sales.SalesSection
+import com.glowstudio.android.blindsjn.feature.home.NewsDetailScreen
+import com.glowstudio.android.blindsjn.data.model.Article
 
 /**
  * 메인 스크린: 상단바, 하단 네비게이션 바, 내부 컨텐츠(AppNavHost)를 포함하여 전체 화면 전환을 관리합니다.
@@ -124,6 +135,23 @@ fun MainScreen(
                                 navController.navigateUp()
                             }
                         )
+                    }
+                    composable("news_detail/{articleJson}") { backStackEntry ->
+                        val articleJson = backStackEntry.arguments?.getString("articleJson")
+                        val article = try {
+                            Gson().fromJson(URLDecoder.decode(articleJson, "UTF-8"), Article::class.java)
+                        } catch (e: Exception) {
+                            null
+                        }
+
+                        if (article != null) {
+                            NewsDetailScreen(
+                                title = article.title ?: "제목 없음",
+                                content = article.content,
+                                description = article.description,
+                                imageUrl = article.urlToImage
+                            )
+                        }
                     }
                 }
             }
