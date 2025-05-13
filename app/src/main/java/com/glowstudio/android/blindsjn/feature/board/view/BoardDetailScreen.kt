@@ -21,6 +21,8 @@ import com.glowstudio.android.blindsjn.feature.board.model.Post
 import com.glowstudio.android.blindsjn.feature.board.viewmodel.*
 import androidx.compose.ui.graphics.Color
 import com.glowstudio.android.blindsjn.ui.theme.*
+import com.glowstudio.android.blindsjn.feature.board.view.PostBottomSheet
+import com.glowstudio.android.blindsjn.feature.board.viewmodel.PostBottomSheetViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -32,14 +34,36 @@ fun BoardDetailScreen(navController: NavController, title: String) {
     var selectedCategory by remember { mutableStateOf("모든 분야") }
     val categories = listOf("모든 분야", "카페", "식당", "배달 전문", "패스트푸드", "호텔")
 
+    val postBottomSheetViewModel: PostBottomSheetViewModel = viewModel()
+    var showSheet by remember { mutableStateOf(false) }
+
     LaunchedEffect(Unit) {
         viewModel.loadPosts()
+    }
+
+    if (showSheet) {
+        ModalBottomSheet(
+            onDismissRequest = { showSheet = false }
+        ) {
+            val tags by postBottomSheetViewModel.tags.collectAsState()
+            val enabledTags by postBottomSheetViewModel.enabledTags.collectAsState()
+            val selectedTags by postBottomSheetViewModel.selectedTags.collectAsState()
+            PostBottomSheet(
+                tags = tags,
+                enabledTags = enabledTags,
+                onDone = {
+                    showSheet = false
+                    navController.navigate("writePost?tags=" + it.joinToString(","))
+                    postBottomSheetViewModel.clearSelection()
+                }
+            )
+        }
     }
 
     Scaffold(
         floatingActionButton = {
             FloatingActionButton(
-                onClick = { navController.navigate("writePost") },
+                onClick = { showSheet = true },
                 containerColor = MaterialTheme.colorScheme.primary
             ) {
                 Icon(Icons.Filled.Edit, contentDescription = "글쓰기")

@@ -11,11 +11,15 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.glowstudio.android.blindsjn.feature.board.viewmodel.BoardViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.glowstudio.android.blindsjn.feature.board.model.BoardCategory
+import com.glowstudio.android.blindsjn.ui.theme.*
+import com.glowstudio.android.blindsjn.ui.theme.BlindSJNTheme
 
 @Composable
 fun BoardScreen(navController: NavController) {
@@ -53,15 +57,15 @@ fun BoardCategoryItem(category: BoardCategory, onClick: () -> Unit) {
             .fillMaxWidth()
             .clickable(onClick = onClick)
             .padding(4.dp)
-            .border(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f), MaterialTheme.shapes.medium)
-            .background(MaterialTheme.colorScheme.surface, MaterialTheme.shapes.medium)
+            .border(1.dp, DividerGray, MaterialTheme.shapes.medium)
+            .background(CardWhite, MaterialTheme.shapes.medium)
             .padding(8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Box(
             modifier = Modifier
                 .size(48.dp)
-                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f), MaterialTheme.shapes.medium),
+                .background(Blue.copy(alpha = 0.1f), MaterialTheme.shapes.medium),
             contentAlignment = Alignment.Center
         ) {
             Text(
@@ -77,14 +81,32 @@ fun BoardCategoryItem(category: BoardCategory, onClick: () -> Unit) {
                 text = category.title,
                 style = MaterialTheme.typography.bodyMedium,
                 maxLines = 1,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-            Text(
-                text = category.postCount,
-                style = MaterialTheme.typography.bodySmall,
-                maxLines = 1,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = TextPrimary
             )
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun BoardScreenPreview() {
+    BlindSJNTheme {
+        val navController = rememberNavController()
+        BoardScreen(navController = navController)
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun BoardCategoryItemPreview() {
+    BlindSJNTheme {
+        BoardCategoryItem(
+            category = BoardCategory(
+                title = "자유게시판",
+                emoji = "💬",
+                route = "freeBoard"
+            ),
+            onClick = {}
+        )
     }
 }
