@@ -10,8 +10,17 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.glowstudio.android.blindsjn.ui.components.CommonButton
+import com.glowstudio.android.blindsjn.ui.components.common.CommonButton
 
+/**
+ * 프로필 편집 화면을 표시하는 컴포저블 함수입니다.
+ *
+ * 사용자가 닉네임과 자기소개를 입력하고, 프로필 이미지를 변경할 수 있는 UI를 제공합니다.
+ * "저장" 버튼을 누르면 onSave 콜백이, "취소" 버튼을 누르면 onBackClick 콜백이 호출됩니다.
+ *
+ * @param onBackClick 취소 버튼 클릭 시 호출되는 콜백
+ * @param onSave 저장 버튼 클릭 시 호출되는 콜백
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditProfileScreen(
