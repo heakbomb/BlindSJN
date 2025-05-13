@@ -28,8 +28,9 @@ fun TopBarMain(
         navigationIcon = {
             IconButton(onClick = onLogoClick) {
                 Icon(
-                    painter = painterResource(id = R.drawable.ic_logo), // 실제 로고 리소스 사용
-                    contentDescription = "로고"
+                    painter = painterResource(id = R.drawable.ic_logo),
+                    contentDescription = "로고",
+                    tint = Color.Unspecified
                 )
             }
         },
