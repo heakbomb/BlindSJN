@@ -1,3 +1,3 @@
-*BlindSJN
+# BlindSJN
 
 작업 풀리퀘스트 오류로 레포지스트리 옮김
