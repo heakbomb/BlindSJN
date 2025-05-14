@@ -44,8 +44,14 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+
+import androidx.compose.ui.viewinterop.AndroidView
+import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.AdSize
+import com.google.android.gms.ads.AdView
 
 @Composable
 fun HomeScreen(navController: NavHostController) {
@@ -55,6 +61,7 @@ fun HomeScreen(navController: NavHostController) {
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(scrollState)
+
     ) {
 
         // 배너 섹션
@@ -68,41 +75,43 @@ fun HomeScreen(navController: NavHostController) {
 
         // 오늘의 매출 관리 섹션
         SalesSection()
+
+
     }
 }
 
-@OptIn(ExperimentalPagerApi::class)
+@OptIn(com.google.accompanist.pager.ExperimentalPagerApi::class)
 @Composable
 fun BannerSection() {
-    val pagerState = rememberPagerState()
-
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .height(200.dp)
             .background(Color(0xFFF5F7FF))
     ) {
-        HorizontalPager(
-            count = 4,
-            state = pagerState,
-        ) { page ->
-            Image(
-                painter = painterResource(id = R.drawable.login_image),
-                contentDescription = "배너 이미지 $page",
-                modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.Crop
-            )
+        val pagerState = rememberPagerState()
+    Column {
+        HorizontalPager(count = 4, state = pagerState) { page ->
+            if (page == 0) {
+                AdMobBanner()
+            } else {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(200.dp)
+                        .background(Color.LightGray),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text("슬라이드 $page", style = MaterialTheme.typography.titleLarge)
+                }
+            }
         }
-
-        // 페이지 인디케이터
+        Spacer(modifier = Modifier.height(8.dp))
         HorizontalPagerIndicator(
             pagerState = pagerState,
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .padding(16.dp),
-            activeColor = MaterialTheme.colorScheme.primary,
-            inactiveColor = Color.Gray.copy(alpha = 0.5f)
+            modifier = Modifier.align(Alignment.CenterHorizontally)
         )
+    }
     }
 }
 
@@ -324,4 +333,22 @@ fun HomeScreenPreview() {
     BlindSJNTheme {
         HomeScreen(navController = navController)
     }
+}
+
+@Composable
+fun AdMobBanner() {
+    val context = LocalContext.current
+    val adView = remember { AdView(context) }
+
+    AndroidView(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(200.dp), // Compose 측 크기와 맞춤
+        factory = {
+            adView.setAdSize(AdSize(AdSize.FULL_WIDTH, 200)) // 200dp에 맞게 높이 고정
+            adView.adUnitId = "ca-app-pub-3940256099942544/6300978111" // 테스트용 ID
+            adView.loadAd(AdRequest.Builder().build())
+            adView
+        }
+    )
 }
