@@ -194,11 +194,11 @@ fun PostItem(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
-                text = "${post.category} ${post.experience}",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+//            Text(
+//                text = "${post.category} ${post.experience}",
+//                style = MaterialTheme.typography.bodySmall,
+//                color = MaterialTheme.colorScheme.onSurfaceVariant
+//            )
             Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {

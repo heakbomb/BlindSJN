@@ -53,6 +53,7 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    implementation(libs.play.services.ads.api)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -102,4 +103,5 @@ dependencies {
 
     implementation ("com.google.accompanist:accompanist-pager:0.32.0")
     implementation ("com.google.accompanist:accompanist-pager-indicators:0.32.0")
+
 }
