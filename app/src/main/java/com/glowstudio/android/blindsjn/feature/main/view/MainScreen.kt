@@ -40,6 +40,8 @@ import com.glowstudio.android.blindsjn.ui.components.hotpost.HotPostsSection
 import com.glowstudio.android.blindsjn.ui.components.sales.SalesSection
 import com.glowstudio.android.blindsjn.feature.home.NewsDetailScreen
 import com.glowstudio.android.blindsjn.data.model.Article
+import com.glowstudio.android.blindsjn.feature.paymanagement.PayManagementScreen
+import com.glowstudio.android.blindsjn.feature.foodcoast.FoodCostScreen
 
 /**
  * 메인 스크린: 상단바, 하단 네비게이션 바, 내부 컨텐츠(AppNavHost)를 포함하여 전체 화면 전환을 관리합니다.
@@ -90,13 +92,21 @@ fun MainScreen(
                 ) {
                     composable("home") { HomeScreen(navController) }
                     composable("board") { BoardScreen(navController) }
-                    composable("popular") { PopularScreen() }
+                    composable("paymanagement") {
+                        PayManagementScreen(
+                            onNavigateToFoodCost = { navController.navigate("foodcoast") }
+                        )
+                    }
                     composable("message") { MessageScreen(navController) }
                     composable("profile") { ProfileScreen(
                         onLogoutClick = { /* ... */ },
                         onBusinessCertificationClick = { /* ... */ },
                         onProfileEditClick = { /* ... */ },
                         onContactEditClick = { /* ... */ }
+                    ) }
+                    composable("foodcoast") { FoodCostScreen(
+                        onRegisterRecipeClick = {},
+                        onRegisterIngredientClick = {}
                     ) }
                     composable("boardDetail/{title}") { backStackEntry ->
                         val encodedTitle = backStackEntry.arguments?.getString("title") ?: ""
