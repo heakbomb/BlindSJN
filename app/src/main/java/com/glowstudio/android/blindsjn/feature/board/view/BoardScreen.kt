@@ -28,20 +28,18 @@ fun BoardScreen(navController: NavController) {
 
     Scaffold(
         content = { paddingValues ->
-            LazyVerticalGrid(
-                columns = GridCells.Fixed(2),
+            Column(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(paddingValues)
-                    .padding(8.dp),
-                verticalArrangement = Arrangement.spacedBy(4.dp),
-                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    .padding(vertical = 16.dp, horizontal = 12.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                items(boardCategories) { category ->
+                boardCategories.forEach { category ->
                     BoardCategoryItem(
                         category = category,
                         onClick = {
-                            navController.navigate("boardDetail/${category.title}")
+                            navController.navigate("boardDetail/${category.route}")
                         }
                     )
                 }
@@ -56,15 +54,13 @@ fun BoardCategoryItem(category: BoardCategory, onClick: () -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick)
-            .padding(4.dp)
-            .border(1.dp, DividerGray, MaterialTheme.shapes.medium)
             .background(CardWhite, MaterialTheme.shapes.medium)
-            .padding(8.dp),
+            .padding(vertical = 18.dp, horizontal = 16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Box(
             modifier = Modifier
-                .size(48.dp)
+                .size(32.dp)
                 .background(Blue.copy(alpha = 0.1f), MaterialTheme.shapes.medium),
             contentAlignment = Alignment.Center
         ) {
@@ -73,17 +69,12 @@ fun BoardCategoryItem(category: BoardCategory, onClick: () -> Unit) {
                 style = MaterialTheme.typography.titleLarge
             )
         }
-
-        Spacer(modifier = Modifier.width(12.dp))
-
-        Column {
-            Text(
-                text = category.title,
-                style = MaterialTheme.typography.bodyMedium,
-                maxLines = 1,
-                color = TextPrimary
-            )
-        }
+        Spacer(modifier = Modifier.width(16.dp))
+        Text(
+            text = category.title,
+            style = MaterialTheme.typography.bodyLarge,
+            color = TextPrimary
+        )
     }
 }
 

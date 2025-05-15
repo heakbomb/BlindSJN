@@ -15,13 +15,10 @@ class BoardViewModel : ViewModel() {
 
     private fun loadBoardCategories() {
         _boardCategories.value = listOf(
-            BoardCategory("🍴", "음식점 및 카페", "298개의 새 게시물"),
-            BoardCategory("🛍️", "쇼핑 및 리테일", "128개의 새 게시물"),
-            BoardCategory("💊", "건강 및 의료", "57개의 새 게시물"),
-            BoardCategory("🏨", "숙박 및 여행", "298개의 새 게시물"),
-            BoardCategory("📚", "교육 및 학습", "36개의 새 게시물"),
-            BoardCategory("🎮", "여가 및 오락", "98개의 새 게시물"),
-            BoardCategory("💰", "금융 및 공공기관", "20개의 새 게시물")
+            BoardCategory("🏢", "업종게시판", "industry"),
+            BoardCategory("💬", "자유게시판", "free"),
+            BoardCategory("❓", "질문게시판", "question"),
+            BoardCategory("🔥", "인기게시판", "hot")
         )
     }
 }

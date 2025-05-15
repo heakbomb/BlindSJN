@@ -77,14 +77,20 @@ fun BoardDetailScreen(navController: NavController, title: String) {
                     .fillMaxSize()
                     .padding(paddingValues)
             ) {
-                CategoryFilterRow(
-                    categories = categories,
-                    selectedCategory = selectedCategory,
-                    onCategorySelected = { selectedCategory = it }
-                )
+                if (title == "industry") {
+                    CategoryFilterRow(
+                        categories = categories,
+                        selectedCategory = selectedCategory,
+                        onCategorySelected = { selectedCategory = it }
+                    )
+                }
 
-                val filteredPosts = posts.filter { post ->
-                    selectedCategory == "모든 분야" || post.category.contains(selectedCategory)
+                val filteredPosts = when (title) {
+                    "free" -> posts.filter { it.category == "자유게시판" }
+                    "question" -> posts.filter { it.category == "질문게시판" }
+                    "hot" -> posts.filter { it.category == "인기게시판" }
+                    "industry" -> posts.filter { selectedCategory == "모든 분야" || it.category.contains(selectedCategory) }
+                    else -> posts
                 }
 
                 if (!statusMessage.isNullOrEmpty()) {
