@@ -33,7 +33,6 @@ fun PostDetailScreen(navController: NavController, postId: String) {
     val post by postViewModel.selectedPost.collectAsState()
     val comments by commentViewModel.comments.collectAsState()
     var newComment by remember { mutableStateOf("") }
-    var isLiked by remember { mutableStateOf(false) }
 
     val safePostId = postId.toIntOrNull() ?: 1
 
@@ -63,18 +62,28 @@ fun PostDetailScreen(navController: NavController, postId: String) {
                     ) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.clickable { isLiked = !isLiked }
+                            modifier = Modifier.clickable {
+                                post?.let {
+                                    val userId = 1 // TODO: 실제 로그인 유저 ID로 교체
+                                    postViewModel.toggleLike(it.id, userId) { success, _, _ ->
+                                        if (success) {
+                                            postViewModel.loadPostById(safePostId)
+                                            postViewModel.loadPosts()
+                                        }
+                                    }
+                                }
+                            }
                         ) {
                             Icon(
                                 imageVector = Icons.Filled.ThumbUp,
                                 contentDescription = "좋아요",
-                                tint = if (isLiked) Color.Red else Color.Gray,
+                                tint = if (post?.isLiked == true) Color.Red else Color.Gray,
                                 modifier = Modifier.size(18.dp)
                             )
                             Spacer(modifier = Modifier.width(4.dp))
                             Text(
-                                "${it.likeCount + if (isLiked) 1 else 0}",
-                                color = if (isLiked) Color.Red else Color.Gray,
+                                text = "${post?.likeCount ?: 0}",
+                                color = if (post?.isLiked == true) Color.Red else Color.Gray,
                                 style = MaterialTheme.typography.bodySmall
                             )
                             Spacer(modifier = Modifier.width(12.dp))
@@ -135,6 +144,7 @@ fun PostDetailScreen(navController: NavController, postId: String) {
                                             content = newComment
                                         )
                                         newComment = ""
+                                        postViewModel.loadPosts() // 댓글 등록 후 카드 댓글수 동기화
                                     }
                                 }
                             )
@@ -150,6 +160,7 @@ fun PostDetailScreen(navController: NavController, postId: String) {
                                         content = newComment
                                     )
                                     newComment = ""
+                                    postViewModel.loadPosts() // 댓글 등록 후 카드 댓글수 동기화
                                 }
                             },
                             modifier = Modifier.padding(top = 8.dp)

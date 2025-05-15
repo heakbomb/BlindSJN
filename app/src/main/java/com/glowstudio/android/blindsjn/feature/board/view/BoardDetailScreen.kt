@@ -14,6 +14,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -24,6 +25,7 @@ import com.glowstudio.android.blindsjn.ui.theme.*
 import com.glowstudio.android.blindsjn.feature.board.view.PostBottomSheet
 import com.glowstudio.android.blindsjn.feature.board.viewmodel.PostBottomSheetViewModel
 import java.net.URLEncoder
+import com.glowstudio.android.blindsjn.utils.TimeUtils
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -176,9 +178,6 @@ fun PostItem(
     post: Post,
     viewModel: PostViewModel
 ) {
-    var isLiked by remember { mutableStateOf(false) }
-    var likeCount by remember { mutableStateOf(post.likeCount) }
-
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -186,62 +185,57 @@ fun PostItem(
             .clickable { navController.navigate("postDetail/${post.id}") }
             .padding(16.dp)
     ) {
-        Text(text = post.title, style = MaterialTheme.typography.titleMedium)
+        Text(
+            text = post.category + " | " + post.title,
+            style = MaterialTheme.typography.titleMedium,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
         Spacer(modifier = Modifier.height(4.dp))
         Text(
             text = post.content,
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-            maxLines = 2
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis
         )
         Spacer(modifier = Modifier.height(8.dp))
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
+            horizontalArrangement = Arrangement.Start,
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "${post.category} ${post.experience}",
+                text = "\u23F1 " + TimeUtils.getTimeAgo(post.time),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(   
-                    imageVector = Icons.Filled.ThumbUp,
-                    contentDescription = "좋아요",
-                    tint = if (isLiked) Error else DividerGray,
-                    modifier = Modifier
-                        .size(18.dp)
-                        .clickable {
-                            if (!isLiked) {
-                                likeCount++
-                                isLiked = true
-                                viewModel.incrementLike(post.id)
-                            }
-                        }
-                )
-                Spacer(modifier = Modifier.width(4.dp))
-                Text(
-                    text = "$likeCount",
-                    color = if (isLiked) Error else DividerGray,
-                    style = MaterialTheme.typography.bodySmall
-                )
-                Spacer(modifier = Modifier.width(12.dp))
-                Icon(
-                    imageVector = Icons.Filled.ChatBubbleOutline,
-                    contentDescription = "댓글",
-                    tint = ChatBlue,
-                    modifier = Modifier.size(18.dp)
-                )
-                Spacer(modifier = Modifier.width(4.dp))
-                Text(
-                    text = "${post.commentCount}",
-                    color = ChatBlue,
-                    style = MaterialTheme.typography.bodySmall
-                )
-            }
+            Spacer(modifier = Modifier.width(12.dp))
+            Icon(
+                imageVector = Icons.Filled.ChatBubbleOutline,
+                contentDescription = "댓글",
+                tint = ChatBlue,
+                modifier = Modifier.size(18.dp)
+            )
+            Spacer(modifier = Modifier.width(4.dp))
+            Text(
+                text = "${post.commentCount}",
+                style = MaterialTheme.typography.bodySmall,
+                color = ChatBlue
+            )
+            Spacer(modifier = Modifier.width(12.dp))
+            Icon(
+                imageVector = Icons.Filled.ThumbUp,
+                contentDescription = "좋아요",
+                tint = if (post.isLiked) Error else DividerGray,
+                modifier = Modifier.size(18.dp)
+            )
+            Spacer(modifier = Modifier.width(4.dp))
+            Text(
+                text = "${post.likeCount}",
+                style = MaterialTheme.typography.bodySmall,
+                color = if (post.isLiked) Error else DividerGray
+            )
         }
     }
 }

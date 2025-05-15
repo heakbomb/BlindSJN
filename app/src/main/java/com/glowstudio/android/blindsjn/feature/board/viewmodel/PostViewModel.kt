@@ -116,4 +116,24 @@ class PostViewModel : ViewModel() {
             }
         }
     }
+
+    fun toggleLike(postId: Int, userId: Int, onResult: (Boolean, Boolean, Int) -> Unit) {
+        viewModelScope.launch {
+            try {
+                val request = LikePostRequest(post_id = postId, user_id = userId)
+                val response = PostRepository.likePost(request)
+                if (response.isSuccessful) {
+                    // 서버에서 최신 게시글 정보 다시 불러오기
+                    val updatedPost = PostRepository.loadPostById(postId).body()?.data
+                    loadPostById(postId)
+                    loadPosts()
+                    onResult(true, updatedPost?.isLiked ?: false, updatedPost?.likeCount ?: 0)
+                } else {
+                    onResult(false, _selectedPost.value?.isLiked ?: false, _selectedPost.value?.likeCount ?: 0)
+                }
+            } catch (e: Exception) {
+                onResult(false, _selectedPost.value?.isLiked ?: false, _selectedPost.value?.likeCount ?: 0)
+            }
+        }
+    }
 } 

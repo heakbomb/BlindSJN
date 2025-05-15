@@ -1,4 +1,4 @@
-package com.glowstudio.android.blindsjn.ui.screens
+    package com.glowstudio.android.blindsjn.ui.screens
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape

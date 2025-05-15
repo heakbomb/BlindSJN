@@ -48,4 +48,8 @@ object PostRepository {
     suspend fun deleteComment(request: DeleteCommentRequest): Response<BasicResponse> {
         return InternalServer.api.deleteComment(request)
     }
+
+    suspend fun likePost(request: LikePostRequest): Response<BasicResponse> {
+        return InternalServer.api.likePost(request)
+    }
 }

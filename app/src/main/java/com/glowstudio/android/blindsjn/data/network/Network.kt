@@ -60,4 +60,7 @@ interface ApiService {
 
     @PUT("Edit_comment.php")
     suspend fun editComment(@Body request: EditCommentRequest): Response<BasicResponse>
+
+    @POST("Like_post.php")
+    suspend fun likePost(@Body request: LikePostRequest): Response<BasicResponse>
 }
