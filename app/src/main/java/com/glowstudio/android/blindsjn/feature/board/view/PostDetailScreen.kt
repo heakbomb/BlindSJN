@@ -12,6 +12,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -196,7 +197,24 @@ fun PostDetailScreen(navController: NavController, postId: String) {
                 onValueChange = { newComment = it },
                 modifier = Modifier.weight(1f),
                 placeholder = { Text("댓글을 입력하세요.") },
-                singleLine = true
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(
+                    imeAction = ImeAction.Done,
+                    capitalization = KeyboardCapitalization.None,
+                    autoCorrect = false
+                ),
+                keyboardActions = KeyboardActions(
+                    onDone = {
+                        if (newComment.isNotBlank()) {
+                            commentViewModel.saveComment(
+                                postId = safePostId,
+                                userId = 1,
+                                content = newComment
+                            )
+                            newComment = ""
+                        }
+                    }
+                )
             )
             Spacer(modifier = Modifier.width(8.dp))
             Button(
