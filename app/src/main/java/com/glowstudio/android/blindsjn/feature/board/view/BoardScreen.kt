@@ -20,6 +20,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.glowstudio.android.blindsjn.feature.board.model.BoardCategory
 import com.glowstudio.android.blindsjn.ui.theme.*
 import com.glowstudio.android.blindsjn.ui.theme.BlindSJNTheme
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
 
 @Composable
 fun BoardScreen(navController: NavController) {
@@ -41,7 +43,8 @@ fun BoardScreen(navController: NavController) {
                     BoardCategoryItem(
                         category = category,
                         onClick = {
-                            navController.navigate("boardDetail/${category.title}")
+                            val encodedTitle = URLEncoder.encode(category.title, StandardCharsets.UTF_8.toString())
+                            navController.navigate("board_detail/$encodedTitle")
                         }
                     )
                 }

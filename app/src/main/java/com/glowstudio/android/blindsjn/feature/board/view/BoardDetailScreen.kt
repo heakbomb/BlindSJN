@@ -55,7 +55,7 @@ fun BoardDetailScreen(navController: NavController, title: String) {
                 onDone = {
                     showSheet = false
                     val encodedTags = URLEncoder.encode(it.joinToString(","), "UTF-8")
-                    navController.navigate("writePost?tags=$encodedTags")
+                    navController.navigate("write_post_screen/$encodedTags")
                     postBottomSheetViewModel.clearSelection()
                 }
             )
@@ -177,7 +177,7 @@ fun PostItem(
         modifier = Modifier
             .fillMaxWidth()
             .background(MaterialTheme.colorScheme.surface, MaterialTheme.shapes.medium)
-            .clickable { navController.navigate("postDetail/${post.id}") }
+            .clickable { navController.navigate("post_detail/${post.id}") }
             .padding(16.dp)
     ) {
         Text(text = post.title, style = MaterialTheme.typography.titleMedium)
