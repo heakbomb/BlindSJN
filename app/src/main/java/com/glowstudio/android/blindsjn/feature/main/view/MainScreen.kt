@@ -45,7 +45,6 @@ import com.glowstudio.android.blindsjn.data.model.Article
  * 메인 스크린: 상단바, 하단 네비게이션 바, 내부 컨텐츠(AppNavHost)를 포함하여 전체 화면 전환을 관리합니다.
  */
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(
     topBarViewModel: TopBarViewModel = viewModel(),
