@@ -2,8 +2,10 @@ package com.glowstudio.android.blindsjn.ui.navigation
 
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
+import androidx.navigation.navArgument
 import com.glowstudio.android.blindsjn.feature.board.view.BoardDetailScreen
 import com.glowstudio.android.blindsjn.feature.board.view.BoardScreen
 import com.glowstudio.android.blindsjn.feature.board.view.WritePostScreen
@@ -30,7 +32,11 @@ fun NavGraphBuilder.mainNavGraph(
     ) {
         // 홈 화면
         composable("home_screen") {
-            topBarViewModel.setMainBar()
+            topBarViewModel.setMainBar(
+                onSearchClick = { /* 검색 */ },
+                onMoreClick = { /* 더보기 */ },
+                onNotificationClick = { /* 알림 */ }
+            )
             HomeScreen(navController = navController)
         }
 
@@ -42,7 +48,12 @@ fun NavGraphBuilder.mainNavGraph(
                 null
             }
 
-            topBarViewModel.setDetailBar("뉴스 상세")
+            topBarViewModel.setDetailBar(
+                title = "뉴스 상세",
+                onBackClick = { navController.navigateUp() },
+                onSearchClick = { /* 검색 기능 */ },
+                onMoreClick = { /* 더보기 메뉴 */ }
+            )
 
             if (article != null) {
                 NewsDetailScreen(
@@ -77,25 +88,57 @@ fun NavGraphBuilder.boardNavGraph(
         route = "board_root"
     ) {
         composable("board_list_screen") {
-            topBarViewModel.setMainBar()
+            topBarViewModel.setMainBar(
+                onSearchClick = { /* 검색 */ },
+                onMoreClick = { /* 더보기 */ },
+                onNotificationClick = { /* 알림 */ }
+            )
             BoardScreen(navController = navController)
         }
 
-        
         composable("board_detail/{title}") { backStackEntry ->
             val postTitle = backStackEntry.arguments?.getString("title") ?: "게시글"
-            topBarViewModel.setDetailBar("게시판 상세")
+            topBarViewModel.setDetailBar(
+                title = postTitle,
+                onBackClick = { navController.navigateUp() },
+                onSearchClick = { /* 검색 기능 */ },
+                onMoreClick = { /* 더보기 메뉴 */ }
+            )
             BoardDetailScreen(navController = navController, title = postTitle)
         }
 
-        composable("write_post_screen") {
-            topBarViewModel.setDetailBar("게시글 작성")
-            WritePostScreen(navController = navController)
+        composable(
+            route = "write_post_screen/{tags}",
+            arguments = listOf(
+                navArgument("tags") {
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = null
+                }
+            )
+        ) { backStackEntry ->
+            val tags = backStackEntry.arguments?.getString("tags")
+            topBarViewModel.setDetailBar(
+                title = "게시글 작성",
+                onBackClick = { navController.navigateUp() }
+            )
+            WritePostScreen(navController = navController, tags = tags)
         }
 
-        composable("post_detail/{postId}") { backStackEntry ->
+        composable(
+            route = "post_detail/{postId}",
+            arguments = listOf(
+                navArgument("postId") {
+                    type = NavType.StringType
+                    defaultValue = "1"
+                }
+            )
+        ) { backStackEntry ->
             val postId = backStackEntry.arguments?.getString("postId") ?: "1"
-            topBarViewModel.setDetailBar("게시글 상세")
+            topBarViewModel.setDetailBar(
+                title = "게시글 상세",
+                onBackClick = { navController.navigateUp() }
+            )
             PostDetailScreen(navController = navController, postId = postId)
         }
     }
@@ -110,7 +153,11 @@ fun NavGraphBuilder.popularNavGraph(
         route = "popular_root"
     ) {
         composable("popular_list_screen") {
-            topBarViewModel.setMainBar()
+            topBarViewModel.setMainBar(
+                onSearchClick = { /* 검색 */ },
+                onMoreClick = { /* 더보기 */ },
+                onNotificationClick = { /* 알림 */ }
+            )
             PopularScreen()
         }
     }
@@ -125,7 +172,11 @@ fun NavGraphBuilder.messageNavGraph(
         route = "message_root"
     ) {
         composable("calendar_screen") {
-            topBarViewModel.setMainBar()
+            topBarViewModel.setMainBar(
+                onSearchClick = { /* 검색 */ },
+                onMoreClick = { /* 더보기 */ },
+                onNotificationClick = { /* 알림 */ }
+            )
             MessageScreen(navController = navController)
         }
 
@@ -150,7 +201,11 @@ fun NavGraphBuilder.profileNavGraph(
         route = "profile_root"
     ) {
         composable("profile_main_screen") {
-            topBarViewModel.setMainBar()
+            topBarViewModel.setMainBar(
+                onSearchClick = { /* 검색 */ },
+                onMoreClick = { /* 더보기 */ },
+                onNotificationClick = { /* 알림 */ }
+            )
             ProfileScreen(
                 onLogoutClick = {
                     navController.navigate("auth") {
