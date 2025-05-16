@@ -7,6 +7,11 @@
 /.idea/workspace.xml
 /.idea/navEditor.xml
 /.idea/assetWizardSettings.xml
+/.idea/buildOutputCleanup.lock
+/.idea/executionHistory.lock
+/.idea/fileHashes.bin
+/.idea/fileHashes.lock
+/.idea/outputFiles.bin
 /build
 /captures
 .externalNativeBuild

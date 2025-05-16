@@ -14,6 +14,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.glowstudio.android.blindsjn.ui.theme.*
+import androidx.compose.foundation.border
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.draw.clip
+import androidx.compose.foundation.background
 
 data class Recipe(
     val name: String,
@@ -25,7 +30,9 @@ data class Recipe(
 @Composable
 fun FoodCostScreen(
     onRegisterRecipeClick: () -> Unit,
-    onRegisterIngredientClick: () -> Unit
+    onRegisterIngredientClick: () -> Unit,
+    onNavigateToPayManagement: () -> Unit = {},
+    onNavigateToFoodCost: () -> Unit = {},
 ) {
     var recipes by remember { mutableStateOf(listOf(
         Recipe("김치찌개", 8000, 3000, 5000),
@@ -50,6 +57,38 @@ fun FoodCostScreen(
             .fillMaxSize()
             .padding(16.dp)
     ) {
+        // 매출관리/마진관리 버튼
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .height(48.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(MaterialTheme.colorScheme.surface)
+                    .border(2.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(12.dp))
+                    .clickable { onNavigateToPayManagement() },
+                contentAlignment = Alignment.Center
+            ) {
+                Text("매출관리", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold, fontSize = 20.sp)
+            }
+            Spacer(modifier = Modifier.width(16.dp))
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .height(48.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(MaterialTheme.colorScheme.primary)
+                    .border(2.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(12.dp))
+                    .clickable { onNavigateToFoodCost() },
+                contentAlignment = Alignment.Center
+            ) {
+                Text("마진관리", color = MaterialTheme.colorScheme.onPrimary, fontWeight = FontWeight.Bold, fontSize = 20.sp)
+            }
+        }
+        Spacer(modifier = Modifier.height(16.dp))
         // Recipe List Header
         Row(
             modifier = Modifier
