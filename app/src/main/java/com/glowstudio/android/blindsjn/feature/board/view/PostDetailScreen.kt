@@ -25,6 +25,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.graphics.Color
 import com.glowstudio.android.blindsjn.ui.theme.*
+import com.glowstudio.android.blindsjn.utils.TimeUtils
 
 @Composable
 fun PostDetailScreen(navController: NavController, postId: String) {
@@ -181,7 +182,15 @@ fun CommentItem(comment: Comment) {
             .fillMaxWidth()
             .padding(vertical = 4.dp)
     ) {
-        Text(text = "익명", style = MaterialTheme.typography.bodyMedium)
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(text = "익명", style = MaterialTheme.typography.bodyMedium)
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(
+                text = TimeUtils.getTimeAgo(comment.createdAt),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
         Text(
             text = comment.content,
             style = MaterialTheme.typography.bodySmall,
