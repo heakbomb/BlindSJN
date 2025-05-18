@@ -10,5 +10,6 @@ data class Post(
     @SerializedName("experience") val experience: String = "",
     @SerializedName("time") val time: String,  // ← 이게 있어야 합니다
     @SerializedName("commentCount") val commentCount: Int,
-    @SerializedName("likeCount") val likeCount: Int
+    @SerializedName("likeCount") val likeCount: Int,
+    @SerializedName("isLiked") val isLiked: Boolean = false
 )
