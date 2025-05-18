@@ -38,13 +38,21 @@ fun RecipeListScreen(
             Modifier.fillMaxWidth().padding(bottom = 8.dp),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Text("이름", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = TextPrimary)
-            Text("판매가", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = TextPrimary)
-            Spacer(Modifier.width(48.dp))
+            Text("레시피 이름", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = TextPrimary)
+            Text("레시피 가격", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = TextPrimary)
+            Text("재료 가격", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = TextPrimary)
+            Text("마진", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = TextPrimary)
         }
         Divider(color = DividerGray, thickness = 1.dp)
         Spacer(Modifier.height(8.dp))
-        recipes.forEach { (name, price) ->
+        val recipeData = listOf(
+            Triple("빵", 5000, 3600),
+            Triple("떡볶이", 6000, 4000),
+            Triple("김밥", 4500, 3000)
+        )
+        recipeData.forEach { (name, price, cost) ->
+            val margin = price - cost
+            val marginRate = if (price > 0) (margin * 100f / price).toInt() else 0
             Row(
                 Modifier
                     .fillMaxWidth()
@@ -52,8 +60,26 @@ fun RecipeListScreen(
                     .padding(vertical = 8.dp, horizontal = 8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(name, Modifier.weight(1f), fontSize = 16.sp, color = TextPrimary)
-                Text("$price", Modifier.weight(1f), fontSize = 16.sp, color = TextPrimary)
+                Text(name, Modifier.weight(1f), fontSize = 14.sp, color = TextPrimary)
+                Text("%,d원".format(price), Modifier.weight(1f), fontSize = 14.sp, color = TextPrimary)
+                Text("%,d원".format(cost), Modifier.weight(1f), fontSize = 14.sp, color = TextPrimary)
+                Column(Modifier.weight(2f), horizontalAlignment = Alignment.Start) {
+                    Box(
+                        Modifier
+                            .fillMaxWidth(0.7f)
+                            .height(12.dp)
+                            .background(Color.LightGray.copy(alpha = 0.3f), RoundedCornerShape(6.dp))
+                    ) {
+                        Box(
+                            Modifier
+                                .fillMaxHeight()
+                                .fillMaxWidth(marginRate / 100f)
+                                .background(Blue, RoundedCornerShape(6.dp))
+                        )
+                    }
+                    Spacer(Modifier.height(2.dp))
+                    Text("${margin}원 (${marginRate}%)", fontSize = 12.sp, color = Blue)
+                }
                 TextButton(onClick = { onEditRecipeClick(name) }) {
                     Text("수정", color = Blue, fontWeight = FontWeight.Bold)
                 }
