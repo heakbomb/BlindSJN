@@ -35,6 +35,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Send
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.ui.text.font.FontWeight
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -46,10 +50,9 @@ fun PostDetailScreen(navController: NavController, postId: String) {
     var newComment by remember { mutableStateOf("") }
     var isLiked by remember { mutableStateOf(false) }
     
-    // 신고 관련 상태
+    // 신고 관련 상태를 상위에서 관리
     var showReportDialog by remember { mutableStateOf(false) }
     var reportReason by remember { mutableStateOf("") }
-    var showReportSuccessDialog by remember { mutableStateOf(false) }
     val reportResult by postViewModel.reportResult.collectAsState()
 
     val safePostId = postId.toIntOrNull() ?: 1
@@ -61,225 +64,242 @@ fun PostDetailScreen(navController: NavController, postId: String) {
 
     Scaffold(
         content = { paddingValues ->
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-                    .padding(horizontal = 16.dp)
+            PostDetailScreenContent(
+                post = post,
+                comments = comments,
+                newComment = newComment,
+                onCommentChange = { newComment = it },
+                onCommentSubmit = {
+                    if (newComment.isNotBlank()) {
+                        commentViewModel.saveComment(
+                            postId = safePostId,
+                            userId = 1,
+                            content = newComment
+                        )
+                        newComment = ""
+                    }
+                },
+                isLiked = isLiked,
+                onLikeClick = { isLiked = !isLiked },
+                showReportDialog = showReportDialog,
+                onShowReportDialogChange = { showReportDialog = it },
+                reportReason = reportReason,
+                onReportReasonChange = { reportReason = it },
+                onReportSubmit = {
+                    postViewModel.reportPost(postId = safePostId, userId = 1, reason = reportReason)
+                    showReportDialog = false
+                }
+            )
+
+            // 신고 결과 알림
+            reportResult?.let {
+                AlertDialog(
+                    onDismissRequest = { postViewModel.clearReportResult() },
+                    title = { Text("알림") },
+                    text = { Text(it) },
+                    confirmButton = {
+                        TextButton(onClick = { postViewModel.clearReportResult() }) { Text("확인") }
+                    }
+                )
+            }
+        }
+    )
+}
+
+@Composable
+fun PostDetailScreenContent(
+    post: Post?,
+    comments: List<Comment>,
+    newComment: String,
+    onCommentChange: (String) -> Unit,
+    onCommentSubmit: () -> Unit,
+    isLiked: Boolean,
+    onLikeClick: () -> Unit,
+    showReportDialog: Boolean,
+    onShowReportDialogChange: (Boolean) -> Unit,
+    reportReason: String,
+    onReportReasonChange: (String) -> Unit,
+    onReportSubmit: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 16.dp)
+    ) {
+        post?.let {
+
+            Spacer(modifier = Modifier.height(8.dp))
+            // 작성자 정보
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth()
             ) {
-                post?.let {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(text = it.title, style = MaterialTheme.typography.headlineMedium)
-                        IconButton(onClick = { showReportDialog = true }) {
-                            Icon(
-                                imageVector = Icons.Filled.Report,
-                                contentDescription = "신고",
-                                tint = MaterialTheme.colorScheme.error
-                            )
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(8.dp))
-                    
-                    // 작성자 정보
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.AccountCircle,
-                            contentDescription = null,
-                            modifier = Modifier.size(48.dp),
-                            tint = DividerGray
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text("익명", color = TextPrimary, style = MaterialTheme.typography.bodyMedium)
-                            Text(
-                                it.time,
-                                color = DividerGray,
-                                style = MaterialTheme.typography.bodySmall
-                            )
-                        }
-                        OutlinedButton(
-                            onClick = { isLiked = !isLiked },
-                            border = ButtonDefaults.outlinedButtonBorder,
-                            shape = MaterialTheme.shapes.small,
-                            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp),
-                            modifier = Modifier.height(32.dp)
-                        ) {
-                            Icon(
-                                Icons.Default.ThumbUp,
-                                contentDescription = null,
-                                tint = if (isLiked) Error else DividerGray,
-                                modifier = Modifier.size(18.dp)
-                            )
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Text(
-                                "${it.likeCount + if (isLiked) 1 else 0}",
-                                color = if (isLiked) Error else DividerGray,
-                                style = MaterialTheme.typography.bodySmall
-                            )
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Text(text = it.content, style = MaterialTheme.typography.bodyMedium)
-                    
-                    Spacer(modifier = Modifier.height(20.dp))
-                    
-                    // 좋아요/댓글 숫자
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 8.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.ThumbUp,
-                            contentDescription = "좋아요",
-                            tint = if (isLiked) Error else DividerGray,
-                            modifier = Modifier.size(18.dp)
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text(
-                            it.likeCount.toString(),
-                            color = if (isLiked) Error else DividerGray,
-                            style = MaterialTheme.typography.bodyMedium
-                        )
-                        Spacer(modifier = Modifier.width(16.dp))
-                        Icon(
-                            imageVector = Icons.Default.ChatBubbleOutline,
-                            contentDescription = "댓글",
-                            tint = ChatBlue,
-                            modifier = Modifier.size(18.dp)
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text(
-                            it.commentCount.toString(),
-                            color = ChatBlue,
-                            style = MaterialTheme.typography.bodyMedium
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.height(24.dp))
-
-                    Divider(
+                Icon(
+                    imageVector = Icons.Default.AccountCircle,
+                    contentDescription = null,
+                    modifier = Modifier.size(48.dp),
+                    tint = DividerGray
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Column(modifier = Modifier.weight(1f)) {
+                    Text("익명", color = TextPrimary, style = MaterialTheme.typography.bodyMedium)
+                    Text(
+                        it.time,
                         color = DividerGray,
-                        thickness = 1.dp,
-                        modifier = Modifier.padding(horizontal = 16.dp)
+                        style = MaterialTheme.typography.bodySmall
                     )
+                }
+                OutlinedButton(
+                    onClick = onLikeClick,
+                    border = ButtonDefaults.outlinedButtonBorder,
+                    shape = MaterialTheme.shapes.small,
+                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp),
+                    modifier = Modifier.height(32.dp)
+                ) {
+                    Icon(
+                        Icons.Default.ThumbUp,
+                        contentDescription = null,
+                        tint = if (isLiked) Error else DividerGray,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(
+                        "${it.likeCount + if (isLiked) 1 else 0}",
+                        color = if (isLiked) Error else DividerGray,
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
+            }
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(text = it.title, style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold))
 
-                    Spacer(modifier = Modifier.height(16.dp))
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(text = it.content, style = MaterialTheme.typography.bodyMedium)
+            Spacer(modifier = Modifier.height(12.dp))
+            // 좋아요/댓글 숫자
 
-                    // 댓글 목록
-                    LazyColumn(
-                        modifier = Modifier.weight(1f),
-                        contentPadding = PaddingValues(vertical = 8.dp)
-                    ) {
-                        items(comments) { comment ->
-                            CommentItem(comment = comment)
-                        }
-                    }
-
-                    // 댓글 입력창
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp)
-                            .background(Color.White, shape = RoundedCornerShape(12.dp)),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        OutlinedTextField(
-                            value = newComment,
-                            onValueChange = { newComment = it },
-                            modifier = Modifier
-                                .weight(1f)
-                                .height(48.dp),
-                            placeholder = { Text("댓글을 입력하세요.") },
-                            singleLine = true,
-                            shape = RoundedCornerShape(8.dp),
-                            keyboardOptions = KeyboardOptions(
-                                imeAction = ImeAction.Done
-                            ),
-                            keyboardActions = KeyboardActions(
-                                onDone = {
-                                    if (newComment.isNotBlank()) {
-                                        commentViewModel.saveComment(
-                                            postId = safePostId,
-                                            userId = 1,
-                                            content = newComment
-                                        )
-                                        newComment = ""
-                                    }
-                                }
-                            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Divider(
+                color = DividerGray,
+                thickness = 1.dp,
+                modifier = Modifier.padding(horizontal = 16.dp)
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 0.dp),
+            verticalAlignment = Alignment.CenterVertically
+            ) {
+            Icon(
+                imageVector = Icons.Default.ThumbUp,
+                contentDescription = "좋아요",
+                tint = if (isLiked) Error else DividerGray,
+                modifier = Modifier.size(18.dp)
+            )
+            Spacer(modifier = Modifier.width(4.dp))
+            Text(
+                it.likeCount.toString(),
+                color = if (isLiked) Error else DividerGray,
+                style = MaterialTheme.typography.bodyMedium
+            )
+            Spacer(modifier = Modifier.width(16.dp))
+            Icon(
+                imageVector = Icons.Default.ChatBubbleOutline,
+                contentDescription = "댓글",
+                tint = ChatBlue,
+                modifier = Modifier.size(18.dp)
+            )
+            Spacer(modifier = Modifier.width(4.dp))
+            Text(
+                it.commentCount.toString(),
+                color = ChatBlue,
+                style = MaterialTheme.typography.bodyMedium
+            )
+            Spacer(modifier = Modifier.width(4.dp))
+            IconButton(onClick = { onShowReportDialogChange(true) }) {
+                Icon(
+                    imageVector = Icons.Filled.Report,
+                    contentDescription = "신고",
+                    tint = MaterialTheme.colorScheme.error
+                )
+            }
+        }
+            // 댓글 목록
+            LazyColumn(
+                modifier = Modifier.weight(1f),
+                contentPadding = PaddingValues(vertical = 8.dp)
+            ) {
+                items(comments) { comment ->
+                    CommentItem(comment = comment)
+                }
+            }
+            // 댓글 입력창
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp)
+                    .background(Color(0xFFF5F5F5), shape = RoundedCornerShape(20.dp)),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Box(modifier = Modifier.weight(1f)) {
+                    if (newComment.isEmpty()) {
+                        Text(
+                            text = "댓글을 입력하세요.",
+                            color = Color.Gray,
+                            style = MaterialTheme.typography.bodyLarge
                         )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Button(
-                            onClick = {
-                                if (newComment.isNotBlank()) {
-                                    commentViewModel.saveComment(
-                                        postId = safePostId,
-                                        userId = 1,
-                                        content = newComment
-                                    )
-                                    newComment = ""
-                                }
-                            },
-                            shape = RoundedCornerShape(8.dp),
-                            colors = ButtonDefaults.buttonColors(containerColor = ChatBlue),
-                            modifier = Modifier.height(48.dp)
-                        ) {
-                            Text("등록", color = Color.White)
-                        }
                     }
-                }
-
-                // 신고 다이얼로그
-                if (showReportDialog) {
-                    AlertDialog(
-                        onDismissRequest = { showReportDialog = false },
-                        title = { Text("게시글 신고") },
-                        text = {
-                            OutlinedTextField(
-                                value = reportReason,
-                                onValueChange = { reportReason = it },
-                                placeholder = { Text("신고 사유를 입력하세요") }
-                            )
-                        },
-                        confirmButton = {
-                            TextButton(
-                                onClick = {
-                                    postViewModel.reportPost(postId = safePostId, userId = 1, reason = reportReason)
-                                    showReportDialog = false
-                                }
-                            ) { Text("신고하기") }
-                        },
-                        dismissButton = {
-                            TextButton(onClick = { showReportDialog = false }) { Text("취소") }
-                        }
+                    BasicTextField(
+                        value = newComment,
+                        onValueChange = { onCommentChange(it) },
+                        singleLine = true,
+                        textStyle = MaterialTheme.typography.bodyLarge,
+                        modifier = Modifier.fillMaxWidth()
                     )
                 }
-
-                // 신고 결과 알림
-                reportResult?.let {
-                    AlertDialog(
-                        onDismissRequest = { postViewModel.clearReportResult() },
-                        title = { Text("알림") },
-                        text = { Text(it) },
-                        confirmButton = {
-                            TextButton(onClick = { postViewModel.clearReportResult() }) { Text("확인") }
-                        }
+                IconButton(
+                    onClick = {
+                        if (newComment.isNotBlank()) onCommentSubmit()
+                    },
+                    modifier = Modifier.padding(end = 8.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Send,
+                        contentDescription = "댓글 등록",
+                        tint = ChatBlue,
+                        modifier = Modifier.size(28.dp)
                     )
                 }
             }
         }
-    )
+        if (showReportDialog) {
+            AlertDialog(
+                onDismissRequest = { onShowReportDialogChange(false) },
+                title = { Text("게시글 신고") },
+                text = {
+                    OutlinedTextField(
+                        value = reportReason,
+                        onValueChange = onReportReasonChange,
+                        placeholder = { Text("신고 사유를 입력하세요") }
+                    )
+                },
+                confirmButton = {
+                    TextButton(
+                        onClick = onReportSubmit
+                    ) { Text("신고하기") }
+                },
+                dismissButton = {
+                    TextButton(onClick = { onShowReportDialogChange(false) }) { Text("취소") }
+                }
+            )
+        }
+    }
 }
 
 @Composable
@@ -440,10 +460,43 @@ fun CommentItem(comment: Comment) {
 @Preview(showBackground = true)
 @Composable
 fun PostDetailScreenPreview() {
-    BlindSJNTheme {
-        val navController = rememberNavController()
-        PostDetailScreen(navController = navController, postId = "1")
-    }
+    val navController = rememberNavController()
+    val dummyPost = Post(
+        id = 1,
+        title = "다들 유심 바꿨나요?",
+        content = "저도 가게 하루 쉬고 바꾸러 가야할 거 같은데 시간이 없네요..",
+        category = "잡담",
+        time = "2025-05-15 02:05:34",
+        commentCount = 1,
+        likeCount = 1
+    )
+    val dummyComments = listOf(
+        Comment(
+            commentId = 1,
+            postId = 1,
+            userId = 1,
+            content = "어제 대리점 갔다가 없다고 해서 그냥 돌아왔네요..",
+            createdAt = "2025-05-15 16:09:50"
+        )
+    )
+    var previewComment by remember { mutableStateOf("") }
+    var previewLiked by remember { mutableStateOf(false) }
+    PostDetailScreenContent(
+        post = dummyPost,
+        comments = dummyComments,
+        newComment = previewComment,
+        onCommentChange = { previewComment = it },
+        onCommentSubmit = {
+            previewComment = ""
+        },
+        isLiked = previewLiked,
+        onLikeClick = { previewLiked = !previewLiked },
+        showReportDialog = false,
+        onShowReportDialogChange = { },
+        reportReason = "",
+        onReportReasonChange = { },
+        onReportSubmit = { }
+    )
 }
 
 @Preview(showBackground = true)
