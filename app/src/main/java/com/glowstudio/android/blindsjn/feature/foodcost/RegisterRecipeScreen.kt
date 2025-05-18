@@ -1,4 +1,4 @@
-package com.glowstudio.android.blindsjn.feature.foodcoast
+package com.glowstudio.android.blindsjn.feature.foodcost
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
@@ -7,23 +7,29 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.glowstudio.android.blindsjn.ui.components.common.CommonButton
-import androidx.compose.ui.draw.clip
-import androidx.compose.foundation.background
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.ui.graphics.Color
-import androidx.compose.foundation.border
 
 @Composable
-fun RegisterIngredientScreen() {
-    var ingredientItems by remember { mutableStateOf(listOf(IngredientItem())) }
+fun RegisterRecipeScreen() {
+    var title by remember { mutableStateOf("") }
+    var price by remember { mutableStateOf("") }
+    var recipeItems by remember { mutableStateOf(listOf(RecipeItem())) }
 
     Column(Modifier.padding(16.dp)) {
-        ingredientItems.forEachIndexed { index, item ->
+        OutlinedTextField(
+            value = title,
+            onValueChange = { title = it },
+            label = { Text("레시피 제목") },
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        recipeItems.forEachIndexed { index, item ->
             Row(verticalAlignment = Alignment.CenterVertically) {
                 OutlinedTextField(
                     value = item.name,
                     onValueChange = {
-                        ingredientItems = ingredientItems.toMutableList().apply {
+                        recipeItems = recipeItems.toMutableList().apply {
                             this[index] = item.copy(name = it)
                         }
                     },
@@ -31,12 +37,12 @@ fun RegisterIngredientScreen() {
                     modifier = Modifier.weight(1f)
                 )
 
-                Spacer(Modifier.width(4.dp))
+                Spacer(Modifier.width(8.dp))
 
                 OutlinedTextField(
                     value = item.grams,
                     onValueChange = {
-                        ingredientItems = ingredientItems.toMutableList().apply {
+                        recipeItems = recipeItems.toMutableList().apply {
                             this[index] = item.copy(grams = it)
                         }
                     },
@@ -44,28 +50,15 @@ fun RegisterIngredientScreen() {
                     modifier = Modifier.weight(1f)
                 )
 
-                Spacer(Modifier.width(4.dp))
-
-                OutlinedTextField(
-                    value = item.price,
-                    onValueChange = {
-                        ingredientItems = ingredientItems.toMutableList().apply {
-                            this[index] = item.copy(price = it)
-                        }
-                    },
-                    label = { Text("가격") },
-                    modifier = Modifier.weight(1f)
-                )
-
                 IconButton(onClick = {
-                    ingredientItems = ingredientItems + IngredientItem()
+                    recipeItems = recipeItems + RecipeItem()
                 }) {
                     Text("+")
                 }
 
-                if (ingredientItems.size > 1) {
+                if (recipeItems.size > 1) {
                     IconButton(onClick = {
-                        ingredientItems = ingredientItems.toMutableList().apply {
+                        recipeItems = recipeItems.toMutableList().apply {
                             removeAt(index)
                         }
                     }) {
@@ -77,10 +70,19 @@ fun RegisterIngredientScreen() {
 
         Spacer(modifier = Modifier.height(8.dp))
 
+        OutlinedTextField(
+            value = price,
+            onValueChange = { price = it },
+            label = { Text("레시피 가격") },
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(modifier = Modifier.height(12.dp))
+
         CommonButton(
             text = "등록",
             onClick = {
-                // TODO: 저장 로직 구현 후 이전 화면으로 이동
+                // TODO: 레시피 저장 로직 구현
             },
             modifier = Modifier.fillMaxWidth()
         )
@@ -89,8 +91,7 @@ fun RegisterIngredientScreen() {
 
 // 데이터 클래스 정의
 
-data class IngredientItem(
+data class RecipeItem(
     val name: String = "",
-    val grams: String = "",
-    val price: String = ""
+    val grams: String = ""
 )
