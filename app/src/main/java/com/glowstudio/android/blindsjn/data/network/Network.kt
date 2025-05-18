@@ -73,4 +73,8 @@ interface ApiService {
         @Path("reportId") reportId: Int,
         @Body status: String
     ): Response<ReportResponse>
+
+    // 🔹 좋아요
+    @POST("Like_post.php")
+    suspend fun likePost(@Body request: LikePostRequest): Response<BasicResponse>
 }
