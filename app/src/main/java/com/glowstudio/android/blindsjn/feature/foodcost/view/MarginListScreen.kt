@@ -19,6 +19,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.BorderStroke
 
 @Composable
 fun MarginListScreen(
@@ -44,88 +45,110 @@ fun MarginListScreen(
             TabButton(text = "마진관리", selected = true, onClick = onNavigateToMargin, modifier = Modifier.weight(1f))
         }
         Spacer(Modifier.height(16.dp))
-        // 버블 그래프 (LazyRow로 변경)
-        LazyRow(
+        // 버블 그래프 카드
+        Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 24.dp),
-            horizontalArrangement = Arrangement.spacedBy(0.dp)
+                .padding(bottom = 16.dp),
+            shape = RoundedCornerShape(12.dp),
+            colors = CardDefaults.cardColors(containerColor = CardWhite),
+            border = BorderStroke(1.dp, DividerGray)
         ) {
-            items(com.glowstudio.android.blindsjn.feature.foodcost.viewmodel.MarginListViewModel().items) { item ->
-                MarginBubble(
-                    name = item.name,
-                    sales = item.price,
-                    cost = item.cost,
-                    marginRate = item.marginRate,
-                    color = item.color,
-                    marginColor = item.marginColor,
-                    modifier = Modifier.padding(8.dp)
-                )
-            }
-        }
-        // 순위표 리스트 (높이 제한, 스크롤 가능)
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxWidth()
-                .heightIn(min = 180.dp, max = 400.dp)
-                .padding(top = 8.dp),
-            userScrollEnabled = true
-        ) {
-            itemsIndexed(com.glowstudio.android.blindsjn.feature.foodcost.viewmodel.MarginListViewModel().items) { idx, item ->
-                Row(
-                    Modifier
+            Box(modifier = Modifier.padding(12.dp)) {
+                LazyRow(
+                    modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                        .padding(vertical = 12.dp),
+                    horizontalArrangement = Arrangement.spacedBy(0.dp)
                 ) {
-                    // 순위 원형 배지
-                    Box(
-                        Modifier
-                            .size(32.dp)
-                            .background(item.color, shape = androidx.compose.foundation.shape.CircleShape),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            "${idx + 1}등",
-                            color = Color.White,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 14.sp
+                    items(com.glowstudio.android.blindsjn.feature.foodcost.viewmodel.MarginListViewModel().items) { item ->
+                        MarginBubble(
+                            name = item.name,
+                            sales = item.price,
+                            cost = item.cost,
+                            marginRate = item.marginRate,
+                            color = item.color,
+                            marginColor = item.marginColor,
+                            modifier = Modifier.padding(8.dp)
                         )
                     }
-                    Spacer(Modifier.width(12.dp))
-                    // 이름
-                    Text(
-                        item.name,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 16.sp,
-                        modifier = Modifier.weight(1.2f)
-                    )
-                    // 판매금액
-                    Text(
-                        "% ,d원".format(item.price),
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 16.sp,
-                        modifier = Modifier.weight(1f),
-                        textAlign = androidx.compose.ui.text.style.TextAlign.End
-                    )
-                    // 순수익(판매가-원가)
-                    Text(
-                        "% ,d원".format(item.price - item.cost),
-                        color = Color(0xFF388E3C),
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 16.sp,
-                        modifier = Modifier.weight(1f),
-                        textAlign = androidx.compose.ui.text.style.TextAlign.End
-                    )
-                    // 마진율
-                    Text(
-                        "${item.marginRate}%",
-                        color = Color(0xFF1976D2),
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 15.sp,
-                        modifier = Modifier.weight(0.7f),
-                        textAlign = androidx.compose.ui.text.style.TextAlign.End
-                    )
+                }
+            }
+        }
+        // 순위표 카드
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 16.dp),
+            shape = RoundedCornerShape(12.dp),
+            colors = CardDefaults.cardColors(containerColor = CardWhite),
+            border = BorderStroke(1.dp, DividerGray)
+        ) {
+            Box(modifier = Modifier.padding(12.dp)) {
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(min = 180.dp, max = 400.dp)
+                        .padding(top = 4.dp),
+                    userScrollEnabled = true
+                ) {
+                    itemsIndexed(com.glowstudio.android.blindsjn.feature.foodcost.viewmodel.MarginListViewModel().items) { idx, item ->
+                        Row(
+                            Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 6.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            // 순위 원형 배지
+                            Box(
+                                Modifier
+                                    .size(28.dp)
+                                    .background(item.color, shape = androidx.compose.foundation.shape.CircleShape),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    "${idx + 1}등",
+                                    color = Color.White,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 12.sp
+                                )
+                            }
+                            Spacer(Modifier.width(10.dp))
+                            // 이름
+                            Text(
+                                item.name,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 13.sp,
+                                modifier = Modifier.weight(1.2f)
+                            )
+                            // 판매금액
+                            Text(
+                                "% ,d원".format(item.price),
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 13.sp,
+                                modifier = Modifier.weight(1f),
+                                textAlign = androidx.compose.ui.text.style.TextAlign.End
+                            )
+                            // 순수익(판매가-원가)
+                            Text(
+                                "% ,d원".format(item.price - item.cost),
+                                color = Color(0xFF388E3C),
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 13.sp,
+                                modifier = Modifier.weight(1f),
+                                textAlign = androidx.compose.ui.text.style.TextAlign.End
+                            )
+                            // 마진율
+                            Text(
+                                "${item.marginRate}%",
+                                color = Color(0xFF1976D2),
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 12.sp,
+                                modifier = Modifier.weight(0.7f),
+                                textAlign = androidx.compose.ui.text.style.TextAlign.End
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -206,12 +229,20 @@ fun MarginBubble(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(top = 12.dp),
+                .padding(top = 8.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Top
         ) {
-            Text(name, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 11.sp, maxLines = 1)
-            Text("${sales}원", color = Color.White, fontSize = 10.sp)
+            Box(
+                modifier = Modifier
+                    .background(Color.Gray.copy(alpha = 0.3f), shape = RoundedCornerShape(1.dp))
+                    .padding(horizontal = 6.dp, vertical = 2.dp)
+            ) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(name, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 13.sp, maxLines = 1)
+                    Text("${sales}원", color = Color.White, fontSize = 12.sp)
+                }
+            }
         }
     }
 }
