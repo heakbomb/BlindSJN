@@ -60,7 +60,8 @@ fun NavGraphBuilder.mainNavGraph(
                     title = article.title ?: "제목 없음",
                     content = article.content,
                     description = article.description,
-                    imageUrl = article.urlToImage
+                    imageUrl = article.urlToImage,
+                    link = article.link
                 )
             }
         }

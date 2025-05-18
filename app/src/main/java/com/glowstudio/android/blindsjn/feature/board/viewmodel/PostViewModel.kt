@@ -18,6 +18,9 @@ class PostViewModel : ViewModel() {
     private val _statusMessage = MutableStateFlow<String?>(null)
     val statusMessage: StateFlow<String?> = _statusMessage
 
+    private val _reportResult = MutableStateFlow<String?>(null)
+    val reportResult: StateFlow<String?> = _reportResult
+
     fun setStatusMessage(message: String) {
         _statusMessage.value = message
     }
@@ -116,4 +119,32 @@ class PostViewModel : ViewModel() {
             }
         }
     }
-} 
+
+    fun reportPost(postId: Int, userId: Int, reason: String) {
+        viewModelScope.launch {
+            try {
+                val request = ReportRequest(postId, userId, reason)
+                val response = PostRepository.reportPost(request)
+                if (response.isSuccessful) {
+                    response.body()?.let { reportResponse ->
+                        if (reportResponse.success) {
+                            _reportResult.value = reportResponse.message ?: "신고가 접수되었습니다."
+                        } else {
+                            _reportResult.value = reportResponse.error ?: "신고 접수 실패"
+                        }
+                    } ?: run {
+                        _reportResult.value = "서버 응답이 비어있습니다."
+                    }
+                } else {
+                    _reportResult.value = "서버 오류: ${response.code()}"
+                }
+            } catch (e: Exception) {
+                _reportResult.value = "신고 중 오류 발생: ${e.message}"
+            }
+        }
+    }
+
+    fun clearReportResult() {
+        _reportResult.value = null
+    }
+}
