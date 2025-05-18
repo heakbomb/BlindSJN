@@ -50,10 +50,9 @@ fun PostDetailScreen(navController: NavController, postId: String) {
     var newComment by remember { mutableStateOf("") }
     var isLiked by remember { mutableStateOf(false) }
     
-    // 신고 관련 상태
+    // 신고 관련 상태를 상위에서 관리
     var showReportDialog by remember { mutableStateOf(false) }
     var reportReason by remember { mutableStateOf("") }
-    var showReportSuccessDialog by remember { mutableStateOf(false) }
     val reportResult by postViewModel.reportResult.collectAsState()
 
     val safePostId = postId.toIntOrNull() ?: 1
@@ -81,34 +80,16 @@ fun PostDetailScreen(navController: NavController, postId: String) {
                     }
                 },
                 isLiked = isLiked,
-                onLikeClick = { isLiked = !isLiked }
+                onLikeClick = { isLiked = !isLiked },
+                showReportDialog = showReportDialog,
+                onShowReportDialogChange = { showReportDialog = it },
+                reportReason = reportReason,
+                onReportReasonChange = { reportReason = it },
+                onReportSubmit = {
+                    postViewModel.reportPost(postId = safePostId, userId = 1, reason = reportReason)
+                    showReportDialog = false
+                }
             )
-
-            // 신고 다이얼로그
-            if (showReportDialog) {
-                AlertDialog(
-                    onDismissRequest = { showReportDialog = false },
-                    title = { Text("게시글 신고") },
-                    text = {
-                        OutlinedTextField(
-                            value = reportReason,
-                            onValueChange = { reportReason = it },
-                            placeholder = { Text("신고 사유를 입력하세요") }
-                        )
-                    },
-                    confirmButton = {
-                        TextButton(
-                            onClick = {
-                                postViewModel.reportPost(postId = safePostId, userId = 1, reason = reportReason)
-                                showReportDialog = false
-                            }
-                        ) { Text("신고하기") }
-                    },
-                    dismissButton = {
-                        TextButton(onClick = { showReportDialog = false }) { Text("취소") }
-                    }
-                )
-            }
 
             // 신고 결과 알림
             reportResult?.let {
@@ -133,7 +114,12 @@ fun PostDetailScreenContent(
     onCommentChange: (String) -> Unit,
     onCommentSubmit: () -> Unit,
     isLiked: Boolean,
-    onLikeClick: () -> Unit
+    onLikeClick: () -> Unit,
+    showReportDialog: Boolean,
+    onShowReportDialogChange: (Boolean) -> Unit,
+    reportReason: String,
+    onReportReasonChange: (String) -> Unit,
+    onReportSubmit: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -236,7 +222,7 @@ fun PostDetailScreenContent(
                 style = MaterialTheme.typography.bodyMedium
             )
             Spacer(modifier = Modifier.width(4.dp))
-            IconButton(onClick = { /* 신고 다이얼로그 생략 */ }) {
+            IconButton(onClick = { onShowReportDialogChange(true) }) {
                 Icon(
                     imageVector = Icons.Filled.Report,
                     contentDescription = "신고",
@@ -291,6 +277,27 @@ fun PostDetailScreenContent(
                     )
                 }
             }
+        }
+        if (showReportDialog) {
+            AlertDialog(
+                onDismissRequest = { onShowReportDialogChange(false) },
+                title = { Text("게시글 신고") },
+                text = {
+                    OutlinedTextField(
+                        value = reportReason,
+                        onValueChange = onReportReasonChange,
+                        placeholder = { Text("신고 사유를 입력하세요") }
+                    )
+                },
+                confirmButton = {
+                    TextButton(
+                        onClick = onReportSubmit
+                    ) { Text("신고하기") }
+                },
+                dismissButton = {
+                    TextButton(onClick = { onShowReportDialogChange(false) }) { Text("취소") }
+                }
+            )
         }
     }
 }
@@ -483,7 +490,12 @@ fun PostDetailScreenPreview() {
             previewComment = ""
         },
         isLiked = previewLiked,
-        onLikeClick = { previewLiked = !previewLiked }
+        onLikeClick = { previewLiked = !previewLiked },
+        showReportDialog = false,
+        onShowReportDialogChange = { },
+        reportReason = "",
+        onReportReasonChange = { },
+        onReportSubmit = { }
     )
 }
 
