@@ -39,6 +39,7 @@ import com.glowstudio.android.blindsjn.feature.board.view.PostBottomSheet
 import com.glowstudio.android.blindsjn.feature.board.viewmodel.PostBottomSheetViewModel
 import com.glowstudio.android.blindsjn.utils.TimeUtils
 import androidx.compose.ui.text.style.TextOverflow
+import com.glowstudio.android.blindsjn.feature.board.view.CategoryBottomSheet
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
@@ -70,6 +71,18 @@ fun BoardScreen(navController: NavController) {
         posts.filter { it.category == cat.title }
     } ?: posts).sortedByDescending { it.time }
 
+    // 카테고리 바텀시트
+    if (showCategorySheet) {
+        CategoryBottomSheet(
+            categories = boardCategories,
+            selectedCategory = selectedCategory,
+            onCategorySelected = { category ->
+                selectedCategory = category
+            },
+            onDismiss = { showCategorySheet = false }
+        )
+    }
+
     // 글쓰기 바텀시트
     if (showSheet) {
         ModalBottomSheet(onDismissRequest = { showSheet = false }) {
@@ -96,25 +109,30 @@ fun BoardScreen(navController: NavController) {
                     .fillMaxWidth()
                     .padding(horizontal = 8.dp, vertical = 8.dp)
             ) {
-                LazyRow(
+                Row(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(end = 40.dp), // 화살표 공간 확보
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    item {
-                        CustomFilterChip(
-                            text = "전체",
-                            isSelected = selectedCategory == null,
-                            onClick = { selectedCategory = null }
-                        )
-                    }
-                    items(industryCategories) { category ->
-                        CustomFilterChip(
-                            text = category.title,
-                            isSelected = selectedCategory?.title == category.title,
-                            onClick = { selectedCategory = category }
-                        )
+                    // 전체 필터칩 (고정)
+                    CustomFilterChip(
+                        text = "전체",
+                        isSelected = selectedCategory == null,
+                        onClick = { selectedCategory = null }
+                    )
+                    
+                    // 스크롤 가능한 업종 카테고리
+                    LazyRow(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        items(industryCategories) { category ->
+                            CustomFilterChip(
+                                text = category.title,
+                                isSelected = selectedCategory?.title == category.title,
+                                onClick = { selectedCategory = category }
+                            )
+                        }
                     }
                 }
                 IconButton(

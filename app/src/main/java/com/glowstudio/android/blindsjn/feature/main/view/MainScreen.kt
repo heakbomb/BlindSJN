@@ -8,6 +8,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.compose.currentBackStackEntryAsState
 import com.glowstudio.android.blindsjn.ui.navigation.mainNavGraph
 import com.glowstudio.android.blindsjn.feature.main.viewmodel.TopBarViewModel
 import com.glowstudio.android.blindsjn.feature.main.viewmodel.NavigationViewModel
@@ -61,6 +62,34 @@ fun MainScreen(
     val navController = rememberNavController()
     // TopBarViewModel에서 상단바 상태를 관찰
     val topBarState by topBarViewModel.topBarState.collectAsState()
+    
+    // 현재 라우트 변경 감지
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
+
+    // 라우트가 변경될 때마다 TopBar 상태 업데이트
+    LaunchedEffect(currentRoute) {
+        when (currentRoute) {
+            "home" -> topBarViewModel.setMainBar()
+            "board" -> topBarViewModel.setMainBar()
+            "paymanagement", "foodcoast" -> topBarViewModel.setMainBar()
+            "message" -> topBarViewModel.setMainBar()
+            "profile" -> topBarViewModel.setMainBar()
+            else -> {
+                // 상세 화면의 경우 현재 라우트에 따라 적절한 TopBar 설정
+                val title = when {
+                    currentRoute?.startsWith("postDetail/") == true -> "게시글"
+                    currentRoute?.startsWith("boardDetail/") == true -> "게시판"
+                    currentRoute?.startsWith("editRecipe/") == true -> "레시피 수정"
+                    else -> "상세"
+                }
+                topBarViewModel.setDetailBar(
+                    title = title,
+                    onBackClick = { navController.navigateUp() }
+                )
+            }
+        }
+    }
 
     Scaffold(
         // 상단바: TopBarViewModel의 상태를 기반으로 동적으로 업데이트됨
