@@ -22,9 +22,18 @@ fun SectionLayout(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(title, fontWeight = FontWeight.Bold)
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+                fontWeight = FontWeight.Bold
+            )
             IconButton(onClick = { onMoreClick?.invoke() }) {
-                Icon(Icons.Default.KeyboardArrowRight, contentDescription = "더보기")
+                Icon(
+                    imageVector = Icons.Default.KeyboardArrowRight,
+                    contentDescription = "더보기",
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
         }
 

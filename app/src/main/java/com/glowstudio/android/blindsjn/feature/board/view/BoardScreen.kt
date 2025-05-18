@@ -112,7 +112,7 @@ fun BoardScreen(navController: NavController) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(end = 40.dp), // 화살표 공간 확보
+                        .padding(end = 12.dp), // 화살표 공간 확보
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     // 전체 필터칩 (고정)
@@ -140,6 +140,7 @@ fun BoardScreen(navController: NavController) {
                     modifier = Modifier
                         .align(Alignment.CenterEnd)
                         .background(CardWhite, MaterialTheme.shapes.medium)
+                        .height(32.dp)
                 ) {
                     Icon(Icons.Filled.ArrowDropDown, contentDescription = "카테고리 전체 보기")
                 }
@@ -260,7 +261,7 @@ fun PostItem(
     userId: Int
 ) {
     var isLiked by remember { mutableStateOf(post.isLiked ?: false) }
-    var likeCount by remember { mutableStateOf(post.likeCount) }
+    var likeCount by remember { mutableIntStateOf(post.likeCount) }
     var isLiking by remember { mutableStateOf(false) }
 
     Column(

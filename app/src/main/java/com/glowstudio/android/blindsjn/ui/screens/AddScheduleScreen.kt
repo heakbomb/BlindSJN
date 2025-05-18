@@ -15,6 +15,8 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
 import com.glowstudio.android.blindsjn.ui.components.common.CommonButton
+import com.glowstudio.android.blindsjn.ui.theme.BlindSJNTheme
+import androidx.compose.ui.tooling.preview.Preview
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -53,12 +55,24 @@ fun AddScheduleScreen(
                         )
                         onSave(schedule)
                     }) {
-                        Icon(Icons.Filled.Save, contentDescription = "저장")
+                        Icon(
+                            Icons.Filled.Save,
+                            contentDescription = "저장",
+                            tint = MaterialTheme.colorScheme.onSurface
+                        )
                     }
                     IconButton(onClick = onCancel) {
-                        Icon(Icons.Filled.Close, contentDescription = "취소")
+                        Icon(
+                            Icons.Filled.Close,
+                            contentDescription = "취소",
+                            tint = MaterialTheme.colorScheme.onSurface
+                        )
                     }
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    titleContentColor = MaterialTheme.colorScheme.onSurface
+                )
             )
         }
     ) { innerPadding ->
@@ -73,7 +87,13 @@ fun AddScheduleScreen(
                 value = title,
                 onValueChange = { title = it },
                 label = { Text("제목") },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = MaterialTheme.colorScheme.primary,
+                    unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+                    focusedLabelColor = MaterialTheme.colorScheme.primary,
+                    unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             )
 
             // 시작일/종료일 row
@@ -88,7 +108,13 @@ fun AddScheduleScreen(
                     modifier = Modifier
                         .weight(1f)
                         .clickable { showStartDatePicker = true },
-                    readOnly = true
+                    readOnly = true,
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = MaterialTheme.colorScheme.primary,
+                        unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+                        focusedLabelColor = MaterialTheme.colorScheme.primary,
+                        unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 )
                 OutlinedTextField(
                     value = endDate,
@@ -97,7 +123,13 @@ fun AddScheduleScreen(
                     modifier = Modifier
                         .weight(1f)
                         .clickable { showEndDatePicker = true },
-                    readOnly = true
+                    readOnly = true,
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = MaterialTheme.colorScheme.primary,
+                        unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+                        focusedLabelColor = MaterialTheme.colorScheme.primary,
+                        unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 )
             }
 
@@ -113,7 +145,13 @@ fun AddScheduleScreen(
                     modifier = Modifier
                         .weight(1f)
                         .clickable { showStartTimeDialog = true },
-                    readOnly = true
+                    readOnly = true,
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = MaterialTheme.colorScheme.primary,
+                        unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+                        focusedLabelColor = MaterialTheme.colorScheme.primary,
+                        unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 )
                 OutlinedTextField(
                     value = endTime,
@@ -122,7 +160,13 @@ fun AddScheduleScreen(
                     modifier = Modifier
                         .weight(1f)
                         .clickable { showEndTimeDialog = true },
-                    readOnly = true
+                    readOnly = true,
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = MaterialTheme.colorScheme.primary,
+                        unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+                        focusedLabelColor = MaterialTheme.colorScheme.primary,
+                        unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 )
             }
 
@@ -130,7 +174,13 @@ fun AddScheduleScreen(
                 value = memo,
                 onValueChange = { memo = it },
                 label = { Text("메모") },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = MaterialTheme.colorScheme.primary,
+                    unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+                    focusedLabelColor = MaterialTheme.colorScheme.primary,
+                    unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             )
 
             Row(
@@ -175,12 +225,18 @@ fun AddScheduleScreen(
                     }
                     showStartDatePicker = false
                 }) {
-                    Text("확인")
+                    Text(
+                        text = "확인",
+                        color = MaterialTheme.colorScheme.primary
+                    )
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showStartDatePicker = false }) {
-                    Text("취소")
+                    Text(
+                        text = "취소",
+                        color = MaterialTheme.colorScheme.primary
+                    )
                 }
             }
         ) {
@@ -203,12 +259,18 @@ fun AddScheduleScreen(
                     }
                     showEndDatePicker = false
                 }) {
-                    Text("확인")
+                    Text(
+                        text = "확인",
+                        color = MaterialTheme.colorScheme.primary
+                    )
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showEndDatePicker = false }) {
-                    Text("취소")
+                    Text(
+                        text = "취소",
+                        color = MaterialTheme.colorScheme.primary
+                    )
                 }
             }
         ) {
@@ -235,6 +297,17 @@ fun AddScheduleScreen(
                 endTime = String.format("%02d:%02d", hour, minute)
                 showEndTimeDialog = false
             }
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun AddScheduleScreenPreview() {
+    BlindSJNTheme {
+        AddScheduleScreen(
+            onCancel = { },
+            onSave = { }
         )
     }
 }
