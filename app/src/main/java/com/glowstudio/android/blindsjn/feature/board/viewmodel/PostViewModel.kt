@@ -120,6 +120,11 @@ class PostViewModel : ViewModel() {
         }
     }
 
+    fun decrementLike(postId: Int) {
+        // TODO: 서버에 좋아요 감소 요청 또는 로컬에서 처리
+        // 예시: PostRepository.decrementLike(postId)
+    }
+
     fun toggleLike(postId: Int, userId: Int, onResult: (Boolean, Boolean, Int) -> Unit) {
         viewModelScope.launch {
             try {
