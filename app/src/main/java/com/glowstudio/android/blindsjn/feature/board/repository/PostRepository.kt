@@ -10,6 +10,7 @@ import com.glowstudio.android.blindsjn.feature.board.model.CommentRequest
 import com.glowstudio.android.blindsjn.feature.board.model.EditCommentRequest
 import com.glowstudio.android.blindsjn.feature.board.model.DeleteCommentRequest
 import com.glowstudio.android.blindsjn.data.network.InternalServer
+import com.glowstudio.android.blindsjn.feature.board.model.ReportRequest
 
 object PostRepository {
 
@@ -47,5 +48,17 @@ object PostRepository {
 
     suspend fun deleteComment(request: DeleteCommentRequest): Response<BasicResponse> {
         return InternalServer.api.deleteComment(request)
+    }
+
+    suspend fun reportPost(request: ReportRequest): Response<ReportResponse> {
+        return InternalServer.api.reportPost(request)
+    }
+
+    suspend fun getReports(): Response<List<Report>> {
+        return InternalServer.api.getReports()
+    }
+
+    suspend fun updateReportStatus(reportId: Int, status: String): Response<ReportResponse> {
+        return InternalServer.api.updateReportStatus(reportId, status)
     }
 }
