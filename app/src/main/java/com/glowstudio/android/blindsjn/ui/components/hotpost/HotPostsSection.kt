@@ -36,25 +36,26 @@ fun HotPostsSection(navController: NavHostController) {
         HotPost("인기글 4", "04/28", 25, 8)
     )
 
-    SectionLayout(
-        title = "인기글",
-        onMoreClick = { navController.navigate("popular") }
-    ) {
-        Surface(
-            shape = RoundedCornerShape(20.dp),
-            tonalElevation = 0.dp,
-            color = CardWhite,
-            modifier = Modifier.fillMaxWidth()
+    Box(modifier = Modifier.padding(horizontal = 16.dp)) {
+        SectionLayout(
+            title = "인기글",
+            onMoreClick = { navController.navigate("popular") }
         ) {
-            Column {
-                hotPosts.forEachIndexed { idx, post ->
-                    HotPostListItem(post)
-                    if (idx != hotPosts.lastIndex) {
-                        Divider(
-                            color = DividerGray,
-                            thickness = 1.dp,
-                            modifier = Modifier.padding(horizontal = 12.dp)
-                        )
+            Surface(
+                shape = RoundedCornerShape(20.dp),
+                color = CardWhite,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Column {
+                    hotPosts.forEachIndexed { idx, post ->
+                        HotPostListItem(post)
+                        if (idx != hotPosts.lastIndex) {
+                            Divider(
+                                color = DividerGray,
+                                thickness = 1.dp,
+                                modifier = Modifier.padding(horizontal = 12.dp)
+                            )
+                        }
                     }
                 }
             }

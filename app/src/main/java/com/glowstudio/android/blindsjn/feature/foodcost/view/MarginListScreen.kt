@@ -20,151 +20,253 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.runtime.*
+import androidx.compose.ui.geometry.Offset
+import com.glowstudio.android.blindsjn.ui.components.common.SectionLayout
+import androidx.compose.ui.text.style.TextAlign
 
 @Composable
 fun MarginListScreen(
     onRecipeListClick: () -> Unit = {},
     onRegisterRecipeClick: () -> Unit = {},
-    onIngredientListClick: () -> Unit = {},
+    onEditRecipeClick: (String) -> Unit = {},
+    onEditIngredientClick: (String) -> Unit = {},
     onRegisterIngredientClick: () -> Unit = {},
+    onIngredientListClick: () -> Unit = {},
     onNavigateToPayManagement: () -> Unit = {},
-    onNavigateToMargin: () -> Unit = {},
+    onNavigateToMargin: () -> Unit = {}
 ) {
-    Column(
+    val recipes = remember {
+        listOf(
+            Triple("빵", 5000, 3600),
+            Triple("떡볶이", 6000, 4000),
+            Triple("김밥", 4500, 3000)
+        )
+    }
+
+    val ingredients = remember {
+        listOf(
+            Triple("밀가루", 2000, 1800),
+            Triple("설탕", 1500, 1200),
+            Triple("소금", 500, 400)
+        )
+    }
+
+    LazyColumn(
         modifier = Modifier
             .fillMaxSize()
             .background(BackgroundWhite)
             .padding(16.dp)
     ) {
         // 상단 탭
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            TabButton(text = "매출관리", selected = false, onClick = onNavigateToPayManagement, modifier = Modifier.weight(1f))
-            TabButton(text = "마진관리", selected = true, onClick = onNavigateToMargin, modifier = Modifier.weight(1f))
-        }
-        Spacer(Modifier.height(16.dp))
-        // 버블 그래프 카드
-        Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 16.dp),
-            shape = RoundedCornerShape(12.dp),
-            colors = CardDefaults.cardColors(containerColor = CardWhite),
-            border = BorderStroke(1.dp, DividerGray)
-        ) {
-            Box(modifier = Modifier.padding(12.dp)) {
-                LazyRow(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 12.dp),
-                    horizontalArrangement = Arrangement.spacedBy(0.dp)
-                ) {
-                    items(com.glowstudio.android.blindsjn.feature.foodcost.viewmodel.MarginListViewModel().items) { item ->
-                        MarginBubble(
-                            name = item.name,
-                            sales = item.price,
-                            cost = item.cost,
-                            marginRate = item.marginRate,
-                            color = item.color,
-                            marginColor = item.marginColor,
-                            modifier = Modifier.padding(8.dp)
-                        )
-                    }
-                }
+        item {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                TabButton(text = "매출관리", selected = false, onClick = onNavigateToPayManagement, modifier = Modifier.weight(1f))
+                TabButton(text = "마진관리", selected = true, onClick = onNavigateToMargin, modifier = Modifier.weight(1f))
             }
+            Spacer(Modifier.height(16.dp))
         }
-        // 순위표 카드
-        Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 16.dp),
-            shape = RoundedCornerShape(12.dp),
-            colors = CardDefaults.cardColors(containerColor = CardWhite),
-            border = BorderStroke(1.dp, DividerGray)
-        ) {
-            Box(modifier = Modifier.padding(12.dp)) {
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .heightIn(min = 180.dp, max = 400.dp)
-                        .padding(top = 4.dp),
-                    userScrollEnabled = true
+
+        // 상단 마진 요약 카드
+        item {
+            MarginSummaryCard(recipes)
+            Spacer(Modifier.height(24.dp))
+        }
+
+        // 레시피 섹션
+        item {
+            SectionLayout(
+                title = "레시피 관리",
+                onMoreClick = onRecipeListClick
+            ) {
+                Card(
+                    shape = RoundedCornerShape(20.dp),
+                    colors = CardDefaults.cardColors(containerColor = CardWhite),
+                    modifier = Modifier.fillMaxWidth()
                 ) {
-                    itemsIndexed(com.glowstudio.android.blindsjn.feature.foodcost.viewmodel.MarginListViewModel().items) { idx, item ->
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        // 레시피 테이블 헤더
                         Row(
                             Modifier
                                 .fillMaxWidth()
-                                .padding(vertical = 6.dp),
+                                .padding(vertical = 8.dp, horizontal = 8.dp)
+                                .height(40.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            // 순위 원형 배지
-                            Box(
-                                Modifier
-                                    .size(28.dp)
-                                    .background(item.color, shape = androidx.compose.foundation.shape.CircleShape),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(
-                                    "${idx + 1}등",
-                                    color = Color.White,
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 12.sp
-                                )
+                            Text("이름", Modifier.weight(1f), fontWeight = FontWeight.Bold, fontSize = 14.sp, color = TextPrimary, textAlign = TextAlign.Start)
+                            Text("판매가", Modifier.weight(1f), fontWeight = FontWeight.Bold, fontSize = 14.sp, color = TextPrimary, textAlign = TextAlign.End)
+                            Text("원가", Modifier.weight(1f), fontWeight = FontWeight.Bold, fontSize = 14.sp, color = TextPrimary, textAlign = TextAlign.End)
+                            Text("마진", Modifier.weight(1.5f), fontWeight = FontWeight.Bold, fontSize = 14.sp, color = TextPrimary, textAlign = TextAlign.End)
+                        }
+                        Divider(color = DividerGray, thickness = 1.dp)
+                        Spacer(Modifier.height(8.dp))
+                        // 레시피 리스트
+                        recipes.forEachIndexed { idx, (name, price, cost) ->
+                            val margin = price - cost
+                            val marginRate = if (price > 0) (margin * 100f / price).toInt() else 0
+                            RecipeItem(
+                                name = name,
+                                price = price,
+                                cost = cost,
+                                margin = margin,
+                                marginRate = marginRate
+                            )
+                            if (idx != recipes.lastIndex) {
+                                Divider(color = DividerGray, thickness = 1.dp, modifier = Modifier.padding(vertical = 2.dp))
                             }
-                            Spacer(Modifier.width(10.dp))
-                            // 이름
-                            Text(
-                                item.name,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 13.sp,
-                                modifier = Modifier.weight(1.2f)
-                            )
-                            // 판매금액
-                            Text(
-                                "% ,d원".format(item.price),
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 13.sp,
-                                modifier = Modifier.weight(1f),
-                                textAlign = androidx.compose.ui.text.style.TextAlign.End
-                            )
-                            // 순수익(판매가-원가)
-                            Text(
-                                "% ,d원".format(item.price - item.cost),
-                                color = Color(0xFF388E3C),
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 13.sp,
-                                modifier = Modifier.weight(1f),
-                                textAlign = androidx.compose.ui.text.style.TextAlign.End
-                            )
-                            // 마진율
-                            Text(
-                                "${item.marginRate}%",
-                                color = Color(0xFF1976D2),
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 12.sp,
-                                modifier = Modifier.weight(0.7f),
-                                textAlign = androidx.compose.ui.text.style.TextAlign.End
-                            )
                         }
                     }
                 }
             }
         }
-        Spacer(Modifier.height(24.dp))
-        // 하단 버튼들
-        Row(
-            Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            Column(modifier = Modifier.weight(1f)) {
-                MainButton("레시피 리스트", onRecipeListClick)
-            }
-            Column(modifier = Modifier.weight(1f)) {
-                MainButton("레시피 등록", onRegisterRecipeClick)
+
+        // 재료 섹션
+        item {
+            SectionLayout(
+                title = "재료 관리",
+                onMoreClick = onIngredientListClick
+            ) {
+                Card(
+                    shape = RoundedCornerShape(20.dp),
+                    colors = CardDefaults.cardColors(containerColor = CardWhite),
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        // 재료 테이블 헤더
+                        Row(
+                            Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 8.dp, horizontal = 8.dp)
+                                .height(40.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text("이름", Modifier.weight(1f), fontWeight = FontWeight.Bold, fontSize = 14.sp, color = TextPrimary, textAlign = TextAlign.Start)
+                            Text("구매가", Modifier.weight(1f), fontWeight = FontWeight.Bold, fontSize = 14.sp, color = TextPrimary, textAlign = TextAlign.End)
+                            Text("사용량", Modifier.weight(1f), fontWeight = FontWeight.Bold, fontSize = 14.sp, color = TextPrimary, textAlign = TextAlign.End)
+                            Text("원가", Modifier.weight(1.5f), fontWeight = FontWeight.Bold, fontSize = 14.sp, color = TextPrimary, textAlign = TextAlign.End)
+                        }
+                        Divider(color = DividerGray, thickness = 1.dp)
+                        Spacer(Modifier.height(8.dp))
+                        // 재료 리스트
+                        ingredients.forEachIndexed { idx, (name, price, usage) ->
+                            IngredientItem(
+                                name = name,
+                                price = price,
+                                usage = usage
+                            )
+                            if (idx != ingredients.lastIndex) {
+                                Divider(color = DividerGray, thickness = 1.dp, modifier = Modifier.padding(vertical = 2.dp))
+                            }
+                        }
+                    }
+                }
             }
         }
+    }
+}
+
+@Composable
+private fun MarginSummaryCard(recipes: List<Triple<String, Int, Int>>) {
+    val totalSales = recipes.sumOf { it.second }
+    val totalCost = recipes.sumOf { it.third }
+    val totalMargin = totalSales - totalCost
+    val marginRate = if (totalSales > 0) (totalMargin * 100f / totalSales).toInt() else 0
+
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = CardWhite),
+        shape = RoundedCornerShape(16.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp)
+        ) {
+            Text("전체 마진 현황", fontWeight = FontWeight.Bold, fontSize = 20.sp, color = TextPrimary)
+            Spacer(Modifier.height(16.dp))
+            Row(
+                Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                MarginStatItem("총 매출", totalSales)
+                MarginStatItem("총 원가", totalCost)
+                MarginStatItem("총 마진", totalMargin)
+                MarginStatItem("마진율", marginRate, "%")
+            }
+        }
+    }
+}
+
+@Composable
+private fun MarginStatItem(label: String, value: Int, suffix: String = "원") {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(label, fontSize = 14.sp, color = TextSecondary)
+        Spacer(Modifier.height(4.dp))
+        Text(
+            "${String.format("%,d", value)}$suffix",
+            fontWeight = FontWeight.Bold,
+            fontSize = 16.sp,
+            color = TextPrimary
+        )
+    }
+}
+
+@Composable
+private fun RecipeItem(
+    name: String,
+    price: Int,
+    cost: Int,
+    margin: Int,
+    marginRate: Int
+) {
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .background(CardWhite, RoundedCornerShape(8.dp))
+            .padding(vertical = 8.dp, horizontal = 8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(name, Modifier.weight(1f), fontSize = 14.sp, color = TextPrimary, textAlign = TextAlign.Start)
+        Text("%,d원".format(price), Modifier.weight(1f), fontSize = 14.sp, color = TextPrimary, textAlign = TextAlign.End)
+        Text("%,d원".format(cost), Modifier.weight(1f), fontSize = 14.sp, color = TextPrimary, textAlign = TextAlign.End)
+        Column(Modifier.weight(1.5f), horizontalAlignment = Alignment.End) {
+            Box(
+                Modifier
+                    .fillMaxWidth(0.7f)
+                    .height(12.dp)
+                    .background(Color.LightGray.copy(alpha = 0.3f), RoundedCornerShape(6.dp))
+            ) {
+                Box(
+                    Modifier
+                        .fillMaxHeight()
+                        .fillMaxWidth(marginRate / 100f)
+                        .background(Blue, RoundedCornerShape(6.dp))
+                )
+            }
+            Spacer(Modifier.height(2.dp))
+            Text("${margin}원 (${marginRate}%)", fontSize = 12.sp, color = Blue, textAlign = TextAlign.End)
+        }
+    }
+}
+
+@Composable
+private fun IngredientItem(
+    name: String,
+    price: Int,
+    usage: Int
+) {
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .background(CardWhite, RoundedCornerShape(8.dp))
+            .padding(vertical = 8.dp, horizontal = 8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(name, Modifier.weight(1f), fontSize = 14.sp, color = TextPrimary, textAlign = TextAlign.Start)
+        Text("%,d원".format(price), Modifier.weight(1f), fontSize = 14.sp, color = TextPrimary, textAlign = TextAlign.End)
+        Text("%,d개".format(usage), Modifier.weight(1f), fontSize = 14.sp, color = TextPrimary, textAlign = TextAlign.End)
+        Text("%,d원".format(price * usage), Modifier.weight(1.5f), fontSize = 14.sp, color = TextPrimary, textAlign = TextAlign.End)
     }
 }
 
@@ -218,12 +320,12 @@ fun MarginBubble(
             drawCircle(
                 color = color,
                 radius = R,
-                center = androidx.compose.ui.geometry.Offset(R, R)
+                center = Offset(R, R)
             )
             drawCircle(
                 color = marginColor,
                 radius = r,
-                center = androidx.compose.ui.geometry.Offset(R, R + (R - r))
+                center = Offset(R, R + (R - r))
             )
         }
         Column(
