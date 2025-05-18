@@ -8,7 +8,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.rememberNavController
-import com.glowstudio.android.blindsjn.ui.navigation.AppNavHost
+import com.glowstudio.android.blindsjn.ui.navigation.mainNavGraph
 import com.glowstudio.android.blindsjn.feature.main.viewmodel.TopBarViewModel
 import com.glowstudio.android.blindsjn.feature.main.viewmodel.NavigationViewModel
 import androidx.compose.foundation.layout.Box
@@ -40,16 +40,11 @@ import com.glowstudio.android.blindsjn.ui.components.hotpost.HotPostsSection
 import com.glowstudio.android.blindsjn.ui.components.sales.SalesSection
 import com.glowstudio.android.blindsjn.feature.home.NewsDetailScreen
 import com.glowstudio.android.blindsjn.data.model.Article
-import com.glowstudio.android.blindsjn.feature.paymanagement.PayManagementScreen
-import com.glowstudio.android.blindsjn.feature.foodcoast.FoodCostScreen
-import com.glowstudio.android.blindsjn.feature.foodcoast.RegisterIngredientScreen
-import com.glowstudio.android.blindsjn.feature.foodcoast.RegisterRecipeScreen
 
 /**
  * 메인 스크린: 상단바, 하단 네비게이션 바, 내부 컨텐츠(AppNavHost)를 포함하여 전체 화면 전환을 관리합니다.
  */
 
-@Preview
 @Composable
 fun MainScreen(
     topBarViewModel: TopBarViewModel = viewModel(),
@@ -63,19 +58,7 @@ fun MainScreen(
     Scaffold(
         // 상단바: TopBarViewModel의 상태를 기반으로 동적으로 업데이트됨
         topBar = {
-            when (topBarState.type) {
-                TopBarType.MAIN -> TopBarMain(
-                    rightContent = {
-                        // 예시: IconButton 등 원하는 컴포넌트 추가
-                    }
-                )
-                TopBarType.DETAIL -> TopBarDetail(
-                    title = topBarState.title,
-                    onBackClick = { navController.navigateUp() },
-                    onSearchClick = { /* TODO: 검색 동작 구현 */ },
-                    onMoreClick = { /* TODO: 더보기 동작 구현 */ }
-                )
-            }
+            TopBar(state = topBarState)
         },
         // 하단 네비게이션 바
         bottomBar = {
@@ -84,13 +67,13 @@ fun MainScreen(
                 viewModel = navigationViewModel
             )
         },
-        // 내부 컨텐츠: AppNavHost에 navController와 TopBarViewModel 전달
+        // 내부 컨텐츠: NavHost에 navController와 TopBarViewModel 전달
         content = { paddingValues ->
             // paddingValues에 추가 top padding(예: 16.dp)을 더해 상단바와의 여백을 확보합니다.
             Box(modifier = Modifier.padding(paddingValues)) {
                 NavHost(
                     navController = navController,
-                    startDestination = "home"
+                    startDestination = "main_nav"
                 ) {
                     composable("home") { HomeScreen(navController) }
                     composable("board") { BoardScreen(navController) }
@@ -170,8 +153,20 @@ fun MainScreen(
                             )
                         }
                     }
+                    mainNavGraph(
+                        navController = navController,
+                        topBarViewModel = topBarViewModel
+                    )
                 }
             }
         }
     )
+}
+
+@Preview(showBackground = true)
+@Composable
+fun MainScreenPreview() {
+    BlindSJNTheme {
+        MainScreen()
+    }
 }
