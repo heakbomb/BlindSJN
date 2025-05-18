@@ -37,7 +37,8 @@ fun BottomNavigationBar(
                 label = { Text(screen.title) },
                 selected = navController.currentBackStackEntry?.destination?.route == screen.route,
                 onClick = {
-                    navController.navigate(screen.route) {
+                    val targetRoute = if (screen is Screen.Popular) "foodcoast" else screen.route
+                    navController.navigate(targetRoute) {
                         popUpTo(navController.graph.findStartDestination().id) {
                             saveState = true
                         }

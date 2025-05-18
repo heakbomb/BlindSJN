@@ -44,6 +44,9 @@ import com.glowstudio.android.blindsjn.feature.paymanagement.PayManagementScreen
 import com.glowstudio.android.blindsjn.feature.foodcost.FoodCostScreen
 import com.glowstudio.android.blindsjn.feature.foodcost.RegisterRecipeScreen
 import com.glowstudio.android.blindsjn.feature.foodcost.RegisterIngredientScreen
+import com.glowstudio.android.blindsjn.feature.foodcost.view.RecipeListScreen
+import com.glowstudio.android.blindsjn.feature.foodcost.view.EditRecipeScreen
+import com.glowstudio.android.blindsjn.feature.foodcost.view.IngredientListScreen
 
 /**
  * 메인 스크린: 상단바, 하단 네비게이션 바, 내부 컨텐츠(AppNavHost)를 포함하여 전체 화면 전환을 관리합니다.
@@ -93,12 +96,36 @@ fun MainScreen(
                         onProfileEditClick = { /* ... */ },
                         onContactEditClick = { /* ... */ }
                     ) }
-                    composable("foodcoast") { FoodCostScreen(
-                        onRegisterRecipeClick = { navController.navigate("registerRecipe") },
-                        onRegisterIngredientClick = { navController.navigate("registerIngredient") },
-                        onNavigateToPayManagement = { navController.navigate("paymanagement") },
-                        onNavigateToFoodCost = { navController.navigate("foodcoast") }
-                    ) }
+                    composable("foodcoast") {
+                        FoodCostScreen(
+                            onRecipeListClick = { navController.navigate("recipeList") },
+                            onRegisterRecipeClick = { navController.navigate("registerRecipe") },
+                            onIngredientListClick = { navController.navigate("ingredientList") },
+                            onRegisterIngredientClick = { navController.navigate("registerIngredient") },
+                            onNavigateToPayManagement = { navController.navigate("paymanagement") },
+                            onNavigateToFoodCost = { navController.navigate("foodcoast") }
+                        )
+                    }
+                    composable("recipeList") {
+                        RecipeListScreen(
+                            onEditRecipeClick = { recipeName -> navController.navigate("editRecipe/$recipeName") },
+                            onRegisterRecipeClick = { navController.navigate("registerRecipe") }
+                        )
+                    }
+                    composable("editRecipe/{recipeName}") { backStackEntry ->
+                        val recipeName = backStackEntry.arguments?.getString("recipeName") ?: ""
+                        EditRecipeScreen(
+                            recipeName = recipeName,
+                            onEditIngredientClick = { /* TODO: 재료 수정 화면으로 이동 */ },
+                            onSaveClick = { navController.popBackStack() }
+                        )
+                    }
+                    composable("ingredientList") {
+                        IngredientListScreen(
+                            onEditIngredientClick = { /* TODO: 재료 수정 화면으로 이동 */ },
+                            onRegisterIngredientClick = { navController.navigate("registerIngredient") }
+                        )
+                    }
                     composable("registerIngredient") { RegisterIngredientScreen() }
                     composable("registerRecipe") { RegisterRecipeScreen() }
                     composable("boardDetail/{title}") { backStackEntry ->
