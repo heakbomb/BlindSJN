@@ -7,6 +7,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ThumbUp
 import androidx.compose.material.icons.filled.ChatBubbleOutline
+import androidx.compose.material.icons.filled.Report
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -25,9 +26,12 @@ import com.glowstudio.android.blindsjn.ui.components.common.CommonButton
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import com.glowstudio.android.blindsjn.ui.theme.*
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.TextButton
 import androidx.compose.foundation.background
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.AccountCircle
+
 
 @Composable
 fun PostDetailScreen(navController: NavController, postId: String) {
@@ -37,6 +41,12 @@ fun PostDetailScreen(navController: NavController, postId: String) {
     val comments by commentViewModel.comments.collectAsState()
     var newComment by remember { mutableStateOf("") }
     var isLiked by remember { mutableStateOf(false) }
+    
+    // 신고 관련 상태
+    var showReportDialog by remember { mutableStateOf(false) }
+    var reportReason by remember { mutableStateOf("") }
+    var showReportSuccessDialog by remember { mutableStateOf(false) }
+    val reportResult by postViewModel.reportResult.collectAsState()
 
     val safePostId = postId.toIntOrNull() ?: 1
 
@@ -57,6 +67,27 @@ fun PostDetailScreen(navController: NavController, postId: String) {
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.fillMaxWidth()
             ) {
+                post?.let {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(text = it.title, style = MaterialTheme.typography.headlineMedium)
+                        IconButton(onClick = { showReportDialog = true }) {
+                            Icon(
+                                imageVector = Icons.Filled.Report,
+                                contentDescription = "신고",
+                                tint = MaterialTheme.colorScheme.error
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(text = it.content, style = MaterialTheme.typography.bodyMedium)
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
                 Icon(
                     imageVector = Icons.Default.AccountCircle,
                     contentDescription = null,
@@ -227,6 +258,45 @@ fun PostDetailScreen(navController: NavController, postId: String) {
                         )
                         newComment = ""
                     }
+                    // 신고 다이얼로그
+                    if (showReportDialog) {
+                        AlertDialog(
+                            onDismissRequest = { showReportDialog = false },
+                            title = { Text("게시글 신고") },
+                            text = {
+                                OutlinedTextField(
+                                    value = reportReason,
+                                    onValueChange = { reportReason = it },
+                                    placeholder = { Text("신고 사유를 입력하세요") }
+                                )
+                            },
+                            confirmButton = {
+                                TextButton(
+                                    onClick = {
+                                        postViewModel.reportPost(postId = safePostId, userId = 1, reason = reportReason)
+                                        showReportDialog = false
+                                    }
+                                ) { Text("신고하기") }
+                            },
+                            dismissButton = {
+                                TextButton(onClick = { showReportDialog = false }) { Text("취소") }
+                            }
+                        )
+                    }
+
+                    // 신고 결과 알림
+                    reportResult?.let {
+                        AlertDialog(
+                            onDismissRequest = { postViewModel.clearReportResult() },
+                            title = { Text("알림") },
+                            text = { Text(it) },
+                            confirmButton = {
+                                TextButton(onClick = { postViewModel.clearReportResult() }) { Text("확인") }
+                            }
+                        )
+                    }
+                } ?: run {
+                    Text("게시글을 불러오는 중입니다...", modifier = Modifier.padding(16.dp))
                 },
                 shape = MaterialTheme.shapes.medium
             ) {

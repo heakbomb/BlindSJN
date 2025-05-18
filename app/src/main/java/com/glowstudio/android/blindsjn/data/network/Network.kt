@@ -60,4 +60,17 @@ interface ApiService {
 
     @PUT("Edit_comment.php")
     suspend fun editComment(@Body request: EditCommentRequest): Response<BasicResponse>
+
+    // 🔹 신고
+    @POST("cors.php")
+    suspend fun reportPost(@Body reportRequest: ReportRequest): Response<ReportResponse>
+
+    @GET("cors.php")
+    suspend fun getReports(): Response<List<Report>>
+
+    @PUT("cors.php")
+    suspend fun updateReportStatus(
+        @Path("reportId") reportId: Int,
+        @Body status: String
+    ): Response<ReportResponse>
 }

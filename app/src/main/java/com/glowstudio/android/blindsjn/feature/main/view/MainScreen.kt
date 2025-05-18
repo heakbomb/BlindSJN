@@ -75,6 +75,84 @@ fun MainScreen(
                     navController = navController,
                     startDestination = "main_nav"
                 ) {
+                    composable("home") { HomeScreen(navController) }
+                    composable("board") { BoardScreen(navController) }
+                    composable("paymanagement") {
+                        PayManagementScreen(
+                            onNavigateToFoodCost = { navController.navigate("foodcoast") }
+                        )
+                    }
+                    composable("message") { MessageScreen(navController) }
+                    composable("profile") { ProfileScreen(
+                        onLogoutClick = { /* ... */ },
+                        onBusinessCertificationClick = { /* ... */ },
+                        onProfileEditClick = { /* ... */ },
+                        onContactEditClick = { /* ... */ }
+                    ) }
+                    composable("foodcoast") { FoodCostScreen(
+                        onRegisterRecipeClick = { navController.navigate("registerRecipe") },
+                        onRegisterIngredientClick = { navController.navigate("registerIngredient") },
+                        onNavigateToPayManagement = { navController.navigate("paymanagement") },
+                        onNavigateToFoodCost = { navController.navigate("foodcoast") }
+                    ) }
+                    composable("registerIngredient") { RegisterIngredientScreen() }
+                    composable("registerRecipe") { RegisterRecipeScreen() }
+                    composable("boardDetail/{title}") { backStackEntry ->
+                        val encodedTitle = backStackEntry.arguments?.getString("title") ?: ""
+                        val title = URLDecoder.decode(encodedTitle, "UTF-8")
+                        BoardDetailScreen(navController, title)
+                    }
+                    composable(
+                        route = "writePost?tags={tags}",
+                        arguments = listOf(
+                            navArgument("tags") {
+                                type = NavType.StringType
+                                nullable = true
+                                defaultValue = null
+                            }
+                        )
+                    ) { backStackEntry ->
+                        val tags = backStackEntry.arguments?.getString("tags")
+                        WritePostScreen(navController, tags)
+                    }
+                    composable(
+                        route = "postDetail/{postId}",
+                        arguments = listOf(
+                            navArgument("postId") {
+                                type = NavType.StringType
+                            }
+                        )
+                    ) { backStackEntry ->
+                        val postId = backStackEntry.arguments?.getString("postId") ?: ""
+                        PostDetailScreen(navController, postId)
+                    }
+                    composable("addSchedule") {
+                        AddScheduleScreen(
+                            onCancel = { navController.navigateUp() },
+                            onSave = { schedule ->
+                                // TODO: 일정 저장 로직 구현
+                                navController.navigateUp()
+                            }
+                        )
+                    }
+                    composable("news_detail/{articleJson}") { backStackEntry ->
+                        val articleJson = backStackEntry.arguments?.getString("articleJson")
+                        val article = try {
+                            Gson().fromJson(URLDecoder.decode(articleJson, "UTF-8"), Article::class.java)
+                        } catch (e: Exception) {
+                            null
+                        }
+
+                        if (article != null) {
+                            NewsDetailScreen(
+                                title = article.title ?: "제목 없음",
+                                content = article.content,
+                                description = article.description,
+                                imageUrl = article.urlToImage,
+                                link = article.link
+                            )
+                        }
+                    }
                     mainNavGraph(
                         navController = navController,
                         topBarViewModel = topBarViewModel
