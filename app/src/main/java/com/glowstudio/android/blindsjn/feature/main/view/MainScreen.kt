@@ -1,8 +1,6 @@
 package com.glowstudio.android.blindsjn.feature.main.view
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -14,16 +12,12 @@ import com.glowstudio.android.blindsjn.feature.main.viewmodel.TopBarViewModel
 import com.glowstudio.android.blindsjn.feature.main.viewmodel.NavigationViewModel
 import androidx.compose.foundation.layout.Box
 import androidx.compose.ui.tooling.preview.Preview
-import com.glowstudio.android.blindsjn.feature.main.view.TopBarMain
-import com.glowstudio.android.blindsjn.feature.main.view.TopBarDetail
-import com.glowstudio.android.blindsjn.feature.main.viewmodel.TopBarType
 import com.glowstudio.android.blindsjn.feature.board.view.BoardScreen
 import com.glowstudio.android.blindsjn.feature.board.view.BoardDetailScreen
 import com.glowstudio.android.blindsjn.feature.board.view.WritePostScreen
 import com.glowstudio.android.blindsjn.feature.board.view.PostDetailScreen
 import com.glowstudio.android.blindsjn.feature.home.HomeScreen
 import com.glowstudio.android.blindsjn.feature.profile.ProfileScreen
-import com.glowstudio.android.blindsjn.feature.popular.PopularScreen
 import com.glowstudio.android.blindsjn.feature.calendar.MessageScreen
 import com.glowstudio.android.blindsjn.ui.screens.AddScheduleScreen
 import androidx.navigation.compose.NavHost
@@ -31,18 +25,12 @@ import androidx.navigation.compose.composable
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
 import java.net.URLDecoder
-import java.net.URLEncoder
 import com.google.gson.Gson
 import com.glowstudio.android.blindsjn.ui.theme.BlindSJNTheme
-import com.glowstudio.android.blindsjn.ui.components.banner.BannerSection
-import com.glowstudio.android.blindsjn.ui.components.shortcut.ShortcutSection
-import com.glowstudio.android.blindsjn.ui.components.news.NaverNewsSection
-import com.glowstudio.android.blindsjn.ui.components.hotpost.HotPostsSection
-import com.glowstudio.android.blindsjn.ui.components.sales.SalesSection
 import com.glowstudio.android.blindsjn.feature.home.NewsDetailScreen
 import com.glowstudio.android.blindsjn.data.model.Article
 import com.glowstudio.android.blindsjn.feature.paymanagement.PayManagementScreen
-import com.glowstudio.android.blindsjn.feature.foodcost.FoodCostScreen
+import com.glowstudio.android.blindsjn.feature.foodcost.view.FoodCostScreen
 import com.glowstudio.android.blindsjn.feature.foodcost.RegisterRecipeScreen
 import com.glowstudio.android.blindsjn.feature.foodcost.RegisterIngredientScreen
 import com.glowstudio.android.blindsjn.feature.foodcost.view.RecipeListScreen
