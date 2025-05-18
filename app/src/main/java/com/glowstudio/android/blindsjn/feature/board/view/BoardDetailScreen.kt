@@ -3,13 +3,10 @@ package com.glowstudio.android.blindsjn.feature.board.view
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.ThumbUp
-import androidx.compose.material.icons.filled.ChatBubbleOutline
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -95,7 +92,9 @@ fun BoardDetailScreen(navController: NavController, title: String) {
                     )
                 }
 
-                PostList(navController, filteredPosts, viewModel)
+                // TODO: 실제 로그인 유저 id로 교체 필요
+                val userId = 1234
+                PostList(navController, filteredPosts, viewModel, userId)
             }
         }
     )
@@ -144,98 +143,5 @@ fun FilterChip(
             style = MaterialTheme.typography.bodySmall,
             color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface
         )
-    }
-}
-
-@Composable
-fun PostList(
-    navController: NavController,
-    posts: List<Post>,
-    viewModel: PostViewModel
-) {
-    LazyColumn(
-        modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 8.dp)
-    ) {
-        items(posts) { post ->
-            PostItem(navController, post, viewModel)
-        }
-    }
-}
-
-@Composable
-fun PostItem(
-    navController: NavController,
-    post: Post,
-    viewModel: PostViewModel
-) {
-    var isLiked by remember { mutableStateOf(false) }
-    var likeCount by remember { mutableStateOf(post.likeCount) }
-
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.surface, MaterialTheme.shapes.medium)
-            .clickable { navController.navigate("post_detail/${post.id}") }
-            .padding(16.dp)
-    ) {
-        Text(text = post.title, style = MaterialTheme.typography.titleMedium)
-        Spacer(modifier = Modifier.height(4.dp))
-        Text(
-            text = post.content,
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            maxLines = 2
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = "${post.category} ${post.experience}",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(   
-                    imageVector = Icons.Filled.ThumbUp,
-                    contentDescription = "좋아요",
-                    tint = if (isLiked) Error else DividerGray,
-                    modifier = Modifier
-                        .size(18.dp)
-                        .clickable {
-                            if (!isLiked) {
-                                likeCount++
-                                isLiked = true
-                                viewModel.incrementLike(post.id)
-                            }
-                        }
-                )
-                Spacer(modifier = Modifier.width(4.dp))
-                Text(
-                    text = "$likeCount",
-                    color = if (isLiked) Error else DividerGray,
-                    style = MaterialTheme.typography.bodySmall
-                )
-                Spacer(modifier = Modifier.width(12.dp))
-                Icon(
-                    imageVector = Icons.Filled.ChatBubbleOutline,
-                    contentDescription = "댓글",
-                    tint = ChatBlue,
-                    modifier = Modifier.size(18.dp)
-                )
-                Spacer(modifier = Modifier.width(4.dp))
-                Text(
-                    text = "${post.commentCount}",
-                    color = ChatBlue,
-                    style = MaterialTheme.typography.bodySmall
-                )
-            }
-        }
     }
 }

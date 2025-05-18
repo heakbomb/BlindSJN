@@ -15,13 +15,17 @@ class BoardViewModel : ViewModel() {
 
     private fun loadBoardCategories() {
         _boardCategories.value = listOf(
-            BoardCategory("🍴", "음식점 및 카페", "298개의 새 게시물"),
-            BoardCategory("🛍️", "쇼핑 및 리테일", "128개의 새 게시물"),
-            BoardCategory("💊", "건강 및 의료", "57개의 새 게시물"),
-            BoardCategory("🏨", "숙박 및 여행", "298개의 새 게시물"),
-            BoardCategory("📚", "교육 및 학습", "36개의 새 게시물"),
-            BoardCategory("🎮", "여가 및 오락", "98개의 새 게시물"),
-            BoardCategory("💰", "금융 및 공공기관", "20개의 새 게시물")
+            // 업종 그룹
+            BoardCategory("🍴", "음식점 및 카페", "restaurant_cafe", "업종"),
+            BoardCategory("🛍️", "쇼핑 및 리테일", "shopping_retail", "업종"),
+            BoardCategory("💊", "건강 및 의료", "health_medical", "업종"),
+            BoardCategory("🏨", "숙박 및 여행", "accommodation_travel", "업종"),
+            BoardCategory("📚", "교육 및 학습", "education_learning", "업종"),
+            BoardCategory("🎮", "여가 및 오락", "leisure_entertainment", "업종"),
+            BoardCategory("💰", "금융 및 공공기관", "finance_public", "업종"),
+            // 소통 그룹
+            BoardCategory("🔥", "인기글", "popular", "소통"),
+            BoardCategory("💬", "자유글", "free", "소통")
         )
     }
 }
