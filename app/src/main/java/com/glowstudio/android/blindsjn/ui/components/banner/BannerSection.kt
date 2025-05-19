@@ -30,7 +30,7 @@ fun BannerSection() {
         modifier = Modifier
             .fillMaxWidth()
             .height(200.dp)
-            .background(Color(0xFFF5F7FF))
+            .background(MaterialTheme.colorScheme.surfaceVariant)
     ) {
         HorizontalPager(
             count = 4,
@@ -40,14 +40,14 @@ fun BannerSection() {
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
-                        .background(Color(0xFFF5F7FF)),
+                        .background(MaterialTheme.colorScheme.surfaceVariant),
                     verticalArrangement = Arrangement.SpaceBetween
                 ) {
                     Spacer(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(64.dp)
-                            .background(Color.Black)
+                            .background(MaterialTheme.colorScheme.surface)
                     )
 
                     AndroidView(
@@ -68,7 +68,7 @@ fun BannerSection() {
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(64.dp)
-                            .background(Color.Black)
+                            .background(MaterialTheme.colorScheme.surface)
                     )
                 }
             } else {
@@ -87,7 +87,7 @@ fun BannerSection() {
                 .align(Alignment.BottomCenter)
                 .padding(16.dp),
             activeColor = MaterialTheme.colorScheme.primary,
-            inactiveColor = Color.Gray.copy(alpha = 0.5f)
+            inactiveColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
         )
     }
 }

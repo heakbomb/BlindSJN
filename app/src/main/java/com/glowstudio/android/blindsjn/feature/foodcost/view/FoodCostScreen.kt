@@ -1,7 +1,6 @@
-package com.glowstudio.android.blindsjn.feature.foodcost
+package com.glowstudio.android.blindsjn.feature.foodcost.view
 
 import androidx.compose.runtime.Composable
-import com.glowstudio.android.blindsjn.feature.foodcost.view.MarginListScreen
 
 @Composable
 fun FoodCostScreen(

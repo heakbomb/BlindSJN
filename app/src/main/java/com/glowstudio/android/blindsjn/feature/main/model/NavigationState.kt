@@ -16,9 +16,9 @@ data class NavigationState(
 )
 
 sealed class Screen(val route: String, val title: String, val icon: ImageVector) {
-    object Home : Screen("home_screen", "홈화면", Icons.Default.Home)
-    object Posts : Screen("board_root", "게시판 목록", Icons.Default.GridView)
-    object Popular : Screen("popular_root", "인기글", Icons.Default.ThumbUp)
-    object Messages : Screen("message_root", "캘린더", Icons.Default.CalendarToday)
-    object Profile : Screen("profile_root", "프로필", Icons.Default.Person)
+    object Home : Screen("home", "홈화면", Icons.Default.Home)
+    object Posts : Screen("board", "게시판 목록", Icons.Default.GridView)
+    object Popular : Screen("paymanagement", "매출 관리", Icons.Default.MonetizationOn)
+    object Messages : Screen("message", "캘린더", Icons.Default.CalendarToday)
+    object Profile : Screen("profile", "프로필", Icons.Default.Person)
 } 

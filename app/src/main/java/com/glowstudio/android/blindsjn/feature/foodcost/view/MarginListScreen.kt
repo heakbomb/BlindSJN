@@ -14,6 +14,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.glowstudio.android.blindsjn.ui.theme.*
 import androidx.compose.ui.tooling.preview.Preview
+import com.glowstudio.android.blindsjn.feature.foodcost.model.MarginItem
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.LazyRow
 
 @Composable
 fun MarginListScreen(
@@ -39,49 +44,88 @@ fun MarginListScreen(
             TabButton(text = "마진관리", selected = true, onClick = onNavigateToMargin, modifier = Modifier.weight(1f))
         }
         Spacer(Modifier.height(16.dp))
-        // 표 헤더
-        Row(
-            Modifier
+        // 버블 그래프 (LazyRow로 변경)
+        LazyRow(
+            modifier = Modifier
                 .fillMaxWidth()
-                .background(CardWhite, RoundedCornerShape(4.dp))
-                .padding(vertical = 8.dp, horizontal = 8.dp),
-            horizontalArrangement = Arrangement.Start
+                .padding(vertical = 24.dp),
+            horizontalArrangement = Arrangement.spacedBy(0.dp)
         ) {
-            Text("이름", modifier = Modifier.weight(1f), fontWeight = FontWeight.Bold)
-            Text("판매가", modifier = Modifier.weight(1f), fontWeight = FontWeight.Bold)
-            Text("원가", modifier = Modifier.weight(1f), fontWeight = FontWeight.Bold)
-            Text("마진", modifier = Modifier.weight(1f), fontWeight = FontWeight.Bold)
-            Text("마진율", modifier = Modifier.weight(1f), fontWeight = FontWeight.Bold)
-        }
-        // 표 리스트
-        Box(
-            Modifier
-                .fillMaxWidth()
-                .weight(1f)
-                .border(2.dp, Blue, RoundedCornerShape(4.dp))
-                .background(Color.White)
-        ) {
-            Column(Modifier.fillMaxSize()) {
-                // 예시 데이터
-                val items = listOf(
-                    MarginItem("빵", 5000, 3600, 1400, 24),
-                    MarginItem("떡볶이", 6000, 4000, 2000, 33),
-                    MarginItem("김밥", 4500, 3000, 1500, 33)
+            items(com.glowstudio.android.blindsjn.feature.foodcost.viewmodel.MarginListViewModel().items) { item ->
+                MarginBubble(
+                    name = item.name,
+                    sales = item.price,
+                    cost = item.cost,
+                    marginRate = item.marginRate,
+                    color = item.color,
+                    marginColor = item.marginColor,
+                    modifier = Modifier.padding(8.dp)
                 )
-                items.forEach { item ->
-                    Row(
+            }
+        }
+        // 순위표 리스트 (높이 제한, 스크롤 가능)
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxWidth()
+                .heightIn(min = 180.dp, max = 400.dp)
+                .padding(top = 8.dp),
+            userScrollEnabled = true
+        ) {
+            itemsIndexed(com.glowstudio.android.blindsjn.feature.foodcost.viewmodel.MarginListViewModel().items) { idx, item ->
+                Row(
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    // 순위 원형 배지
+                    Box(
                         Modifier
-                            .fillMaxWidth()
-                            .background(CardWhite, RoundedCornerShape(2.dp))
-                            .padding(vertical = 6.dp, horizontal = 8.dp),
-                        horizontalArrangement = Arrangement.Start
+                            .size(32.dp)
+                            .background(item.color, shape = androidx.compose.foundation.shape.CircleShape),
+                        contentAlignment = Alignment.Center
                     ) {
-                        Text(item.name, modifier = Modifier.weight(1f))
-                        Text("${item.price}원", modifier = Modifier.weight(1f))
-                        Text("${item.cost}원", modifier = Modifier.weight(1f))
-                        Text("${item.margin}원", modifier = Modifier.weight(1f))
-                        Text("${item.marginRate}%", modifier = Modifier.weight(1f))
+                        Text(
+                            "${idx + 1}등",
+                            color = Color.White,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 14.sp
+                        )
                     }
+                    Spacer(Modifier.width(12.dp))
+                    // 이름
+                    Text(
+                        item.name,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.sp,
+                        modifier = Modifier.weight(1.2f)
+                    )
+                    // 판매금액
+                    Text(
+                        "% ,d원".format(item.price),
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.sp,
+                        modifier = Modifier.weight(1f),
+                        textAlign = androidx.compose.ui.text.style.TextAlign.End
+                    )
+                    // 순수익(판매가-원가)
+                    Text(
+                        "% ,d원".format(item.price - item.cost),
+                        color = Color(0xFF388E3C),
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.sp,
+                        modifier = Modifier.weight(1f),
+                        textAlign = androidx.compose.ui.text.style.TextAlign.End
+                    )
+                    // 마진율
+                    Text(
+                        "${item.marginRate}%",
+                        color = Color(0xFF1976D2),
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 15.sp,
+                        modifier = Modifier.weight(0.7f),
+                        textAlign = androidx.compose.ui.text.style.TextAlign.End
+                    )
                 }
             }
         }
@@ -93,13 +137,9 @@ fun MarginListScreen(
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 MainButton("레시피 리스트", onRecipeListClick)
-                Spacer(Modifier.height(12.dp))
-                MainButton("재료 리스트", onIngredientListClick)
             }
             Column(modifier = Modifier.weight(1f)) {
                 MainButton("레시피 등록", onRegisterRecipeClick)
-                Spacer(Modifier.height(12.dp))
-                MainButton("재료 등록", onRegisterIngredientClick)
             }
         }
     }
@@ -121,51 +161,6 @@ fun TabButton(text: String, selected: Boolean, onClick: () -> Unit, modifier: Mo
 }
 
 @Composable
-fun ChartTabButton(text: String, selected: Boolean) {
-    Box(
-        Modifier
-            .padding(end = 8.dp)
-            .background(if (selected) Blue else Color.White, RoundedCornerShape(8.dp))
-            .border(1.dp, Blue, RoundedCornerShape(8.dp))
-            .padding(horizontal = 16.dp, vertical = 6.dp)
-    ) {
-        Text(text, color = if (selected) Color.White else Blue, fontWeight = FontWeight.Bold)
-    }
-}
-
-@Composable
-fun BarChartBar(label: String, percent: Float, value: Int) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Box(
-            Modifier
-                .width(32.dp)
-                .height((100 * percent).dp)
-                .background(Blue, RoundedCornerShape(8.dp))
-        )
-        Spacer(Modifier.height(4.dp))
-        Text(label, color = TextSecondary, fontSize = 14.sp)
-        Text("$value", color = TextSecondary, fontSize = 14.sp)
-    }
-}
-
-@Composable
-fun PieChart(percent1: Float, percent2: Float) {
-    // 실제 파이차트 대신 원형 Box 2개로 대체 (예시)
-    Box(Modifier.size(80.dp), contentAlignment = Alignment.Center) {
-        Box(
-            Modifier
-                .size(80.dp)
-                .background(LightBlue, shape = RoundedCornerShape(40.dp))
-        )
-        Box(
-            Modifier
-                .size(80.dp * percent1)
-                .background(Blue, shape = RoundedCornerShape(40.dp))
-        )
-    }
-}
-
-@Composable
 fun MainButton(text: String, onClick: () -> Unit) {
     Button(
         onClick = onClick,
@@ -177,13 +172,49 @@ fun MainButton(text: String, onClick: () -> Unit) {
     }
 }
 
-data class MarginItem(
-    val name: String,
-    val price: Int,
-    val cost: Int,
-    val margin: Int,
-    val marginRate: Int
-)
+@Composable
+fun MarginBubble(
+    name: String,
+    sales: Int,
+    cost: Int,
+    marginRate: Int,
+    color: Color,
+    marginColor: Color,
+    modifier: Modifier = Modifier
+) {
+    // 버블 크기 축소: 기본값 60, 매출에 따라 최대 50까지 증가
+    val bubbleSize = (60 + (sales / 30000).coerceAtMost(50)).dp
+    val marginRatio = marginRate / 100f
+    Box(
+        modifier = modifier.size(bubbleSize),
+        contentAlignment = Alignment.TopCenter
+    ) {
+        androidx.compose.foundation.Canvas(modifier = Modifier.fillMaxSize()) {
+            val R = size.minDimension / 2f
+            val r = R * marginRatio
+            drawCircle(
+                color = color,
+                radius = R,
+                center = androidx.compose.ui.geometry.Offset(R, R)
+            )
+            drawCircle(
+                color = marginColor,
+                radius = r,
+                center = androidx.compose.ui.geometry.Offset(R, R + (R - r))
+            )
+        }
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(top = 12.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Top
+        ) {
+            Text(name, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 11.sp, maxLines = 1)
+            Text("${sales}원", color = Color.White, fontSize = 10.sp)
+        }
+    }
+}
 
 @Preview(showBackground = true)
 @Composable

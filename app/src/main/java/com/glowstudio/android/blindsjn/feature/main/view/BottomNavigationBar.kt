@@ -7,6 +7,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.Color
 import androidx.navigation.NavController
 import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.compose.currentBackStackEntryAsState
 import com.glowstudio.android.blindsjn.feature.main.viewmodel.NavigationViewModel
 import com.glowstudio.android.blindsjn.ui.theme.Blue
 import com.glowstudio.android.blindsjn.ui.theme.TextSecondary
@@ -17,6 +18,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.rememberNavController
 import com.glowstudio.android.blindsjn.ui.theme.BlindSJNTheme
 import com.glowstudio.android.blindsjn.feature.main.model.Screen
+import android.util.Log
 
 @Composable
 fun BottomNavigationBar(
@@ -24,6 +26,10 @@ fun BottomNavigationBar(
     viewModel: NavigationViewModel
 ) {
     val navigationState by viewModel.navigationState.collectAsState()
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
+
+    Log.d("BottomNav", "Current Route: $currentRoute")
 
     NavigationBar(
         containerColor = Color.White,
@@ -32,12 +38,16 @@ fun BottomNavigationBar(
             .fillMaxWidth()
     ) {
         navigationState.items.forEach { screen ->
+            val targetRoute = if (screen is Screen.Popular) "foodcoast" else screen.route
+            val isSelected = currentRoute == targetRoute || (screen is Screen.Popular && currentRoute == "paymanagement")
+            
+            Log.d("BottomNav", "Screen: ${screen.route}, Target: $targetRoute, Selected: $isSelected")
+
             NavigationBarItem(
                 icon = { Icon(imageVector = screen.icon, contentDescription = screen.title) },
                 label = { Text(screen.title) },
-                selected = navController.currentBackStackEntry?.destination?.route == screen.route,
+                selected = isSelected,
                 onClick = {
-                    val targetRoute = if (screen is Screen.Popular) "foodcoast" else screen.route
                     navController.navigate(targetRoute) {
                         popUpTo(navController.graph.findStartDestination().id) {
                             saveState = true
