@@ -41,6 +41,7 @@ import com.glowstudio.android.blindsjn.utils.TimeUtils
 import androidx.compose.ui.text.style.TextOverflow
 import com.glowstudio.android.blindsjn.feature.board.view.CategoryBottomSheet
 
+
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun BoardScreen(navController: NavController) {
@@ -133,6 +134,25 @@ fun BoardScreen(navController: NavController) {
                                 onClick = { selectedCategory = category }
                             )
                         }
+                LazyRow(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(end = 40.dp), // 화살표 공간 확보
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    item {
+                        CustomFilterChip(
+                            text = "전체",
+                            isSelected = selectedCategory == null,
+                            onClick = { selectedCategory = null }
+                        )
+                    }
+                    items(industryCategories) { category ->
+                        CustomFilterChip(
+                            text = category.title,
+                            isSelected = selectedCategory?.title == category.title,
+                            onClick = { selectedCategory = category }
+                        )
                     }
                 }
                 IconButton(
@@ -262,6 +282,7 @@ fun PostItem(
 ) {
     var isLiked by remember { mutableStateOf(post.isLiked ?: false) }
     var likeCount by remember { mutableIntStateOf(post.likeCount) }
+    var likeCount by remember { mutableStateOf(post.likeCount) }
     var isLiking by remember { mutableStateOf(false) }
 
     Column(
