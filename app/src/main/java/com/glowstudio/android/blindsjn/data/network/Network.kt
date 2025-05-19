@@ -89,4 +89,8 @@ interface ApiService {
     // 🔹 재료 목록 조회
     @GET("Ingredient_list.php")
     suspend fun getIngredientsList(): Response<com.glowstudio.android.blindsjn.feature.foodcost.model.IngredientListResponse>
+
+    // 🔹 마진 요약
+    @GET("Recipe_margin_summary.php")
+    suspend fun getMarginSummary(@Query("business_id") businessId: Int): Response<com.glowstudio.android.blindsjn.feature.foodcost.model.MarginSummaryResponse>
 }
