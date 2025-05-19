@@ -73,4 +73,16 @@ interface ApiService {
         @Path("reportId") reportId: Int,
         @Body status: String
     ): Response<ReportResponse>
+
+    // 🔹 재료 등록
+    @POST("Save_ingredients.php")
+    suspend fun registerIngredient(@Body request: com.glowstudio.android.blindsjn.feature.foodcost.model.IngredientRequest): Response<BasicResponse>
+
+    // 🔹 레시피 등록
+    @POST("Save_recipe.PHP")
+    suspend fun registerRecipe(@Body request: com.glowstudio.android.blindsjn.feature.foodcost.model.RecipeRequest): Response<BasicResponse>
+
+    // 🔹 레시피 리스트
+    @GET("Recipe_list.PHP")
+    suspend fun getRecipeList(@Query("business_id") businessId: Int): Response<com.glowstudio.android.blindsjn.feature.foodcost.repository.RecipeListResponse>
 }

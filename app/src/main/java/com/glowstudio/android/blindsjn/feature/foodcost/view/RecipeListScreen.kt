@@ -17,14 +17,20 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.glowstudio.android.blindsjn.ui.theme.*
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.glowstudio.android.blindsjn.feature.foodcost.viewmodel.RecipeViewModel
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.LaunchedEffect
 
 @Composable
 fun RecipeListScreen(
     onEditRecipeClick: (String) -> Unit = {},
     onRegisterRecipeClick: () -> Unit = {}
 ) {
-    val recipes = remember {
-        listOf("빵" to 5000, "떡볶이" to 6000, "김밥" to 4500)
+    val viewModel: RecipeViewModel = viewModel()
+    val recipes by viewModel.recipeList.collectAsState()
+    LaunchedEffect(Unit) {
+        viewModel.getRecipeList(1) // TODO: 실제 앱에서는 로그인 정보에서 business_id 받아야 함
     }
     Column(
         modifier = Modifier
@@ -44,7 +50,7 @@ fun RecipeListScreen(
         }
         Divider(color = DividerGray, thickness = 1.dp)
         Spacer(Modifier.height(8.dp))
-        recipes.forEach { (name, price) ->
+        recipes.forEach { recipe ->
             Row(
                 Modifier
                     .fillMaxWidth()
@@ -52,9 +58,9 @@ fun RecipeListScreen(
                     .padding(vertical = 8.dp, horizontal = 8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(name, Modifier.weight(1f), fontSize = 16.sp, color = TextPrimary)
-                Text("$price", Modifier.weight(1f), fontSize = 16.sp, color = TextPrimary)
-                TextButton(onClick = { onEditRecipeClick(name) }) {
+                Text(recipe.title, Modifier.weight(1f), fontSize = 16.sp, color = TextPrimary)
+                Text("${recipe.price}", Modifier.weight(1f), fontSize = 16.sp, color = TextPrimary)
+                TextButton(onClick = { onEditRecipeClick(recipe.title) }) {
                     Text("수정", color = Blue, fontWeight = FontWeight.Bold)
                 }
             }
