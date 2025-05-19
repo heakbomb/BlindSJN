@@ -109,7 +109,7 @@ fun MainScreen(
                     composable("message") { MessageScreen(navController) }
                     composable("profile") { ProfileScreen(
                         onLogoutClick = { /* ... */ },
-                        onBusinessCertificationClick = { /* ... */ },
+                        onBusinessCertificationClick = { navController.navigate("businessCertification") },
                         onProfileEditClick = { /* ... */ },
                         onContactEditClick = { /* ... */ }
                     ) }
@@ -200,6 +200,15 @@ fun MainScreen(
                                 link = article.link
                             )
                         }
+                    }
+                    composable("businessCertification") {
+                        com.glowstudio.android.blindsjn.feature.certification.BusinessCertificationScreen(
+                            navController = navController,
+                            onConfirm = { phone, certNumber, industry ->
+                                // 인증 완료 후 뒤로가기 또는 원하는 화면 이동
+                                navController.popBackStack()
+                            }
+                        )
                     }
                     mainNavGraph(
                         navController = navController,

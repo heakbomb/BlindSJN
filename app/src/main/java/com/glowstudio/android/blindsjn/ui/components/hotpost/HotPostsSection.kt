@@ -30,31 +30,32 @@ data class HotPost(
 fun HotPostsSection(navController: NavHostController) {
     // 예시 데이터
     val hotPosts = listOf(
-        HotPost("인기글 1", "05/07", 11, 4),
-        HotPost("인기글 2", "04/29", 10, 0),
-        HotPost("인기글 3", "04/29", 13, 0),
-        HotPost("인기글 4", "04/28", 25, 8)
+        HotPost("오늘 점심시간에 손님이 너무 많아서 힘들었어요...", "05/13", 156, 42),
+        HotPost("새로 나온 떡볶이 레시피 공유합니다!", "05/15", 89, 23),
+        HotPost("주말 알바 구합니다 (시급 12,000원)", "05/11", 45, 12),
+        HotPost("원가 계산하는 방법 알려주세요", "05/15", 67, 35)
     )
 
-    SectionLayout(
-        title = "인기글",
-        onMoreClick = { navController.navigate("popular") }
-    ) {
-        Surface(
-            shape = RoundedCornerShape(20.dp),
-            tonalElevation = 0.dp,
-            color = CardWhite,
-            modifier = Modifier.fillMaxWidth()
+    Box(modifier = Modifier.padding(horizontal = 16.dp)) {
+        SectionLayout(
+            title = "인기글",
+            onMoreClick = { navController.navigate("popular") }
         ) {
-            Column {
-                hotPosts.forEachIndexed { idx, post ->
-                    HotPostListItem(post)
-                    if (idx != hotPosts.lastIndex) {
-                        Divider(
-                            color = DividerGray,
-                            thickness = 1.dp,
-                            modifier = Modifier.padding(horizontal = 12.dp)
-                        )
+            Surface(
+                shape = RoundedCornerShape(20.dp),
+                color = CardWhite,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Column {
+                    hotPosts.forEachIndexed { idx, post ->
+                        HotPostListItem(post)
+                        if (idx != hotPosts.lastIndex) {
+                            Divider(
+                                color = DividerGray,
+                                thickness = 1.dp,
+                                modifier = Modifier.padding(horizontal = 12.dp)
+                            )
+                        }
                     }
                 }
             }

@@ -16,7 +16,7 @@ fun SectionLayout(
     onMoreClick: (() -> Unit)? = null,
     content: @Composable () -> Unit
 ) {
-    Column(modifier = Modifier.padding(16.dp)) {
+    Column() {
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -28,16 +28,18 @@ fun SectionLayout(
                 color = MaterialTheme.colorScheme.onSurface,
                 fontWeight = FontWeight.Bold
             )
-            IconButton(onClick = { onMoreClick?.invoke() }) {
-                Icon(
-                    imageVector = Icons.Default.KeyboardArrowRight,
-                    contentDescription = "더보기",
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+            if (onMoreClick != null) {
+                IconButton(onClick = { onMoreClick() }) {
+                    Icon(
+                        imageVector = Icons.Default.KeyboardArrowRight,
+                        contentDescription = "더보기",
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
             }
         }
-
         Spacer(modifier = Modifier.height(8.dp))
         content()
+        Spacer(modifier = Modifier.height(20.dp)) // 섹션 간 여백
     }
 } 
