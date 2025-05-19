@@ -3,6 +3,7 @@ package com.glowstudio.android.blindsjn.feature.foodcost.repository
 import com.glowstudio.android.blindsjn.feature.foodcost.model.RecipeRequest
 import com.glowstudio.android.blindsjn.feature.foodcost.model.Recipe
 import com.glowstudio.android.blindsjn.data.model.BasicResponse
+import com.glowstudio.android.blindsjn.feature.foodcost.model.RecipeListResponse
 import retrofit2.Response
 
 object RecipeRepository {

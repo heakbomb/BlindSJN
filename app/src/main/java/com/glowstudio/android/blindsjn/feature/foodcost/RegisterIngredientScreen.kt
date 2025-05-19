@@ -9,6 +9,7 @@ import androidx.compose.ui.unit.dp
 import com.glowstudio.android.blindsjn.ui.components.common.CommonButton
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.glowstudio.android.blindsjn.feature.foodcost.viewmodel.IngredientViewModel
+import com.glowstudio.android.blindsjn.feature.foodcost.model.IngredientRequest
 import androidx.compose.runtime.collectAsState
 
 @Composable
@@ -89,12 +90,9 @@ fun RegisterIngredientScreen() {
                     val grams = item.grams.toDoubleOrNull() ?: 0.0
                     val price = item.price.toIntOrNull() ?: 0
                     if (name.isNotEmpty() && grams > 0 && price > 0) {
-                        viewModel.registerIngredient(name, grams, price)
+                        viewModel.registerIngredient(IngredientRequest(name, grams, price))
                     }
                 }
-                // 성공 시 폼 초기화 (간단 처리)
-                // 실제로는 성공 콜백에서 처리 권장
-                // ingredientItems = listOf(IngredientItem())
             },
             modifier = Modifier.fillMaxWidth()
         )

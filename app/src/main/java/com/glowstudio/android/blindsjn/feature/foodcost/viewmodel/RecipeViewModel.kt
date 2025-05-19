@@ -2,6 +2,7 @@ package com.glowstudio.android.blindsjn.feature.foodcost.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.glowstudio.android.blindsjn.data.network.InternalServer
 import com.glowstudio.android.blindsjn.feature.foodcost.model.*
 import com.glowstudio.android.blindsjn.feature.foodcost.repository.RecipeRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,6 +15,12 @@ class RecipeViewModel : ViewModel() {
 
     private val _recipeList = MutableStateFlow<List<Recipe>>(emptyList())
     val recipeList: StateFlow<List<Recipe>> = _recipeList
+
+    private val _isLoading = MutableStateFlow(false)
+    val isLoading: StateFlow<Boolean> = _isLoading
+
+    private val _error = MutableStateFlow<String?>(null)
+    val error: StateFlow<String?> = _error
 
     fun registerRecipe(title: String, price: Long, businessId: Int, ingredients: List<RecipeIngredient>) {
         viewModelScope.launch {
@@ -34,11 +41,20 @@ class RecipeViewModel : ViewModel() {
     fun getRecipeList(businessId: Int) {
         viewModelScope.launch {
             try {
-                val response = RecipeRepository.getRecipeList(businessId)
-                if (response.isSuccessful) {
+                _isLoading.value = true
+                _error.value = null
+                
+                val response = InternalServer.api.getRecipeList(businessId)
+                if (response.isSuccessful && response.body()?.status == "success") {
                     _recipeList.value = response.body()?.data ?: emptyList()
+                } else {
+                    _error.value = "레시피 목록을 불러오는데 실패했습니다."
                 }
-            } catch (_: Exception) {}
+            } catch (e: Exception) {
+                _error.value = e.message ?: "알 수 없는 오류가 발생했습니다."
+            } finally {
+                _isLoading.value = false
+            }
         }
     }
 
