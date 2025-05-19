@@ -38,17 +38,21 @@ fun MarginListScreen(
 ) {
     val recipes = remember {
         listOf(
-            Triple("빵", 5000, 3600),
-            Triple("떡볶이", 6000, 4000),
-            Triple("김밥", 4500, 3000)
+            Triple("떡볶이", 4500, 2750),   // 39% (1750/4500)
+            Triple("김밥", 3000, 1920),    // 36% (1080/3000)
+            Triple("튀김", 2500, 1650),    // 34% (850/2500)
+            Triple("순대", 4000, 2520),    // 37% (1480/4000)
+            Triple("어묵", 2000, 1220)     // 39% (780/2000)
         )
     }
 
     val ingredients = remember {
         listOf(
-            Triple("밀가루", 2000, 1800),
-            Triple("설탕", 1500, 1200),
-            Triple("소금", 500, 400)
+            Triple("떡", 8000, 2),
+            Triple("고추장", 5000, 1),
+            Triple("김", 10000, 3),
+            Triple("쌀", 15000, 5),
+            Triple("어묵", 7000, 2)
         )
     }
 
@@ -170,8 +174,17 @@ fun MarginListScreen(
 
 @Composable
 private fun MarginSummaryCard(recipes: List<Triple<String, Int, Int>>) {
-    val totalSales = recipes.sumOf { it.second }
-    val totalCost = recipes.sumOf { it.third }
+    // 하드코딩된 일일 판매량 (각 메뉴별)
+    val dailySales = mapOf(
+        "떡볶이" to 35,
+        "김밥" to 25,
+        "튀김" to 20,
+        "순대" to 15,
+        "어묵" to 30
+    )
+
+    val totalSales = recipes.sumOf { (name, price, _) -> price * (dailySales[name] ?: 0) }
+    val totalCost = recipes.sumOf { (name, _, cost) -> cost * (dailySales[name] ?: 0) }
     val totalMargin = totalSales - totalCost
     val marginRate = if (totalSales > 0) (totalMargin * 100f / totalSales).toInt() else 0
 

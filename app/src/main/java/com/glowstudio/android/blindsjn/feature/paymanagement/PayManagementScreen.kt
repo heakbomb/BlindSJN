@@ -36,6 +36,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.LazyListScope
 import com.glowstudio.android.blindsjn.ui.components.common.SectionLayout
 import androidx.compose.foundation.Canvas
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.ui.geometry.Offset
 
 @Composable
@@ -47,19 +48,20 @@ fun PayManagementScreen(
     var selectedPeriod by remember { mutableStateOf("일") }
 
     // 샘플 데이터 (7일치)
-    val barData = listOf(65000, 80000, 50000, 72000, 81000, 90000, 85000) // 월~일
+    val barData = listOf(350000, 380000, 320000, 400000, 450000, 500000, 420000) // 월~일
     val barLabels = listOf("월", "화", "수", "목", "금", "토", "일")
-    val pieData = listOf(0.35f, 0.65f) // 떡볶이, 김밥
-    val pieLabels = listOf("떡볶이", "김밥")
-    val pieColors = listOf(LightBlue, Color(0xFFB3E5FC)) // 더 연한 파란색 계열
+    val pieData = listOf(0.45f, 0.25f, 0.20f, 0.10f) // 떡볶이, 김밥, 튀김, 음료
+    val pieLabels = listOf("떡볶이", "김밥", "튀김", "음료")
+    val pieColors = listOf(LightBlue, Color(0xFFB3E5FC), Color(0xFF81D4FA), Color(0xFF4FC3F7))
 
     // 하드코딩: 전일 대비 증감률, 마진 위험, TOP3 데이터
-    val salesDiff = 12 // +12% 증가
-    val marginRates = listOf(25, 18, 30, 22, 28, 35, 19) // 각 barData에 대응, 일부 위험
+    val salesDiff = 8 // +8% 증가
+    // 요일별 마진율: [월, 화, 수, 목, 금, 토, 일] (평균 37%)
+    val marginRates = listOf(35, 38, 36, 37, 39, 34, 40)
     val top3List = listOf(
-        Triple("떡볶이", 80000, 35),
-        Triple("김밥", 65000, 28),
-        Triple("튀김", 50000, 22)
+        Triple("떡볶이", 157500, 39),
+        Triple("김밥", 75000, 36),
+        Triple("튀김", 50000, 34)
     )
 
     Box(Modifier.fillMaxSize()) {
@@ -83,18 +85,32 @@ fun PayManagementScreen(
             // 1. 전체 매출 현황
             item {
                 SalesSummaryCard()
-                Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+            // 경고 배너
+            item {
+                Surface(
+                    color = Color(0xFFFFF3E0),
+                    shape = RoundedCornerShape(8.dp),
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)
+                ) {
+                    Row(Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Icon(Icons.Default.Warning, contentDescription = null, tint = Color.Red)
+                        Spacer(Modifier.width(8.dp))
+                        Text("지난주 대비 매출이 4% 감소했어요!", color = Color.Red, fontWeight = FontWeight.Bold)
+                    }
+                }
             }
             // 2. 목표 달성률 ProgressBar
             item {
                 Card(Modifier.fillMaxWidth().padding(bottom = 16.dp), shape = RoundedCornerShape(20.dp), colors = CardDefaults.cardColors(containerColor = CardWhite)) {
                     Column(Modifier.padding(16.dp)) {
-                        val progress = 0.8f // 80% 달성
-                        Text("이번달 매출 목표: 300만원", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                        val progress = 0.75f // 75% 달성
+                        Text("이번달 매출 목표: 350만원", fontWeight = FontWeight.Bold, fontSize = 16.sp)
                         Spacer(Modifier.height(8.dp))
                         LinearProgressIndicator(progress = progress, modifier = Modifier.fillMaxWidth().height(8.dp), color = Blue)
                         Spacer(Modifier.height(4.dp))
-                        Text("240만원 / 300만원 (80%)", fontSize = 13.sp, color = TextSecondary)
+                        Text("262.5만원 / 350만원 (75%)", fontSize = 13.sp, color = TextSecondary)
                     }
                 }
             }
@@ -116,19 +132,19 @@ fun PayManagementScreen(
                                     .height(170.dp)
                                     .padding(horizontal = 8.dp)
                             ) {
-                                val maxValue = (barData + listOf(80000)).maxOrNull()?.toFloat() ?: 1f
-                                val goal = 80000
+                                val maxValue = 500000f // 토요일 매출을 최대값으로 고정
+                                val goal = 450000
                                 val compactGoal = if (goal >= 10000) "${goal / 10000}만" else goal.toString()
                                 val barHeightPx = 120f // same as used for bar height
-                                val yOffsetPx = (1 - goal / maxValue) * barHeightPx
+                                val yOffsetPx = (1 - (goal.toFloat() / maxValue)) * barHeightPx
                                 val yOffset = yOffsetPx.dp
                                 // 목표선
                                 Canvas(modifier = Modifier.matchParentSize()) {
-                                    val y = size.height - (goal / maxValue * size.height)
+                                    val y = size.height - ((goal.toFloat() / maxValue) * (size.height - 120f)) - 40f
                                     drawLine(
                                         color = Color.Red,
-                                        start = Offset(0f, y),
-                                        end = Offset(size.width, y),
+                                        start = Offset(30f, y),
+                                        end = Offset(size.width - 30f, y),
                                         strokeWidth = 2.dp.toPx()
                                     )
                                 }
@@ -145,7 +161,7 @@ fun PayManagementScreen(
                                             val compactValue = if (value >= 10000) String.format("%.1f만", value / 10000f) else value.toString()
                                             Text(
                                                 compactValue,
-                                                fontSize = 13.sp,
+                                                fontSize = 11.sp,
                                                 color = if (isToday) Blue else if (isDanger) Color.Red else TextHint,
                                                 fontWeight = if (isToday) FontWeight.Bold else FontWeight.Normal
                                             )
@@ -184,7 +200,7 @@ fun PayManagementScreen(
                                     modifier = Modifier
                                         .align(Alignment.TopStart)
                                         .padding(start = 2.dp)
-                                        .offset(y = yOffset + 12.dp)
+                                        .offset(y = yOffset+8.dp)
                                 )
                                 // 목표선 라벨 - 오른쪽
                                 Text(
@@ -195,7 +211,7 @@ fun PayManagementScreen(
                                     modifier = Modifier
                                         .align(Alignment.TopEnd)
                                         .padding(end = 2.dp)
-                                        .offset(y = yOffset + 12.dp)
+                                        .offset(y = yOffset+8.dp)
                                 )
                             }
                         }
@@ -227,24 +243,10 @@ fun PayManagementScreen(
             item {
                 Card(Modifier.fillMaxWidth().padding(bottom = 16.dp), shape = RoundedCornerShape(20.dp), colors = CardDefaults.cardColors(containerColor = CardWhite)) {
                     Column(Modifier.padding(16.dp)) {
-                        Text("월요일 평균 매출", fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                        Text("금요일 평균 매출", fontWeight = FontWeight.Bold, fontSize = 18.sp)
                         Spacer(Modifier.height(8.dp))
-                        Text("₩ 85,000", fontSize = 24.sp, fontWeight = FontWeight.Bold, color = Blue)
-                        Text("다른 요일 대비 +8%", color = Color(0xFF388E3C), fontSize = 14.sp)
-                    }
-                }
-            }
-            // 6. 이상 탐지/경고 배너
-            item {
-                Surface(
-                    color = Color(0xFFFFF3E0),
-                    shape = RoundedCornerShape(8.dp),
-                    modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)
-                ) {
-                    Row(Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
-                        Icon(Icons.Default.Warning, contentDescription = null, tint = Color.Red)
-                        Spacer(Modifier.width(8.dp))
-                        Text("오늘 김밥 원가가 평소보다 30% 높아요!", color = Color.Red, fontWeight = FontWeight.Bold)
+                        Text("₩ 450,000", fontSize = 24.sp, fontWeight = FontWeight.Bold, color = Blue)
+                        Text("다른 요일 대비 +25%", color = Color(0xFF388E3C), fontSize = 14.sp)
                     }
                 }
             }
@@ -356,7 +358,7 @@ fun PayManagementScreen(
                 contentColor = Color.White,
                 modifier = Modifier.padding(16.dp)
             ) {
-                Icon(Icons.Default.ArrowUpward, contentDescription = "오늘의 매출입력")
+                Icon(Icons.Default.Edit, contentDescription = "오늘의 매출입력")
             }
         }
     }
@@ -425,8 +427,8 @@ fun TabButton(text: String, selected: Boolean, onClick: () -> Unit, modifier: Mo
 @Composable
 fun SalesSummaryCard() {
     // 하드코딩 예시 데이터
-    val totalSales = 210000
-    val totalCost = 150000
+    val totalSales = 350000
+    val totalCost = 210000
     val totalMargin = totalSales - totalCost
     val marginRate = if (totalSales > 0) (totalMargin * 100f / totalSales).toInt() else 0
 
@@ -485,7 +487,11 @@ fun SummaryStatItem(label: String, value: Int, suffix: String = "원") {
         Text(label, fontSize = 14.sp, color = TextSecondary)
         Spacer(Modifier.height(4.dp))
         Text(
-            "${String.format("%,d", value)}$suffix",
+            if (value >= 10000) {
+                "${String.format("%.1f", value / 10000f)}만$suffix"
+            } else {
+                "${String.format("%,d", value)}$suffix"
+            },
             fontWeight = FontWeight.Bold,
             fontSize = 16.sp,
             color = TextPrimary
