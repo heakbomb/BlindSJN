@@ -25,6 +25,7 @@ import com.glowstudio.android.blindsjn.ui.components.common.CommonButton
 import com.glowstudio.android.blindsjn.feature.board.viewmodel.WritePostViewModel
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.rememberNavController
+import com.glowstudio.android.blindsjn.feature.user.UserViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -45,6 +46,9 @@ fun WritePostScreen(
 
     val contentFocusRequester = remember { FocusRequester() }
     val statusMessage by viewModel.statusMessage.collectAsState()
+
+    val userViewModel: UserViewModel = viewModel()
+    val userId by userViewModel.userIdFlow.collectAsState()
 
     LaunchedEffect(statusMessage) {
         statusMessage?.let { message ->
@@ -174,9 +178,12 @@ fun WritePostScreen(
                         if (title.isBlank() || content.isBlank()) {
                             viewModel.setStatusMessage("제목과 내용을 입력하세요.")
                         } else {
-                            val userId = 1
                             val industry = "카페"
-                            viewModel.savePost(title, content, userId, industry)
+                            if (userId != -1) {
+                                viewModel.savePost(title, content, userId, industry)
+                            } else {
+                                viewModel.setStatusMessage("로그인이 필요합니다.")
+                            }
                         }
                     },
                     modifier = Modifier.align(Alignment.End)

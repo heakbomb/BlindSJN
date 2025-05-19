@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.glowstudio.android.blindsjn.data.network.AuthRepository
 import com.glowstudio.android.blindsjn.data.network.AutoLoginManager
 import com.glowstudio.android.blindsjn.data.network.isNetworkAvailable
+import com.glowstudio.android.blindsjn.feature.user.UserViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -45,7 +46,7 @@ class LoginViewModel : ViewModel() {
         _uiState.value = _uiState.value.copy(autoLoginEnabled = enabled)
     }
 
-    fun checkAutoLogin(context: Context) {
+    fun checkAutoLogin(context: Context, userViewModel: UserViewModel) {
         viewModelScope.launch {
             if (!isNetworkAvailable(context)) {
                 _uiState.value = _uiState.value.copy(showNetworkErrorPopup = true)
@@ -63,8 +64,9 @@ class LoginViewModel : ViewModel() {
                         isLoading = true
                     )
                     try {
-                        val success = AuthRepository.login(context, savedPhone, savedPassword)
-                        if (success) {
+                        val userId = AuthRepository.login(context, savedPhone, savedPassword)
+                        if (userId != null) {
+                            userViewModel.saveUserId(userId)
                             onLoginSuccess?.invoke(true)
                         } else {
                             _uiState.value = _uiState.value.copy(showInvalidCredentialsPopup = true)
@@ -79,7 +81,7 @@ class LoginViewModel : ViewModel() {
         }
     }
 
-    fun login(context: Context, phoneNumber: String, password: String) {
+    fun login(context: Context, phoneNumber: String, password: String, userViewModel: UserViewModel) {
         if (_uiState.value.isLoading) return
 
         viewModelScope.launch {
@@ -96,8 +98,9 @@ class LoginViewModel : ViewModel() {
             _uiState.value = _uiState.value.copy(isLoading = true)
             
             try {
-                val success = AuthRepository.login(context, phoneNumber, password)
-                if (success) {
+                val userId = AuthRepository.login(context, phoneNumber, password)
+                if (userId != null) {
+                    userViewModel.saveUserId(userId)
                     AutoLoginManager.saveLoginInfo(
                         context,
                         phoneNumber,

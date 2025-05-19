@@ -25,6 +25,7 @@ import com.glowstudio.android.blindsjn.R
 import androidx.compose.ui.text.font.FontWeight
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.glowstudio.android.blindsjn.feature.login.LoginViewModel
+import com.glowstudio.android.blindsjn.feature.user.UserViewModel
 import com.glowstudio.android.blindsjn.ui.components.common.AutoLoginRow
 import com.glowstudio.android.blindsjn.ui.components.common.CommonButton
 import com.glowstudio.android.blindsjn.ui.components.common.CommonTextField
@@ -54,6 +55,7 @@ fun LoginScreen(
 ) {
     val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsState()
+    val userViewModel: UserViewModel = viewModel()
 
     // onLoginSuccess 콜백 설정
     LaunchedEffect(Unit) {
@@ -66,7 +68,7 @@ fun LoginScreen(
 
     // 자동 로그인 체크
     LaunchedEffect(Unit) {
-        viewModel.checkAutoLogin(context)
+        viewModel.checkAutoLogin(context, userViewModel)
     }
 
     Column(
@@ -144,7 +146,7 @@ fun LoginScreen(
             CommonButton(
                 text = "로그인",
                 onClick = {
-                    viewModel.login(context, uiState.phoneNumber, uiState.password)
+                    viewModel.login(context, uiState.phoneNumber, uiState.password, userViewModel)
                 },
                 isLoading = uiState.isLoading,
                 enabled = !uiState.isLoading

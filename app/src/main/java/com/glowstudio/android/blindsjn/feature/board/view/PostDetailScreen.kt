@@ -44,7 +44,9 @@ fun PostDetailScreen(navController: NavController, postId: String) {
     val post by postViewModel.selectedPost.collectAsState()
     val comments by commentViewModel.comments.collectAsState()
     var newComment by remember { mutableStateOf("") }
-    var isLiked by remember { mutableStateOf(false) }
+    var isLiking by remember { mutableStateOf(false) }
+    var localLikeState by remember { mutableStateOf(false) }
+    var localLikeCount by remember { mutableStateOf(0) }
     
     // 신고 관련 상태
     var showReportDialog by remember { mutableStateOf(false) }
@@ -57,6 +59,12 @@ fun PostDetailScreen(navController: NavController, postId: String) {
     LaunchedEffect(safePostId) {
         postViewModel.loadPostById(safePostId)
         commentViewModel.loadComments(safePostId)
+    }
+
+    // post가 변경될 때 localLikeState와 localLikeCount 업데이트
+    LaunchedEffect(post?.isLiked, post?.likeCountInt) {
+        post?.isLiked?.let { localLikeState = it }
+        post?.likeCountInt?.let { localLikeCount = it }
     }
 
     Scaffold(
@@ -106,7 +114,20 @@ fun PostDetailScreen(navController: NavController, postId: String) {
                             )
                         }
                         OutlinedButton(
-                            onClick = { isLiked = !isLiked },
+                            onClick = {
+                                if (!isLiking) {
+                                    isLiking = true
+                                    localLikeState = !localLikeState
+                                    localLikeCount += if (localLikeState) 1 else -1
+                                    postViewModel.toggleLike(it.id, 1) { success, _, _ ->
+                                        isLiking = false
+                                        if (!success) {
+                                            localLikeState = !localLikeState
+                                            localLikeCount += if (localLikeState) 1 else -1
+                                        }
+                                    }
+                                }
+                            },
                             border = ButtonDefaults.outlinedButtonBorder,
                             shape = MaterialTheme.shapes.small,
                             contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp),
@@ -115,13 +136,13 @@ fun PostDetailScreen(navController: NavController, postId: String) {
                             Icon(
                                 Icons.Default.ThumbUp,
                                 contentDescription = null,
-                                tint = if (isLiked) Error else DividerGray,
+                                tint = if (localLikeState) Error else DividerGray,
                                 modifier = Modifier.size(18.dp)
                             )
                             Spacer(modifier = Modifier.width(4.dp))
                             Text(
-                                "${it.likeCount + if (isLiked) 1 else 0}",
-                                color = if (isLiked) Error else DividerGray,
+                                localLikeCount.toString(),
+                                color = if (localLikeState) Error else DividerGray,
                                 style = MaterialTheme.typography.bodySmall
                             )
                         }
@@ -142,13 +163,28 @@ fun PostDetailScreen(navController: NavController, postId: String) {
                         Icon(
                             imageVector = Icons.Default.ThumbUp,
                             contentDescription = "좋아요",
-                            tint = if (isLiked) Error else DividerGray,
-                            modifier = Modifier.size(18.dp)
+                            tint = if (localLikeState) Error else DividerGray,
+                            modifier = Modifier
+                                .size(18.dp)
+                                .clickable(enabled = !isLiking) {
+                                    if (!isLiking) {
+                                        isLiking = true
+                                        localLikeState = !localLikeState
+                                        localLikeCount += if (localLikeState) 1 else -1
+                                        postViewModel.toggleLike(it.id, 1) { success, _, _ ->
+                                            isLiking = false
+                                            if (!success) {
+                                                localLikeState = !localLikeState
+                                                localLikeCount += if (localLikeState) 1 else -1
+                                            }
+                                        }
+                                    }
+                                }
                         )
                         Spacer(modifier = Modifier.width(4.dp))
                         Text(
-                            it.likeCount.toString(),
-                            color = if (isLiked) Error else DividerGray,
+                            localLikeCount.toString(),
+                            color = if (localLikeState) Error else DividerGray,
                             style = MaterialTheme.typography.bodyMedium
                         )
                         Spacer(modifier = Modifier.width(16.dp))

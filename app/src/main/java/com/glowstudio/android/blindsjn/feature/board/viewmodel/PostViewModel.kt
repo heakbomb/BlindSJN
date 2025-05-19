@@ -1,5 +1,6 @@
 package com.glowstudio.android.blindsjn.feature.board.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.glowstudio.android.blindsjn.feature.board.model.*
@@ -31,7 +32,18 @@ class PostViewModel : ViewModel() {
                 val response = PostRepository.loadPosts()
                 if (response.isSuccessful) {
                     response.body()?.let { postListResponse ->
-                        _posts.value = postListResponse.data
+                        // 현재 선택된 게시글의 좋아요 상태 유지
+                        val currentSelectedPost = _selectedPost.value
+                        _posts.value = postListResponse.data.map { post ->
+                            if (currentSelectedPost?.id == post.id) {
+                                post.copy(
+                                    isLiked = currentSelectedPost.isLiked,
+                                    likeCount = currentSelectedPost.likeCount
+                                )
+                            } else {
+                                post
+                            }
+                        }
                     }
                 } else {
                     _statusMessage.value = "불러오기 실패: ${response.message()}"
@@ -48,7 +60,21 @@ class PostViewModel : ViewModel() {
                 val response = PostRepository.loadPostById(postId)
                 if (response.isSuccessful) {
                     response.body()?.let { postDetailResponse ->
-                        _selectedPost.value = postDetailResponse.data
+                        // 게시글 목록에서 해당 게시글 찾기
+                        val existingPost = _posts.value.find { it.id == postId }
+                        // 기존 게시글의 좋아요 상태 유지
+                        postDetailResponse.data?.let { newPost ->
+                            val updatedPost = newPost.copy(
+                                isLiked = existingPost?.isLiked ?: newPost.isLiked,
+                                likeCount = existingPost?.likeCount ?: newPost.likeCount
+                            )
+                            _selectedPost.value = updatedPost
+                            
+                            // 게시글 목록도 업데이트
+                            _posts.value = _posts.value.map { post ->
+                                if (post.id == postId) updatedPost else post
+                            }
+                        }
                     }
                 } else {
                     _statusMessage.value = "게시글 조회 실패: ${response.message()}"
@@ -111,36 +137,136 @@ class PostViewModel : ViewModel() {
     }
 
     fun incrementLike(postId: Int) {
-        _posts.value = _posts.value.map { post ->
-            if (post.id == postId) {
-                post.copy(likeCount = post.likeCount + 1)
-            } else {
-                post
+        viewModelScope.launch {
+            try {
+                // 먼저 UI 업데이트
+                _posts.value = _posts.value.map { post ->
+                    if (post.id == postId) {
+                        post.copy(
+                            isLiked = true,
+                            likeCount = (post.likeCountInt + 1).toString()
+                        )
+                    } else {
+                        post
+                    }
+                }
+                
+                _selectedPost.value?.let { currentPost ->
+                    if (currentPost.id == postId) {
+                        _selectedPost.value = currentPost.copy(
+                            isLiked = true,
+                            likeCount = (currentPost.likeCountInt + 1).toString()
+                        )
+                    }
+                }
+
+                // 서버 요청
+                val request = LikePostRequest(post_id = postId, user_id = 1)
+                val response = PostRepository.likePost(request)
+                
+                if (!response.isSuccessful || response.body()?.status != "success") {
+                    // 실패 시 원래 상태로 복구
+                    _posts.value = _posts.value.map { post ->
+                        if (post.id == postId) {
+                            post.copy(
+                                isLiked = false,
+                                likeCount = (post.likeCountInt - 1).toString()
+                            )
+                        } else {
+                            post
+                        }
+                    }
+                    
+                    _selectedPost.value?.let { currentPost ->
+                        if (currentPost.id == postId) {
+                            _selectedPost.value = currentPost.copy(
+                                isLiked = false,
+                                likeCount = (currentPost.likeCountInt - 1).toString()
+                            )
+                        }
+                    }
+                    _statusMessage.value = "좋아요 추가 실패: ${response.message()}"
+                }
+            } catch (e: Exception) {
+                _statusMessage.value = "좋아요 추가 중 오류: ${e.message}"
+                Log.e("PostViewModel", "좋아요 추가 오류", e)
             }
         }
     }
 
     fun decrementLike(postId: Int) {
-        // TODO: 서버에 좋아요 감소 요청 또는 로컬에서 처리
-        // 예시: PostRepository.decrementLike(postId)
+        viewModelScope.launch {
+            try {
+                // 먼저 UI 업데이트
+                _posts.value = _posts.value.map { post ->
+                    if (post.id == postId) {
+                        post.copy(
+                            isLiked = false,
+                            likeCount = (post.likeCountInt - 1).toString()
+                        )
+                    } else {
+                        post
+                    }
+                }
+                
+                _selectedPost.value?.let { currentPost ->
+                    if (currentPost.id == postId) {
+                        _selectedPost.value = currentPost.copy(
+                            isLiked = false,
+                            likeCount = (currentPost.likeCountInt - 1).toString()
+                        )
+                    }
+                }
+
+                // 서버 요청
+                val request = LikePostRequest(post_id = postId, user_id = 1)
+                val response = PostRepository.likePost(request)
+                
+                if (!response.isSuccessful || response.body()?.status != "success") {
+                    // 실패 시 원래 상태로 복구
+                    _posts.value = _posts.value.map { post ->
+                        if (post.id == postId) {
+                            post.copy(
+                                isLiked = true,
+                                likeCount = (post.likeCountInt + 1).toString()
+                            )
+                        } else {
+                            post
+                        }
+                    }
+                    
+                    _selectedPost.value?.let { currentPost ->
+                        if (currentPost.id == postId) {
+                            _selectedPost.value = currentPost.copy(
+                                isLiked = true,
+                                likeCount = (currentPost.likeCountInt + 1).toString()
+                            )
+                        }
+                    }
+                    _statusMessage.value = "좋아요 취소 실패: ${response.message()}"
+                }
+            } catch (e: Exception) {
+                _statusMessage.value = "좋아요 취소 중 오류: ${e.message}"
+                Log.e("PostViewModel", "좋아요 취소 오류", e)
+            }
+        }
     }
 
     fun toggleLike(postId: Int, userId: Int, onResult: (Boolean, Boolean, Int) -> Unit) {
         viewModelScope.launch {
             try {
-                val request = LikePostRequest(post_id = postId, user_id = userId)
-                val response = PostRepository.likePost(request)
-                if (response.isSuccessful) {
-                    // 서버에서 최신 게시글 정보 다시 불러오기
-                    val updatedPost = PostRepository.loadPostById(postId).body()?.data
-                    loadPostById(postId)
-                    loadPosts()
-                    onResult(true, updatedPost?.isLiked ?: false, updatedPost?.likeCount ?: 0)
+                val currentPost = _selectedPost.value
+                if (currentPost?.isLiked == true) {
+                    decrementLike(postId)
+                    onResult(true, false, currentPost.likeCountInt - 1)
                 } else {
-                    onResult(false, _selectedPost.value?.isLiked ?: false, _selectedPost.value?.likeCount ?: 0)
+                    incrementLike(postId)
+                    onResult(true, true, currentPost?.likeCountInt?.plus(1) ?: 1)
                 }
             } catch (e: Exception) {
-                onResult(false, _selectedPost.value?.isLiked ?: false, _selectedPost.value?.likeCount ?: 0)
+                _statusMessage.value = "좋아요 상태 변경 중 오류: ${e.message}"
+                Log.e("PostViewModel", "좋아요 토글 오류", e)
+                onResult(false, _selectedPost.value?.isLiked ?: false, _selectedPost.value?.likeCountInt ?: 0)
             }
         }
     }

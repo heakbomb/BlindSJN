@@ -39,6 +39,7 @@ import com.glowstudio.android.blindsjn.feature.board.view.PostBottomSheet
 import com.glowstudio.android.blindsjn.feature.board.viewmodel.PostBottomSheetViewModel
 import com.glowstudio.android.blindsjn.utils.TimeUtils
 import androidx.compose.ui.text.style.TextOverflow
+import android.util.Log
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
@@ -241,8 +242,6 @@ fun PostItem(
     viewModel: PostViewModel,
     userId: Int
 ) {
-    var isLiked by remember { mutableStateOf(post.isLiked ?: false) }
-    var likeCount by remember { mutableStateOf(post.likeCount) }
     var isLiking by remember { mutableStateOf(false) }
 
     Column(
@@ -297,11 +296,7 @@ fun PostItem(
                 modifier = Modifier
                     .clickable(enabled = !isLiking) {
                         isLiking = true
-                        viewModel.toggleLike(post.id, userId) { success, newIsLiked, newLikeCount ->
-                            if (success) {
-                                isLiked = newIsLiked
-                                likeCount = newLikeCount
-                            }
+                        viewModel.toggleLike(post.id, userId) { success, _, _ ->
                             isLiking = false
                         }
                     }
@@ -310,14 +305,14 @@ fun PostItem(
                 Icon(
                     imageVector = Icons.Default.ThumbUp,
                     contentDescription = "좋아요",
-                    tint = if (isLiked) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
+                    tint = if (post.isLiked) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.size(18.dp)
                 )
                 Spacer(modifier = Modifier.width(4.dp))
                 Text(
-                    text = likeCount.toString(),
+                    text = post.likeCountInt.toString(),
                     style = MaterialTheme.typography.bodySmall,
-                    color = if (isLiked) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+                    color = if (post.isLiked) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
                 )
             }
             Spacer(modifier = Modifier.width(16.dp))

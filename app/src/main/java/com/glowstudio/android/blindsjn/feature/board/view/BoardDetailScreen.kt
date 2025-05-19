@@ -92,9 +92,7 @@ fun BoardDetailScreen(navController: NavController, title: String) {
                     )
                 }
 
-                // TODO: 실제 로그인 유저 id로 교체 필요
-                val userId = 1234
-                PostList(navController, filteredPosts, viewModel, userId)
+
             }
         }
     )

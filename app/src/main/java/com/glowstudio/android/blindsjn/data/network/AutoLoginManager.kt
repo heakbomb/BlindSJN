@@ -10,12 +10,9 @@ import android.content.Context
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
-import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
-
-// DataStore 인스턴스 생성
-private val Context.dataStore by preferencesDataStore("user_prefs")
+import com.glowstudio.android.blindsjn.data.session.userDataStore
 
 object AutoLoginManager {
 
@@ -32,7 +29,7 @@ object AutoLoginManager {
      * @param autoLogin 자동 로그인 상태 (true: 활성화)
      */
     suspend fun saveLoginInfo(context: Context, phoneNumber: String, password: String, autoLogin: Boolean) {
-        context.dataStore.edit { prefs ->
+        context.userDataStore.edit { prefs ->
             prefs[AUTO_LOGIN_KEY] = autoLogin
             if (autoLogin) {
                 prefs[PHONE_NUMBER_KEY] = phoneNumber
@@ -50,7 +47,7 @@ object AutoLoginManager {
      * @return 자동 로그인 활성화 여부 (true/false)
      */
     suspend fun isAutoLoginEnabled(context: Context): Boolean {
-        return context.dataStore.data.map { prefs ->
+        return context.userDataStore.data.map { prefs ->
             prefs[AUTO_LOGIN_KEY] ?: false
         }.first()
     }
@@ -61,7 +58,7 @@ object AutoLoginManager {
      * @return 전화번호와 비밀번호 쌍 (없으면 null 반환)
      */
     suspend fun getSavedCredentials(context: Context): Pair<String, String>? {
-        val prefs = context.dataStore.data.first()
+        val prefs = context.userDataStore.data.first()
         val phone = prefs[PHONE_NUMBER_KEY]
         val password = prefs[PASSWORD_KEY]
         return if (phone != null && password != null) Pair(phone, password) else null
@@ -72,7 +69,7 @@ object AutoLoginManager {
      * @param context 앱의 컨텍스트
      */
     suspend fun clearLoginInfo(context: Context) {
-        context.dataStore.edit { prefs ->
+        context.userDataStore.edit { prefs ->
             prefs.clear() // 모든 저장된 데이터 삭제
         }
     }
