@@ -135,11 +135,11 @@ fun MarginListScreen(
                             Text(sale.title, modifier = Modifier.weight(1f))
                             Text("${sale.price}원", modifier = Modifier.weight(1f))
                             Text("${sale.total_ingredient_price}원", modifier = Modifier.weight(1f))
-                            Text("${sale.margin}원", modifier = Modifier.weight(1f))
-                            Text(
-                                "${if (sale.price > 0) (sale.margin.toDouble() / sale.price * 100).toInt() else 0}%",
-                                modifier = Modifier.weight(1f)
-                            )
+                            Text("${sale.margin.toInt()}원", modifier = Modifier.weight(1f))
+                            val marginPercentage = if (sale.price > 0) {
+                                ((sale.margin.toDouble() / sale.price) * 100).toInt()
+                            } else 0
+                            Text("${marginPercentage}%", modifier = Modifier.weight(1f))
                         }
                     }
                 }

@@ -23,6 +23,6 @@ data class RecentSale(
     val title: String,
     val price: Int,
     val total_ingredient_price: Int,
-    val margin: Int,
+    val margin: Double,
     val sale_date: String
 ) 

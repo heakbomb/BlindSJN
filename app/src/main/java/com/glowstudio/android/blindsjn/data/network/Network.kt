@@ -48,6 +48,9 @@ interface ApiService {
     @GET("Popular_posts.php")
     suspend fun getPopularPosts(): Response<PostListResponse>
 
+    @POST("Like_post.php")
+    suspend fun likePost(@Body request: LikePostRequest): Response<BasicResponse>
+
     // 🔹 댓글
     @GET("Load_comment.php")
     suspend fun getComments(@Query("post_id") postId: Int): Response<CommentListResponse>

@@ -32,12 +32,14 @@ class MarginViewModel : ViewModel() {
                         } else {
                             _error.value = "마진 데이터를 불러오는데 실패했습니다."
                         }
+                    } ?: run {
+                        _error.value = "응답 데이터가 없습니다."
                     }
                 } else {
-                    _error.value = "마진 데이터를 불러오는데 실패했습니다."
+                    _error.value = "서버 오류: ${response.code()}"
                 }
             } catch (e: Exception) {
-                _error.value = "마진 데이터를 불러오는데 실패했습니다."
+                _error.value = "오류 발생: ${e.message}"
             } finally {
                 _isLoading.value = false
             }
