@@ -17,14 +17,19 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.glowstudio.android.blindsjn.ui.theme.*
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 
 @Composable
 fun RecipeListScreen(
     onEditRecipeClick: (String) -> Unit = {},
     onRegisterRecipeClick: () -> Unit = {}
 ) {
-    val recipes = remember {
-        listOf("빵" to 5000, "떡볶이" to 6000, "김밥" to 4500)
+    val viewModel: com.glowstudio.android.blindsjn.feature.foodcost.viewmodel.RecipeViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
+    val recipeList by viewModel.recipeList.collectAsState()
+    androidx.compose.runtime.LaunchedEffect(Unit) {
+        viewModel.getRecipeList(1) // businessId는 실제 값으로 대체 필요
     }
     Column(
         modifier = Modifier
@@ -45,14 +50,9 @@ fun RecipeListScreen(
         }
         Divider(color = DividerGray, thickness = 1.dp)
         Spacer(Modifier.height(8.dp))
-        val recipeData = listOf(
-            Triple("빵", 5000, 3600),
-            Triple("떡볶이", 6000, 4000),
-            Triple("김밥", 4500, 3000)
-        )
-        recipeData.forEach { (name, price, cost) ->
-            val margin = price - cost
-            val marginRate = if (price > 0) (margin * 100f / price).toInt() else 0
+        recipeList.forEach { recipe ->
+            val margin = recipe.price - recipe.margin_info.total_ingredient_price.toInt()
+            val marginRate = if (recipe.price > 0) (margin * 100f / recipe.price).toInt() else 0
             Row(
                 Modifier
                     .fillMaxWidth()
@@ -60,9 +60,9 @@ fun RecipeListScreen(
                     .padding(vertical = 8.dp, horizontal = 8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(name, Modifier.weight(1f), fontSize = 14.sp, color = TextPrimary)
-                Text("%,d원".format(price), Modifier.weight(1f), fontSize = 14.sp, color = TextPrimary)
-                Text("%,d원".format(cost), Modifier.weight(1f), fontSize = 14.sp, color = TextPrimary)
+                Text(recipe.title, Modifier.weight(1f), fontSize = 14.sp, color = TextPrimary)
+                Text("%,d원".format(recipe.price), Modifier.weight(1f), fontSize = 14.sp, color = TextPrimary)
+                Text("%,d원".format(recipe.margin_info.total_ingredient_price.toInt()), Modifier.weight(1f), fontSize = 14.sp, color = TextPrimary)
                 Column(Modifier.weight(2f), horizontalAlignment = Alignment.Start) {
                     Box(
                         Modifier
@@ -80,7 +80,7 @@ fun RecipeListScreen(
                     Spacer(Modifier.height(2.dp))
                     Text("${margin}원 (${marginRate}%)", fontSize = 12.sp, color = Blue)
                 }
-                TextButton(onClick = { onEditRecipeClick(name) }) {
+                TextButton(onClick = { onEditRecipeClick(recipe.title) }) {
                     Text("수정", color = Blue, fontWeight = FontWeight.Bold)
                 }
             }

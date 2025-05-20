@@ -24,6 +24,9 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.geometry.Offset
 import com.glowstudio.android.blindsjn.ui.components.common.SectionLayout
 import androidx.compose.ui.text.style.TextAlign
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.glowstudio.android.blindsjn.feature.foodcost.viewmodel.MarginListViewModel
+import com.glowstudio.android.blindsjn.feature.foodcost.viewmodel.IngredientViewModel
 
 @Composable
 fun MarginListScreen(
@@ -36,24 +39,13 @@ fun MarginListScreen(
     onNavigateToPayManagement: () -> Unit = {},
     onNavigateToMargin: () -> Unit = {}
 ) {
-    val recipes = remember {
-        listOf(
-            Triple("떡볶이", 4500, 2750),   // 39% (1750/4500)
-            Triple("김밥", 3000, 1920),    // 36% (1080/3000)
-            Triple("튀김", 2500, 1650),    // 34% (850/2500)
-            Triple("순대", 4000, 2520),    // 37% (1480/4000)
-            Triple("어묵", 2000, 1220)     // 39% (780/2000)
-        )
-    }
-
-    val ingredients = remember {
-        listOf(
-            Triple("떡", 8000, 2),
-            Triple("고추장", 5000, 1),
-            Triple("김", 10000, 3),
-            Triple("쌀", 15000, 5),
-            Triple("어묵", 7000, 2)
-        )
+    val viewModel: MarginListViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
+    val items by viewModel.items.collectAsState()
+    val ingredientViewModel: IngredientViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
+    val ingredients by ingredientViewModel.ingredients.collectAsState()
+    LaunchedEffect(Unit) {
+        viewModel.loadMarginData(1) // businessId는 실제 값으로 대체 필요
+        ingredientViewModel.loadIngredients()
     }
 
     LazyColumn(
@@ -76,7 +68,7 @@ fun MarginListScreen(
 
         // 상단 마진 요약 카드
         item {
-            MarginSummaryCard(recipes)
+            MarginSummaryCard(items)
             Spacer(Modifier.height(24.dp))
         }
 
@@ -108,17 +100,17 @@ fun MarginListScreen(
                         Divider(color = DividerGray, thickness = 1.dp)
                         Spacer(Modifier.height(8.dp))
                         // 레시피 리스트
-                        recipes.forEachIndexed { idx, (name, price, cost) ->
-                            val margin = price - cost
-                            val marginRate = if (price > 0) (margin * 100f / price).toInt() else 0
+                        items.forEachIndexed { idx, item ->
+                            val margin = item.price - item.cost
+                            val marginRate = item.marginRate
                             RecipeItem(
-                                name = name,
-                                price = price,
-                                cost = cost,
+                                name = item.name,
+                                price = item.price,
+                                cost = item.cost,
                                 margin = margin,
                                 marginRate = marginRate
                             )
-                            if (idx != recipes.lastIndex) {
+                            if (idx != items.lastIndex) {
                                 Divider(color = DividerGray, thickness = 1.dp, modifier = Modifier.padding(vertical = 2.dp))
                             }
                         }
@@ -148,18 +140,17 @@ fun MarginListScreen(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text("이름", Modifier.weight(1f), fontWeight = FontWeight.Bold, fontSize = 14.sp, color = TextPrimary, textAlign = TextAlign.Start)
+                            Text("단위(g)", Modifier.weight(1f), fontWeight = FontWeight.Bold, fontSize = 14.sp, color = TextPrimary, textAlign = TextAlign.End)
                             Text("구매가", Modifier.weight(1f), fontWeight = FontWeight.Bold, fontSize = 14.sp, color = TextPrimary, textAlign = TextAlign.End)
-                            Text("사용량", Modifier.weight(1f), fontWeight = FontWeight.Bold, fontSize = 14.sp, color = TextPrimary, textAlign = TextAlign.End)
-                            Text("원가", Modifier.weight(1.5f), fontWeight = FontWeight.Bold, fontSize = 14.sp, color = TextPrimary, textAlign = TextAlign.End)
                         }
                         Divider(color = DividerGray, thickness = 1.dp)
                         Spacer(Modifier.height(8.dp))
                         // 재료 리스트
-                        ingredients.forEachIndexed { idx, (name, price, usage) ->
+                        ingredients.forEachIndexed { idx, ingredient ->
                             IngredientItem(
-                                name = name,
-                                price = price,
-                                usage = usage
+                                name = ingredient.name,
+                                grams = ingredient.grams,
+                                price = ingredient.price
                             )
                             if (idx != ingredients.lastIndex) {
                                 Divider(color = DividerGray, thickness = 1.dp, modifier = Modifier.padding(vertical = 2.dp))
@@ -173,18 +164,9 @@ fun MarginListScreen(
 }
 
 @Composable
-private fun MarginSummaryCard(recipes: List<Triple<String, Int, Int>>) {
-    // 하드코딩된 일일 판매량 (각 메뉴별)
-    val dailySales = mapOf(
-        "떡볶이" to 35,
-        "김밥" to 25,
-        "튀김" to 20,
-        "순대" to 15,
-        "어묵" to 30
-    )
-
-    val totalSales = recipes.sumOf { (name, price, _) -> price * (dailySales[name] ?: 0) }
-    val totalCost = recipes.sumOf { (name, _, cost) -> cost * (dailySales[name] ?: 0) }
+private fun MarginSummaryCard(recipes: List<MarginItem>) {
+    val totalSales = recipes.sumOf { it.price }
+    val totalCost = recipes.sumOf { it.cost }
     val totalMargin = totalSales - totalCost
     val marginRate = if (totalSales > 0) (totalMargin * 100f / totalSales).toInt() else 0
 
@@ -292,8 +274,8 @@ private fun RecipeItem(
 @Composable
 private fun IngredientItem(
     name: String,
-    price: Int,
-    usage: Int
+    grams: Double,
+    price: Int
 ) {
     Row(
         Modifier
@@ -303,9 +285,8 @@ private fun IngredientItem(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(name, Modifier.weight(1f), fontSize = 14.sp, color = TextPrimary, textAlign = TextAlign.Start)
+        Text(String.format("%.1f", grams), Modifier.weight(1f), fontSize = 14.sp, color = TextPrimary, textAlign = TextAlign.End)
         Text("%,d원".format(price), Modifier.weight(1f), fontSize = 14.sp, color = TextPrimary, textAlign = TextAlign.End)
-        Text("%,d개".format(usage), Modifier.weight(1f), fontSize = 14.sp, color = TextPrimary, textAlign = TextAlign.End)
-        Text("%,d원".format(price * usage), Modifier.weight(1.5f), fontSize = 14.sp, color = TextPrimary, textAlign = TextAlign.End)
     }
 }
 
