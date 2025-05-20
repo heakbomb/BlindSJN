@@ -123,13 +123,14 @@ fun WritePostScreen(
                 OutlinedTextField(
                     value = content,
                     onValueChange = { content = it },
-                    placeholder = { Text("자유롭게 얘기해보세요.\n#질문 #고민") },
+                    placeholder = { Text("자유롭게 얘기해보세요.\n#질문 #고민", style = MaterialTheme.typography.bodyMedium) },
                     modifier = Modifier
                         .fillMaxWidth()
                         .weight(1f)
                         .padding(vertical = 8.dp)
                         .focusRequester(contentFocusRequester),
-                    maxLines = Int.MAX_VALUE
+                    maxLines = Int.MAX_VALUE,
+                    textStyle = MaterialTheme.typography.bodyMedium
                 )
 
                 Row(

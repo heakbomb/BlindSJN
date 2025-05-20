@@ -38,55 +38,60 @@ fun NaverNewsSection(navController: NavHostController) {
         viewModel.searchNews("자영업")
     }
 
-    SectionLayout(title = "새로운 소식") {
-        when {
-            uiState.isLoading -> {
-                CircularProgressIndicator()
-            }
-            uiState.error != null -> {
-                Text(uiState.error ?: "오류", color = Color.Red)
-            }
-            else -> {
-                Surface(
-                    shape = RoundedCornerShape(20.dp),
-                    tonalElevation = 0.dp,
-                    color = CardWhite,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    LazyRow(
-                        horizontalArrangement = Arrangement.spacedBy(12.dp),
-                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp)
+    Box(modifier = Modifier.padding(horizontal = 16.dp)) {
+        SectionLayout(
+            title = "새로운 소식",
+            onMoreClick = { /* TODO: 네이버 뉴스 더보기 이동 */ }
+        ) {
+            when {
+                uiState.isLoading -> {
+                    CircularProgressIndicator()
+                }
+                uiState.error != null -> {
+                    Text(uiState.error ?: "오류", color = Color.Red)
+                }
+                else -> {
+                    Surface(
+                        shape = RoundedCornerShape(20.dp),
+                        tonalElevation = 0.dp,
+                        color = CardWhite,
+                        modifier = Modifier.fillMaxWidth()
                     ) {
-                        items(uiState.newsList) { article ->
-                            Box(
-                                modifier = Modifier
-                                    .width(300.dp)
-                                    .height(120.dp)
-                                    .clip(RoundedCornerShape(12.dp))
-                                    .background(MaterialTheme.colorScheme.surface)
-                                    .clickable {
-                                        val articleJson = URLEncoder.encode(Gson().toJson(article), "UTF-8")
-                                        navController.navigate("news_detail/$articleJson")
-                                    }
-                            ) {
-                                Column(
+                        LazyRow(
+                            horizontalArrangement = Arrangement.spacedBy(12.dp),
+                            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp)
+                        ) {
+                            items(uiState.newsList) { article ->
+                                Box(
                                     modifier = Modifier
-                                        .fillMaxSize()
-                                        .padding(12.dp),
-                                    verticalArrangement = Arrangement.SpaceBetween
+                                        .width(300.dp)
+                                        .height(120.dp)
+                                        .clip(RoundedCornerShape(12.dp))
+                                        .background(MaterialTheme.colorScheme.surface)
+                                        .clickable {
+                                            val articleJson = URLEncoder.encode(Gson().toJson(article), "UTF-8")
+                                            navController.navigate("news_detail/$articleJson")
+                                        }
                                 ) {
-                                    Text(
-                                        text = HtmlCompat.fromHtml(article.title, HtmlCompat.FROM_HTML_MODE_LEGACY).toString(),
-                                        fontWeight = FontWeight.Bold,
-                                        maxLines = 2,
-                                        overflow = TextOverflow.Ellipsis
-                                    )
-                                    Spacer(modifier = Modifier.height(4.dp))
-                                    Text(
-                                        text = HtmlCompat.fromHtml(article.description, HtmlCompat.FROM_HTML_MODE_LEGACY).toString(),
-                                        maxLines = 3,
-                                        overflow = TextOverflow.Ellipsis
-                                    )
+                                    Column(
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .padding(12.dp),
+                                        verticalArrangement = Arrangement.SpaceBetween
+                                    ) {
+                                        Text(
+                                            text = HtmlCompat.fromHtml(article.title, HtmlCompat.FROM_HTML_MODE_LEGACY).toString(),
+                                            fontWeight = FontWeight.Bold,
+                                            maxLines = 2,
+                                            overflow = TextOverflow.Ellipsis
+                                        )
+                                        Spacer(modifier = Modifier.height(4.dp))
+                                        Text(
+                                            text = HtmlCompat.fromHtml(article.description, HtmlCompat.FROM_HTML_MODE_LEGACY).toString(),
+                                            maxLines = 3,
+                                            overflow = TextOverflow.Ellipsis
+                                        )
+                                    }
                                 }
                             }
                         }

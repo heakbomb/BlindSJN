@@ -1,28 +1,23 @@
 package com.glowstudio.android.blindsjn.feature.main.view
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.compose.currentBackStackEntryAsState
 import com.glowstudio.android.blindsjn.ui.navigation.mainNavGraph
 import com.glowstudio.android.blindsjn.feature.main.viewmodel.TopBarViewModel
 import com.glowstudio.android.blindsjn.feature.main.viewmodel.NavigationViewModel
 import androidx.compose.foundation.layout.Box
 import androidx.compose.ui.tooling.preview.Preview
-import com.glowstudio.android.blindsjn.feature.main.view.TopBarMain
-import com.glowstudio.android.blindsjn.feature.main.view.TopBarDetail
-import com.glowstudio.android.blindsjn.feature.main.viewmodel.TopBarType
 import com.glowstudio.android.blindsjn.feature.board.view.BoardScreen
 import com.glowstudio.android.blindsjn.feature.board.view.BoardDetailScreen
 import com.glowstudio.android.blindsjn.feature.board.view.WritePostScreen
 import com.glowstudio.android.blindsjn.feature.board.view.PostDetailScreen
 import com.glowstudio.android.blindsjn.feature.home.HomeScreen
 import com.glowstudio.android.blindsjn.feature.profile.ProfileScreen
-import com.glowstudio.android.blindsjn.feature.popular.PopularScreen
 import com.glowstudio.android.blindsjn.feature.calendar.MessageScreen
 import com.glowstudio.android.blindsjn.ui.screens.AddScheduleScreen
 import androidx.navigation.compose.NavHost
@@ -30,18 +25,12 @@ import androidx.navigation.compose.composable
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
 import java.net.URLDecoder
-import java.net.URLEncoder
 import com.google.gson.Gson
 import com.glowstudio.android.blindsjn.ui.theme.BlindSJNTheme
-import com.glowstudio.android.blindsjn.ui.components.banner.BannerSection
-import com.glowstudio.android.blindsjn.ui.components.shortcut.ShortcutSection
-import com.glowstudio.android.blindsjn.ui.components.news.NaverNewsSection
-import com.glowstudio.android.blindsjn.ui.components.hotpost.HotPostsSection
-import com.glowstudio.android.blindsjn.ui.components.sales.SalesSection
 import com.glowstudio.android.blindsjn.feature.home.NewsDetailScreen
 import com.glowstudio.android.blindsjn.data.model.Article
 import com.glowstudio.android.blindsjn.feature.paymanagement.PayManagementScreen
-import com.glowstudio.android.blindsjn.feature.foodcost.FoodCostScreen
+import com.glowstudio.android.blindsjn.feature.foodcost.view.FoodCostScreen
 import com.glowstudio.android.blindsjn.feature.foodcost.RegisterRecipeScreen
 import com.glowstudio.android.blindsjn.feature.foodcost.RegisterIngredientScreen
 import com.glowstudio.android.blindsjn.feature.foodcost.view.RecipeListScreen
@@ -61,6 +50,34 @@ fun MainScreen(
     val navController = rememberNavController()
     // TopBarViewModel에서 상단바 상태를 관찰
     val topBarState by topBarViewModel.topBarState.collectAsState()
+    
+    // 현재 라우트 변경 감지
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
+
+    // 라우트가 변경될 때마다 TopBar 상태 업데이트
+    LaunchedEffect(currentRoute) {
+        when (currentRoute) {
+            "home" -> topBarViewModel.setMainBar()
+            "board" -> topBarViewModel.setMainBar()
+            "paymanagement", "foodcoast" -> topBarViewModel.setMainBar()
+            "message" -> topBarViewModel.setMainBar()
+            "profile" -> topBarViewModel.setMainBar()
+            else -> {
+                // 상세 화면의 경우 현재 라우트에 따라 적절한 TopBar 설정
+                val title = when {
+                    currentRoute?.startsWith("postDetail/") == true -> "게시글"
+                    currentRoute?.startsWith("boardDetail/") == true -> "게시판"
+                    currentRoute?.startsWith("editRecipe/") == true -> "레시피 수정"
+                    else -> "상세"
+                }
+                topBarViewModel.setDetailBar(
+                    title = title,
+                    onBackClick = { navController.navigateUp() }
+                )
+            }
+        }
+    }
 
     Scaffold(
         // 상단바: TopBarViewModel의 상태를 기반으로 동적으로 업데이트됨
@@ -92,7 +109,7 @@ fun MainScreen(
                     composable("message") { MessageScreen(navController) }
                     composable("profile") { ProfileScreen(
                         onLogoutClick = { /* ... */ },
-                        onBusinessCertificationClick = { /* ... */ },
+                        onBusinessCertificationClick = { navController.navigate("businessCertification") },
                         onProfileEditClick = { /* ... */ },
                         onContactEditClick = { /* ... */ }
                     ) }
@@ -183,6 +200,15 @@ fun MainScreen(
                                 link = article.link
                             )
                         }
+                    }
+                    composable("businessCertification") {
+                        com.glowstudio.android.blindsjn.feature.certification.BusinessCertificationScreen(
+                            navController = navController,
+                            onConfirm = { phone, certNumber, industry ->
+                                // 인증 완료 후 뒤로가기 또는 원하는 화면 이동
+                                navController.popBackStack()
+                            }
+                        )
                     }
                     mainNavGraph(
                         navController = navController,

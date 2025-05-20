@@ -11,6 +11,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.glowstudio.android.blindsjn.ui.components.common.CommonButton
+import com.glowstudio.android.blindsjn.ui.theme.BlindSJNTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -42,9 +43,15 @@ fun EditProfileScreen(
                 Button(
                     onClick = { /* 이미지 선택 로직 */ },
                     modifier = Modifier.fillMaxSize(),
-                    shape = CircleShape
+                    shape = CircleShape,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.primary
+                    )
                 ) {
-                    Text("이미지 변경")
+                    Text(
+                        text = "이미지 변경",
+                        color = MaterialTheme.colorScheme.onPrimary
+                    )
                 }
             }
         }
@@ -57,7 +64,13 @@ fun EditProfileScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(vertical = 8.dp),
-            singleLine = true
+            singleLine = true,
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = MaterialTheme.colorScheme.primary,
+                unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+                focusedLabelColor = MaterialTheme.colorScheme.primary,
+                unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         )
 
         // 자기소개 입력
@@ -69,7 +82,13 @@ fun EditProfileScreen(
                 .fillMaxWidth()
                 .height(120.dp)
                 .padding(vertical = 8.dp),
-            maxLines = 5
+            maxLines = 5,
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = MaterialTheme.colorScheme.primary,
+                unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+                focusedLabelColor = MaterialTheme.colorScheme.primary,
+                unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         )
 
         Spacer(modifier = Modifier.weight(1f))
@@ -90,9 +109,11 @@ fun EditProfileScreen(
 @Preview(showBackground = true)
 @Composable
 fun EditProfileScreenPreview() {
-    EditProfileScreen(
-        onBackClick = { },
-        onSave = { }
-    )
+    BlindSJNTheme {
+        EditProfileScreen(
+            onBackClick = { },
+            onSave = { }
+        )
+    }
 }
 
