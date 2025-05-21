@@ -6,6 +6,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.navArgument
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.glowstudio.android.blindsjn.feature.board.view.BoardDetailScreen
 import com.glowstudio.android.blindsjn.feature.board.view.BoardScreen
 import com.glowstudio.android.blindsjn.feature.board.view.WritePostScreen
@@ -21,6 +22,7 @@ import com.glowstudio.android.blindsjn.feature.popular.PopularScreen
 import com.glowstudio.android.blindsjn.feature.profile.ProfileScreen
 import com.google.gson.Gson
 import java.net.URLDecoder
+import com.glowstudio.android.blindsjn.feature.certification.BusinessCertViewModel
 
 fun NavGraphBuilder.mainNavGraph(
     navController: NavHostController,
@@ -222,10 +224,13 @@ fun NavGraphBuilder.profileNavGraph(
 
         composable("certification_screen") {
             topBarViewModel.setDetailBar("사업자 인증")
+            val viewModel: BusinessCertViewModel = viewModel()
             BusinessCertificationScreen(
                 navController = navController,
-                onConfirm = { phone, certNumber, industry ->
-                    navController.navigate("someNextRoute")
+                viewModel = viewModel,
+                userId = 1,
+                onConfirm = {
+                    navController.navigateUp()
                 }
             )
         }

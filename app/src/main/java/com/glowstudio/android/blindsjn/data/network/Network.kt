@@ -8,6 +8,7 @@ import com.glowstudio.android.blindsjn.data.model.BasicResponse
 import com.glowstudio.android.blindsjn.feature.board.model.*
 import com.glowstudio.android.blindsjn.data.model.LoginRequest
 import com.glowstudio.android.blindsjn.data.model.SignupRequest
+import com.glowstudio.android.blindsjn.data.model.BusinessCertRequest
 import retrofit2.Response
 import retrofit2.http.*
 
@@ -96,4 +97,10 @@ interface ApiService {
     // 🔹 마진 요약
     @GET("Recipe_margin_summary.php")
     suspend fun getMarginSummary(@Query("business_id") businessId: Int): Response<com.glowstudio.android.blindsjn.feature.foodcost.model.MarginSummaryResponse>
+
+    // 🔹 사업자 인증
+    @POST("business_certification.php")
+    suspend fun certifyBusiness(
+        @Body request: BusinessCertRequest
+    ): Response<BasicResponse>
 }

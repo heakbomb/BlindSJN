@@ -1,27 +1,17 @@
 package com.glowstudio.android.blindsjn.feature.login
 
-import android.content.Context
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.glowstudio.android.blindsjn.data.network.AuthRepository
 import com.glowstudio.android.blindsjn.data.network.AutoLoginManager
-import com.glowstudio.android.blindsjn.data.network.isNetworkAvailable
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-data class LoginUiState(
-    val phoneNumber: String = "",
-    val password: String = "",
-    val autoLoginEnabled: Boolean = false,
-    val isLoading: Boolean = false,
-    val showEmptyFieldsPopup: Boolean = false,
-    val showInvalidCredentialsPopup: Boolean = false,
-    val showNetworkErrorPopup: Boolean = false
-)
-
-class LoginViewModel : ViewModel() {
+class LoginViewModel(application: Application) : AndroidViewModel(application) {
     private val _uiState = MutableStateFlow(LoginUiState())
     val uiState: StateFlow<LoginUiState> = _uiState.asStateFlow()
 
@@ -32,99 +22,66 @@ class LoginViewModel : ViewModel() {
     }
 
     fun updatePhoneNumber(phoneNumber: String) {
-        _uiState.value = _uiState.value.copy(
-            phoneNumber = phoneNumber.filter { it.isDigit() }
-        )
+        _uiState.update { it.copy(phoneNumber = phoneNumber) }
     }
 
     fun updatePassword(password: String) {
-        _uiState.value = _uiState.value.copy(password = password)
+        _uiState.update { it.copy(password = password) }
     }
 
     fun updateAutoLogin(enabled: Boolean) {
-        _uiState.value = _uiState.value.copy(autoLoginEnabled = enabled)
+        _uiState.update { it.copy(autoLoginEnabled = enabled) }
     }
 
-    fun checkAutoLogin(context: Context) {
-        viewModelScope.launch {
-            if (!isNetworkAvailable(context)) {
-                _uiState.value = _uiState.value.copy(showNetworkErrorPopup = true)
-                return@launch
-            }
-
-            val autoLoginEnabled = AutoLoginManager.isAutoLoginEnabled(context)
-            _uiState.value = _uiState.value.copy(autoLoginEnabled = autoLoginEnabled)
-
-            if (autoLoginEnabled) {
-                AutoLoginManager.getSavedCredentials(context)?.let { (savedPhone, savedPassword) ->
-                    _uiState.value = _uiState.value.copy(
-                        phoneNumber = savedPhone,
-                        password = savedPassword,
-                        isLoading = true
-                    )
-                    try {
-                        val success = AuthRepository.login(context, savedPhone, savedPassword)
-                        if (success) {
-                            onLoginSuccess?.invoke(true)
-                        } else {
-                            _uiState.value = _uiState.value.copy(showInvalidCredentialsPopup = true)
-                        }
-                    } catch (e: Exception) {
-                        _uiState.value = _uiState.value.copy(showInvalidCredentialsPopup = true)
-                    } finally {
-                        _uiState.value = _uiState.value.copy(isLoading = false)
-                    }
-                }
-            }
+    fun login(context: android.content.Context, phoneNumber: String, password: String) {
+        if (phoneNumber.isBlank() || password.isBlank()) {
+            _uiState.update { it.copy(showEmptyFieldsPopup = true) }
+            return
         }
-    }
 
-    fun login(context: Context, phoneNumber: String, password: String) {
-        if (_uiState.value.isLoading) return
+        _uiState.update { it.copy(isLoading = true) }
 
         viewModelScope.launch {
-            if (phoneNumber.isEmpty() || password.isEmpty()) {
-                _uiState.value = _uiState.value.copy(showEmptyFieldsPopup = true)
-                return@launch
-            }
-
-            if (!isNetworkAvailable(context)) {
-                _uiState.value = _uiState.value.copy(showNetworkErrorPopup = true)
-                return@launch
-            }
-
-            _uiState.value = _uiState.value.copy(isLoading = true)
-            
             try {
-                val success = AuthRepository.login(context, phoneNumber, password)
-                if (success) {
-                    AutoLoginManager.saveLoginInfo(
-                        context,
-                        phoneNumber,
-                        password,
-                        _uiState.value.autoLoginEnabled
-                    )
+                val response = AuthRepository.login(phoneNumber, password)
+                if (response.isSuccessful && response.body()?.status == "success") {
+                    val userId = response.body()?.userId ?: 1
+                    _uiState.update { it.copy(userId = userId) }
+                    if (_uiState.value.autoLoginEnabled) {
+                        AutoLoginManager.saveLoginData(context, phoneNumber, password)
+                    }
                     onLoginSuccess?.invoke(true)
                 } else {
-                    _uiState.value = _uiState.value.copy(showInvalidCredentialsPopup = true)
+                    _uiState.update { it.copy(showInvalidCredentialsPopup = true) }
                 }
             } catch (e: Exception) {
-                _uiState.value = _uiState.value.copy(showInvalidCredentialsPopup = true)
+                _uiState.update { it.copy(showNetworkErrorPopup = true) }
             } finally {
-                _uiState.value = _uiState.value.copy(isLoading = false)
+                _uiState.update { it.copy(isLoading = false) }
             }
         }
     }
 
     fun dismissEmptyFieldsPopup() {
-        _uiState.value = _uiState.value.copy(showEmptyFieldsPopup = false)
+        _uiState.update { it.copy(showEmptyFieldsPopup = false) }
     }
 
     fun dismissInvalidCredentialsPopup() {
-        _uiState.value = _uiState.value.copy(showInvalidCredentialsPopup = false)
+        _uiState.update { it.copy(showInvalidCredentialsPopup = false) }
     }
 
     fun dismissNetworkErrorPopup() {
-        _uiState.value = _uiState.value.copy(showNetworkErrorPopup = false)
+        _uiState.update { it.copy(showNetworkErrorPopup = false) }
     }
 }
+
+data class LoginUiState(
+    val phoneNumber: String = "",
+    val password: String = "",
+    val autoLoginEnabled: Boolean = false,
+    val isLoading: Boolean = false,
+    val showEmptyFieldsPopup: Boolean = false,
+    val showInvalidCredentialsPopup: Boolean = false,
+    val showNetworkErrorPopup: Boolean = false,
+    val userId: Int = 1
+)

@@ -36,6 +36,8 @@ import com.glowstudio.android.blindsjn.feature.foodcost.RegisterIngredientScreen
 import com.glowstudio.android.blindsjn.feature.foodcost.view.RecipeListScreen
 import com.glowstudio.android.blindsjn.feature.foodcost.view.EditRecipeScreen
 import com.glowstudio.android.blindsjn.feature.foodcost.view.IngredientListScreen
+import com.glowstudio.android.blindsjn.feature.certification.BusinessCertViewModel
+import com.glowstudio.android.blindsjn.feature.login.LoginViewModel
 
 /**
  * 메인 스크린: 상단바, 하단 네비게이션 바, 내부 컨텐츠(AppNavHost)를 포함하여 전체 화면 전환을 관리합니다.
@@ -44,7 +46,9 @@ import com.glowstudio.android.blindsjn.feature.foodcost.view.IngredientListScree
 @Composable
 fun MainScreen(
     topBarViewModel: TopBarViewModel = viewModel(),
-    navigationViewModel: NavigationViewModel = viewModel()
+    navigationViewModel: NavigationViewModel = viewModel(),
+    businessCertViewModel: BusinessCertViewModel = viewModel(),
+    loginViewModel: LoginViewModel = viewModel()
 ) {
     // 하나의 NavController 생성
     val navController = rememberNavController()
@@ -54,6 +58,10 @@ fun MainScreen(
     // 현재 라우트 변경 감지
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
+
+    // 로그인 상태 관찰
+    val loginState by loginViewModel.uiState.collectAsState()
+    val currentUserId = loginState.userId ?: 1 // 기본값 1
 
     // 라우트가 변경될 때마다 TopBar 상태 업데이트
     LaunchedEffect(currentRoute) {
@@ -204,8 +212,9 @@ fun MainScreen(
                     composable("businessCertification") {
                         com.glowstudio.android.blindsjn.feature.certification.BusinessCertificationScreen(
                             navController = navController,
-                            onConfirm = { phone, certNumber, industry ->
-                                // 인증 완료 후 뒤로가기 또는 원하는 화면 이동
+                            viewModel = businessCertViewModel,
+                            userId = currentUserId,
+                            onConfirm = {
                                 navController.popBackStack()
                             }
                         )

@@ -16,6 +16,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.glowstudio.android.blindsjn.ui.theme.*
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.material3.HorizontalDivider
 
 @Composable
 fun EditRecipeScreen(
@@ -42,7 +43,11 @@ fun EditRecipeScreen(
             Text("단위(g)", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = TextPrimary)
             Spacer(Modifier.width(48.dp))
         }
-        Divider(color = DividerGray, thickness = 1.dp)
+        HorizontalDivider(
+            modifier = Modifier.padding(vertical = 8.dp),
+            thickness = 1.dp,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f)
+        )
         Spacer(Modifier.height(8.dp))
         ingredients.forEach { (name, gram) ->
             Row(

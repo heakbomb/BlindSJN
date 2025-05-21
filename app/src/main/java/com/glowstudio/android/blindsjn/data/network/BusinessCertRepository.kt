@@ -1,6 +1,7 @@
 package com.glowstudio.android.blindsjn.data.network
 
 import android.util.Log
+import com.glowstudio.android.blindsjn.data.model.BusinessCertRequest
 import retrofit2.Response
 
 object BusinessCertRepository {
@@ -29,9 +30,33 @@ object BusinessCertRepository {
         }
     }
 
-    // 이미 인증된 번호인지 확인하는 함수 (DB나 SharedPreferences에서 확인)
-    suspend fun checkAlreadyCertified(businessNumber: String): Boolean {
-        // 예시로 DB나 SharedPreferences에서 확인 (실제 구현은 DB 연동 필요)
-        return false // 실제 DB 연동 시 true로 반환하도록 변경
+    // 사업자 인증 정보 저장
+    suspend fun saveBusinessCertification(
+        userId: Int,
+        phoneNumber: String,
+        businessNumber: String,
+        industryId: Int
+    ): Boolean {
+        return try {
+            val request = BusinessCertRequest(
+                user_id = userId,
+                phone_number = phoneNumber,
+                business_number = businessNumber,
+                industry_id = industryId
+            )
+
+            val response = InternalServer.api.certifyBusiness(request)
+            
+            if (response.isSuccessful) {
+                val body = response.body()
+                body?.let {
+                    return it.status == "success"
+                }
+            }
+            false
+        } catch (e: Exception) {
+            Log.e("BusinessCertRepository", "인증 정보 저장 실패: ${e.message}")
+            false
+        }
     }
 }

@@ -64,11 +64,6 @@ fun LoginScreen(
         }
     }
 
-    // 자동 로그인 체크
-    LaunchedEffect(Unit) {
-        viewModel.checkAutoLogin(context)
-    }
-
     Column(
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally

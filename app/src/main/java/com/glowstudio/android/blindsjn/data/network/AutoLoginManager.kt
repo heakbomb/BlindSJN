@@ -7,6 +7,7 @@ package com.glowstudio.android.blindsjn.data.network
  */
 
 import android.content.Context
+import android.content.SharedPreferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
@@ -17,12 +18,24 @@ import kotlinx.coroutines.flow.map
 // DataStore 인스턴스 생성
 private val Context.dataStore by preferencesDataStore("user_prefs")
 
+data class LoginData(
+    val username: String,
+    val password: String
+)
+
 object AutoLoginManager {
+    private const val PREF_NAME = "auto_login_pref"
+    private const val KEY_USERNAME = "username"
+    private const val KEY_PASSWORD = "password"
 
     // DataStore 키 정의
     private val AUTO_LOGIN_KEY = booleanPreferencesKey("auto_login") // 자동 로그인 상태
     private val PHONE_NUMBER_KEY = stringPreferencesKey("phone_number") // 저장된 전화번호
     private val PASSWORD_KEY = stringPreferencesKey("password") // 저장된 비밀번호
+
+    private fun getPrefs(context: Context): SharedPreferences {
+        return context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+    }
 
     /**
      * 로그인 정보 저장
@@ -75,5 +88,29 @@ object AutoLoginManager {
         context.dataStore.edit { prefs ->
             prefs.clear() // 모든 저장된 데이터 삭제
         }
+    }
+
+    fun saveLoginData(context: Context, username: String, password: String) {
+        getPrefs(context).edit().apply {
+            putString(KEY_USERNAME, username)
+            putString(KEY_PASSWORD, password)
+            apply()
+        }
+    }
+
+    fun getSavedLoginData(context: Context): LoginData? {
+        val prefs = getPrefs(context)
+        val username = prefs.getString(KEY_USERNAME, null)
+        val password = prefs.getString(KEY_PASSWORD, null)
+        
+        return if (username != null && password != null) {
+            LoginData(username, password)
+        } else {
+            null
+        }
+    }
+
+    fun clearLoginData(context: Context) {
+        getPrefs(context).edit().clear().apply()
     }
 }

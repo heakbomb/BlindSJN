@@ -8,6 +8,7 @@ import com.glowstudio.android.blindsjn.data.model.LoginRequest
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import retrofit2.HttpException
+import retrofit2.Response
 import java.io.IOException
 
 object AuthRepository {
@@ -64,6 +65,15 @@ object AuthRepository {
                 }
                 false
             }
+        }
+    }
+
+    suspend fun login(phoneNumber: String, password: String): Response<ApiResponse> {
+        return try {
+            InternalServer.api.login(LoginRequest(phoneNumber, password))
+        } catch (e: Exception) {
+            Log.e("AuthRepository", "로그인 오류: ${e.message}")
+            throw e
         }
     }
 }
