@@ -8,6 +8,9 @@ import com.glowstudio.android.blindsjn.data.model.BasicResponse
 import com.glowstudio.android.blindsjn.feature.board.model.*
 import com.glowstudio.android.blindsjn.data.model.LoginRequest
 import com.glowstudio.android.blindsjn.data.model.SignupRequest
+import com.glowstudio.android.blindsjn.feature.paymanagement.model.SalesSummaryResponse
+import com.glowstudio.android.blindsjn.feature.paymanagement.model.SalesComparisonResponse
+import com.glowstudio.android.blindsjn.feature.paymanagement.model.TopItemsResponse
 import retrofit2.Response
 import retrofit2.http.*
 
@@ -97,4 +100,22 @@ interface ApiService {
     // 🔹 마진 요약
     @GET("Recipe_margin_summary.php")
     suspend fun getMarginSummary(@Query("business_id") businessId: Int): Response<com.glowstudio.android.blindsjn.feature.foodcost.model.MarginSummaryResponse>
+
+    // 🔹 매출 관리
+    @GET("api_sales_summary.php")
+    suspend fun getSalesSummary(
+        @Query("period") period: String,
+        @Query("date") date: String
+    ): Response<SalesSummaryResponse>
+
+    @GET("api_sales_comparison.php")
+    suspend fun getSalesComparison(
+        @Query("date") date: String
+    ): Response<SalesComparisonResponse>
+
+    @GET("api_sales_top_items.php")
+    suspend fun getTopItems(
+        @Query("date") date: String,
+        @Query("period") period: String = "day"
+    ): Response<TopItemsResponse>
 }

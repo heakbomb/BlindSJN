@@ -20,6 +20,9 @@ import com.glowstudio.android.blindsjn.feature.home.view.NewsDetailScreen
 import com.glowstudio.android.blindsjn.feature.home.NewsListScreen
 import com.glowstudio.android.blindsjn.feature.popular.PopularScreen
 import com.glowstudio.android.blindsjn.feature.profile.ProfileScreen
+import com.glowstudio.android.blindsjn.feature.paymanagement.view.PayManagementScreen
+import com.glowstudio.android.blindsjn.feature.ocr.view.CameraScreen
+import com.glowstudio.android.blindsjn.feature.ocr.model.OcrResult
 import com.google.gson.Gson
 import java.net.URLDecoder
 
@@ -94,6 +97,9 @@ fun NavGraphBuilder.mainNavGraph(
         
         // 프로필 네비게이션 그래프
         profileNavGraph(navController, topBarViewModel)
+
+        // 매출관리 네비게이션 그래프
+        payManagementNavGraph(navController, topBarViewModel)
     }
 }
 
@@ -262,6 +268,41 @@ fun NavGraphBuilder.profileNavGraph(
             EditContactScreen(
                 onBackClick = { navController.navigateUp() },
                 onSave = {
+                    navController.navigateUp()
+                }
+            )
+        }
+    }
+}
+
+fun NavGraphBuilder.payManagementNavGraph(
+    navController: NavHostController,
+    topBarViewModel: TopBarViewModel
+) {
+    navigation(
+        startDestination = "pay_management_screen",
+        route = "pay_management_root"
+    ) {
+        composable("pay_management_screen") {
+            topBarViewModel.setMainBar(
+                onSearchClick = { /* 검색 */ },
+                onMoreClick = { /* 더보기 */ },
+                onNotificationClick = { /* 알림 */ }
+            )
+            PayManagementScreen(
+                onNavigateToSalesManagement = { _, _ ->
+                    navController.navigate("camera_screen")
+                }
+            )
+        }
+
+        composable("camera_screen") {
+            topBarViewModel.setDetailBar(
+                title = "매출 입력",
+                onBackClick = { navController.navigateUp() }
+            )
+            CameraScreen(
+                onNavigateToSalesManagement = { _, _ ->
                     navController.navigateUp()
                 }
             )

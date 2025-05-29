@@ -50,7 +50,13 @@ fun AppNavHost(
 */
         // 메인 앱 진입점
         composable("main") {
-            MainScreen()
+            MainScreen(
+                onNavigateToFoodCost = { navController.navigate("foodcoast") },
+                onNavigateToOcr = { navController.navigate("ocr") },
+                onNavigateToSalesManagement = { results, totalAmount ->
+                    navController.navigate("pay_management_root")
+                }
+            )
         }
     }
 }

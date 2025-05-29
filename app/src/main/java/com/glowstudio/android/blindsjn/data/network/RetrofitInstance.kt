@@ -110,3 +110,26 @@ object PublicApiRetrofitInstance {
         retrofit.create(BusinessApiService::class.java)
     }
 }
+
+// OCR API 서버용 Retrofit 인스턴스
+object OcrApiServer {
+    private const val BASE_URL = "https://d7cblqkw1o.apigw.ntruss.com/custom/v1/42447/02392618f64f8a5d3fd1004abc08eb2e9cd4a9eba2e80c21b5ccdf7fa7b73df4/"
+
+    private val client = OkHttpClient.Builder()
+        .addInterceptor(HttpLoggingInterceptor().apply {
+            level = HttpLoggingInterceptor.Level.BODY
+        })
+        .connectTimeout(30, TimeUnit.SECONDS)
+        .readTimeout(30, TimeUnit.SECONDS)
+        .writeTimeout(30, TimeUnit.SECONDS)
+        .build()
+
+    val apiService: com.glowstudio.android.blindsjn.feature.ocr.network.OcrApiService by lazy {
+        Retrofit.Builder()
+            .baseUrl(BASE_URL)
+            .client(client)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+            .create(com.glowstudio.android.blindsjn.feature.ocr.network.OcrApiService::class.java)
+    }
+}

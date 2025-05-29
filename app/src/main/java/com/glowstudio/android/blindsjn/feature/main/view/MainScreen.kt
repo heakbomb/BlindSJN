@@ -38,6 +38,7 @@ import com.glowstudio.android.blindsjn.feature.foodcost.view.EditRecipeScreen
 import com.glowstudio.android.blindsjn.feature.foodcost.view.IngredientListScreen
 import com.glowstudio.android.blindsjn.feature.main.model.NavigationState
 import com.glowstudio.android.blindsjn.feature.main.viewmodel.BottomBarViewModel
+import com.glowstudio.android.blindsjn.feature.ocr.model.OcrResult
 
 /**
  * 메인 스크린: 상단바, 하단 네비게이션 바, 내부 컨텐츠(AppNavHost)를 포함하여 전체 화면 전환을 관리합니다.
@@ -47,7 +48,10 @@ import com.glowstudio.android.blindsjn.feature.main.viewmodel.BottomBarViewModel
 fun MainScreen(
     topBarViewModel: TopBarViewModel = viewModel(),
     navigationViewModel: NavigationViewModel = viewModel(),
-    bottomBarViewModel: BottomBarViewModel = viewModel()
+    bottomBarViewModel: BottomBarViewModel = viewModel(),
+    onNavigateToFoodCost: () -> Unit,
+    onNavigateToOcr: () -> Unit,
+    onNavigateToSalesManagement: (List<OcrResult>, Int) -> Unit
 ) {
     // 하나의 NavController 생성
     val navController = rememberNavController()
@@ -112,8 +116,9 @@ fun MainScreen(
                     composable("board") { BoardScreen(navController) }
                     composable("paymanagement") {
                         PayManagementScreen(
-                            onNavigateToFoodCost = { navController.navigate("foodcoast") },
-                            onNavigateToOcr = { navController.navigate("ocr") }
+                            onNavigateToSalesManagement = { results, totalAmount ->
+                                navController.navigate("paymanagement")
+                            }
                         )
                     }
                     composable("message") { MessageScreen(navController) }
@@ -221,7 +226,11 @@ fun MainScreen(
                         )
                     }
                     composable("ocr") {
-                        com.glowstudio.android.blindsjn.feature.paymanagement.view.OcrScreen()
+                        com.glowstudio.android.blindsjn.feature.ocr.view.CameraScreen(
+                            onNavigateToSalesManagement = { results, totalAmount ->
+                                navController.navigate("paymanagement")
+                            }
+                        )
                     }
                     mainNavGraph(
                         navController = navController,
@@ -237,6 +246,10 @@ fun MainScreen(
 @Composable
 fun MainScreenPreview() {
     BlindSJNTheme {
-        MainScreen()
+        MainScreen(
+            onNavigateToFoodCost = { },
+            onNavigateToOcr = { },
+            onNavigateToSalesManagement = { _, _ -> }
+        )
     }
 }

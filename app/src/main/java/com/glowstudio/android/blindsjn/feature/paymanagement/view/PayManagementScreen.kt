@@ -28,13 +28,18 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.glowstudio.android.blindsjn.feature.paymanagement.model.SalesComparisonResponse
 import com.glowstudio.android.blindsjn.feature.paymanagement.model.SalesSummaryResponse
 import com.glowstudio.android.blindsjn.feature.paymanagement.viewmodel.PayManagementViewModel
+import com.glowstudio.android.blindsjn.feature.ocr.model.OcrResult
+import com.glowstudio.android.blindsjn.feature.paymanagement.repository.PayManagementRepository
+import com.glowstudio.android.blindsjn.feature.paymanagement.api.PayManagementApi
 import java.time.LocalDate
 import kotlin.math.cos
 import kotlin.math.sin
+import androidx.compose.ui.platform.LocalContext
+import com.glowstudio.android.blindsjn.data.network.InternalServer
 
 @Composable
 private fun GoalSettingDialog(
@@ -121,11 +126,98 @@ private fun FixedCostSettingDialog(
 }
 
 @Composable
+private fun OcrDataCard(
+    ocrResults: List<OcrResult>,
+    totalAmount: Int,
+    totalMargin: Int,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(12.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp)
+        ) {
+            Text(
+                text = "최근 OCR 결과",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold
+            )
+            
+            Spacer(modifier = Modifier.height(12.dp))
+            
+            // OCR 결과 목록
+            ocrResults.forEach { result ->
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 4.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        text = result.name,
+                        modifier = Modifier.weight(1f)
+                    )
+                    Text(
+                        text = "${result.quantity}개",
+                        modifier = Modifier.padding(horizontal = 8.dp)
+                    )
+                    Text(
+                        text = "${result.price * result.quantity}원"
+                    )
+                }
+            }
+            
+            Divider(
+                modifier = Modifier.padding(vertical = 8.dp),
+                color = ColorPalette.DividerGray
+            )
+            
+            // 합계 정보
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = "총 매출",
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    text = "${totalAmount}원",
+                    fontWeight = FontWeight.Bold
+                )
+            }
+            
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = "예상 마진",
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    text = "${totalMargin}원",
+                    fontWeight = FontWeight.Bold,
+                    color = Blue
+                )
+            }
+        }
+    }
+}
+
+@Composable
 fun PayManagementScreen(
-    viewModel: PayManagementViewModel = hiltViewModel(),
-    onNavigateToFoodCost: () -> Unit = {},
-    onNavigateToSalesInput: () -> Unit = {},
-    onNavigateToOcr: () -> Unit = {},
+    onNavigateToSalesManagement: (List<OcrResult>, Int) -> Unit,
+    viewModel: PayManagementViewModel = viewModel(
+        factory = PayManagementViewModel.provideFactory(
+            repository = PayManagementRepository(
+                api = InternalServer.api,
+                context = LocalContext.current
+            )
+        )
+    )
 ) {
     val periodTabs = listOf("일", "주", "월", "연")
     val selectedPeriod by viewModel.selectedPeriod.collectAsState()
@@ -158,7 +250,7 @@ fun PayManagementScreen(
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     TabButton(text = "매출관리", selected = true, onClick = { /* 현재 화면 */ }, modifier = Modifier.weight(1f))
-                    TabButton(text = "마진관리", selected = false, onClick = onNavigateToFoodCost, modifier = Modifier.weight(1f))
+                    TabButton(text = "마진관리", selected = false, onClick = { /* 마진관리 클릭 시 처리 */ }, modifier = Modifier.weight(1f))
                 }
                 Spacer(modifier = Modifier.height(16.dp))
             }
@@ -272,7 +364,7 @@ fun PayManagementScreen(
 
             // 3. 매출 추이 섹션
             item {
-                SectionLayout(title = "매출 추이", onMoreClick = onNavigateToSalesInput) {
+                SectionLayout(title = "매출 추이", onMoreClick = { /* 매출 추이 클릭 시 처리 */ }) {
                     Card(
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(20.dp),
@@ -604,7 +696,7 @@ fun PayManagementScreen(
             contentAlignment = Alignment.BottomEnd
         ) {
             FloatingActionButton(
-                onClick = onNavigateToOcr,
+                onClick = { onNavigateToSalesManagement(emptyList(), 0) },
                 containerColor = Blue,
                 contentColor = Color.White,
                 modifier = Modifier.padding(16.dp)
@@ -787,5 +879,7 @@ fun SalesComparisonCard(comparison: SalesComparisonResponse) {
 @Preview(showBackground = true)
 @Composable
 fun PayManagementScreenPreview() {
-    PayManagementScreen()
+    PayManagementScreen(
+        onNavigateToSalesManagement = { _, _ -> }
+    )
 } 

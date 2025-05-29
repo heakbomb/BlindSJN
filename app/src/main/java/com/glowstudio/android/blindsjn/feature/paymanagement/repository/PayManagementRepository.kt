@@ -1,33 +1,30 @@
 package com.glowstudio.android.blindsjn.feature.paymanagement.repository
 
-import com.glowstudio.android.blindsjn.feature.paymanagement.model.SalesSummaryResponse
-import com.glowstudio.android.blindsjn.feature.paymanagement.model.SalesComparisonResponse
-import com.glowstudio.android.blindsjn.feature.paymanagement.model.TopItemsResponse
-import javax.inject.Inject
-import javax.inject.Singleton
 import android.content.Context
 import android.content.SharedPreferences
-import dagger.hilt.android.qualifiers.ApplicationContext
+import com.glowstudio.android.blindsjn.feature.paymanagement.model.SalesComparisonResponse
+import com.glowstudio.android.blindsjn.feature.paymanagement.model.SalesSummaryResponse
+import com.glowstudio.android.blindsjn.feature.paymanagement.model.TopItemsResponse
+import com.glowstudio.android.blindsjn.data.network.ApiService
 
-@Singleton
-class PayManagementRepository @Inject constructor(
-    private val api: PayManagementApi,
-    @ApplicationContext private val context: Context
+class PayManagementRepository(
+    private val api: ApiService,
+    private val context: Context
 ) {
     private val sharedPreferences = context.getSharedPreferences("pay_management_prefs", Context.MODE_PRIVATE)
     private val MONTHLY_GOAL_KEY = "monthly_sales_goal"
     private val FIXED_COST_KEY = "monthly_fixed_cost"
 
     suspend fun getSalesSummary(date: String): SalesSummaryResponse {
-        return api.getSalesSummary(date)
+        return api.getSalesSummary("day", date).body() ?: throw Exception("Failed to get sales summary")
     }
 
     suspend fun getSalesComparison(date: String): SalesComparisonResponse {
-        return api.getSalesComparison(date)
+        return api.getSalesComparison(date).body() ?: throw Exception("Failed to get sales comparison")
     }
 
     suspend fun getTopItems(date: String, period: String = "day"): TopItemsResponse {
-        return api.getTopItems(date, period)
+        return api.getTopItems(date, period).body() ?: throw Exception("Failed to get top items")
     }
 
     fun getMonthlyGoal(): Double {
