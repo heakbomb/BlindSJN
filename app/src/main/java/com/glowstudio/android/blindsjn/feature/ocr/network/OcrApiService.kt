@@ -1,23 +1,32 @@
 package com.glowstudio.android.blindsjn.feature.ocr.network
 
 import com.glowstudio.android.blindsjn.feature.ocr.model.*
-import okhttp3.MultipartBody
 import retrofit2.Response
 import retrofit2.http.*
 
 interface OcrApiService {
     // 영수증 이미지 분석 API
-    @Multipart
     @POST("document/receipt")
     suspend fun analyzeReceipt(
-        @Header("X-OCR-SECRET") secretKey: String,
-        @Part image: MultipartBody.Part
+        @Body request: OcrRequest
     ): Response<OcrApiResponse>
 
     // OCR 분석 결과 저장 API
     @POST("api_save_ocr_result.php")
     suspend fun saveOcrResult(@Body request: OcrSaveRequest): OcrSaveResponse
 }
+
+data class OcrRequest(
+    val version: String,
+    val requestId: String,
+    val timestamp: Long,
+    val images: List<OcrImage>
+)
+
+data class OcrImage(
+    val format: String,
+    val name: String
+)
 
 data class OcrSaveRequest(
     val date: String,

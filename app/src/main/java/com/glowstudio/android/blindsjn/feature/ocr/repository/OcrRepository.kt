@@ -7,12 +7,13 @@ import com.glowstudio.android.blindsjn.data.network.OcrApiServer
 import com.glowstudio.android.blindsjn.feature.ocr.model.*
 import com.glowstudio.android.blindsjn.feature.ocr.network.OcrItem
 import com.glowstudio.android.blindsjn.feature.ocr.network.OcrSaveRequest
-import okhttp3.MediaType.Companion.toMediaTypeOrNull
-import okhttp3.MultipartBody
-import okhttp3.RequestBody.Companion.asRequestBody
+import com.glowstudio.android.blindsjn.feature.ocr.network.OcrRequest
+import com.glowstudio.android.blindsjn.feature.ocr.network.OcrImage
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
+import android.util.Base64
+import java.util.UUID
 
 class OcrRepository {
     companion object {
@@ -22,11 +23,22 @@ class OcrRepository {
     // 영수증 이미지를 분석하여 상품 정보 추출
     suspend fun analyzeReceipt(uri: Uri): Result<List<OcrResult>> {
         return try {
-            val file = File(uri.path!!)
-            val requestFile = file.asRequestBody("image/*".toMediaTypeOrNull())
-            val imagePart = MultipartBody.Part.createFormData("file", file.name, requestFile)
+            val imageBytes = File(uri.path!!).readBytes()
+            val base64Image = Base64.encodeToString(imageBytes, Base64.NO_WRAP)
+            
+            val request = OcrRequest(
+                version = "V2",
+                requestId = UUID.randomUUID().toString(),
+                timestamp = System.currentTimeMillis(),
+                images = listOf(
+                    OcrImage(
+                        format = "jpg",
+                        name = "image"
+                    )
+                )
+            )
 
-            val response = OcrApiServer.apiService.analyzeReceipt(API_KEY, imagePart)
+            val response = OcrApiServer.apiService.analyzeReceipt(request)
             
             if (response.isSuccessful) {
                 val ocrResponse = response.body()

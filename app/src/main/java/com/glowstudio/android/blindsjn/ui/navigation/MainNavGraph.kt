@@ -1,5 +1,6 @@
 package com.glowstudio.android.blindsjn.ui.navigation
 
+import android.net.Uri
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -23,6 +24,7 @@ import com.glowstudio.android.blindsjn.feature.profile.ProfileScreen
 import com.glowstudio.android.blindsjn.feature.paymanagement.view.PayManagementScreen
 import com.glowstudio.android.blindsjn.feature.ocr.view.CameraScreen
 import com.glowstudio.android.blindsjn.feature.ocr.model.OcrResult
+import com.glowstudio.android.blindsjn.feature.ocr.view.OcrResultScreen
 import com.google.gson.Gson
 import java.net.URLDecoder
 
@@ -100,6 +102,9 @@ fun NavGraphBuilder.mainNavGraph(
 
         // 매출관리 네비게이션 그래프
         payManagementNavGraph(navController, topBarViewModel)
+
+        // OCR 네비게이션 그래프
+        ocrNavGraph(navController, topBarViewModel)
     }
 }
 
@@ -302,9 +307,56 @@ fun NavGraphBuilder.payManagementNavGraph(
                 onBackClick = { navController.navigateUp() }
             )
             CameraScreen(
-                onNavigateToSalesManagement = { _, _ ->
+                onNavigateToOcrResult = { results ->
                     navController.navigateUp()
                 }
+            )
+        }
+    }
+}
+
+fun NavGraphBuilder.ocrNavGraph(
+    navController: NavHostController,
+    topBarViewModel: TopBarViewModel
+) {
+    navigation(
+        startDestination = "camera_screen",
+        route = "ocr_root"
+    ) {
+        composable("camera_screen") {
+            topBarViewModel.setDetailBar(
+                title = "영수증 촬영",
+                onBackClick = { navController.navigateUp() }
+            )
+            CameraScreen(
+                onNavigateToOcrResult = { results ->
+                    val resultsJson = Uri.encode(Gson().toJson(results))
+                    navController.navigate("ocr_result_screen/$resultsJson")
+                }
+            )
+        }
+
+        composable(
+            route = "ocr_result_screen/{results}",
+            arguments = listOf(
+                navArgument("results") {
+                    type = NavType.StringType
+                }
+            )
+        ) { backStackEntry ->
+            val resultsJson = backStackEntry.arguments?.getString("results")
+            val results = try {
+                Gson().fromJson(URLDecoder.decode(resultsJson, "UTF-8"), Array<OcrResult>::class.java).toList()
+            } catch (e: Exception) {
+                emptyList()
+            }
+
+            topBarViewModel.setDetailBar(
+                title = "OCR 결과",
+                onBackClick = { navController.navigateUp() }
+            )
+            OcrResultScreen(
+                results = results
             )
         }
     }

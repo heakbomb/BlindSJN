@@ -21,7 +21,11 @@ android {
     }
 
     buildTypes {
+        debug {
+            buildConfigField("String", "OCR_API_SECRET", "\"${System.getenv("OCR_API_SECRET") ?: ""}\"")
+        }
         release {
+            buildConfigField("String", "OCR_API_SECRET", "\"${System.getenv("OCR_API_SECRET") ?: ""}\"")
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
@@ -40,6 +44,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 

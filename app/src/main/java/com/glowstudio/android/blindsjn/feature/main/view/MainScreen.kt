@@ -227,7 +227,7 @@ fun MainScreen(
                     }
                     composable("ocr") {
                         com.glowstudio.android.blindsjn.feature.ocr.view.CameraScreen(
-                            onNavigateToSalesManagement = { results, totalAmount ->
+                            onNavigateToOcrResult = { results ->
                                 navController.navigate("paymanagement")
                             }
                         )

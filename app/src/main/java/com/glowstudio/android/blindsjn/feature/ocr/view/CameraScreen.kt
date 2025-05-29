@@ -37,10 +37,11 @@ import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.Executor
+import com.glowstudio.android.blindsjn.ui.theme.ColorPalette
 
 @Composable
 fun CameraScreen(
-    onNavigateToSalesManagement: (List<OcrResult>, Int) -> Unit,
+    onNavigateToOcrResult: (List<OcrResult>) -> Unit,
     viewModel: CameraViewModel = viewModel()
 ) {
     val context = LocalContext.current
@@ -48,113 +49,127 @@ fun CameraScreen(
     val ocrResults by viewModel.ocrResults.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     val error by viewModel.error.collectAsState()
-    val saveSuccess by viewModel.saveSuccess.collectAsState()
-    var showEditScreen by remember { mutableStateOf(false) }
+
+    // OCR 결과가 있을 때 자동으로 결과 화면으로 이동
+    LaunchedEffect(ocrResults) {
+        if (ocrResults.isNotEmpty()) {
+            onNavigateToOcrResult(ocrResults)
+        }
+    }
+
+    // 에러가 있을 때 처리
+    LaunchedEffect(error) {
+        error?.let {
+            android.widget.Toast.makeText(context, it, android.widget.Toast.LENGTH_LONG).show()
+        }
+    }
 
     // 카메라 관련 상태
     val imageCapture = remember { ImageCapture.Builder().build() }
     val cameraExecutor = remember { ContextCompat.getMainExecutor(context) }
 
-    if (showEditScreen) {
-        EditOcrScreen(
-            results = ocrResults,
-            onUpdateResult = { index, result ->
-                viewModel.updateOcrResult(index, result)
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(ColorPalette.White)
+    ) {
+        // 카메라 프리뷰
+        AndroidView(
+            factory = { ctx ->
+                PreviewView(ctx).apply {
+                    implementationMode = PreviewView.ImplementationMode.COMPATIBLE
+                }
             },
-            onConfirm = {
-                showEditScreen = false
-            }
-        )
-    } else {
+            modifier = Modifier.fillMaxSize()
+        ) { previewView ->
+            val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
+            cameraProviderFuture.addListener({
+                val cameraProvider = cameraProviderFuture.get()
+                val preview = CameraXPreview.Builder().build().also {
+                    it.setSurfaceProvider(previewView.surfaceProvider)
+                }
+
+                try {
+                    cameraProvider.unbindAll()
+                    cameraProvider.bindToLifecycle(
+                        lifecycleOwner,
+                        CameraSelector.DEFAULT_BACK_CAMERA,
+                        preview,
+                        imageCapture
+                    )
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }, cameraExecutor)
+        }
+
+        // 프레임 오버레이
         Box(
             modifier = Modifier
-                .fillMaxSize()
-                .background(BackgroundWhite)
+                .align(Alignment.TopCenter)
+                .padding(top = 48.dp)
+                .size(width = 320.dp, height = 520.dp)
         ) {
-            // 카메라 프리뷰
-            AndroidView(
-                factory = { ctx ->
-                    PreviewView(ctx).apply {
-                        implementationMode = PreviewView.ImplementationMode.COMPATIBLE
-                    }
-                },
-                modifier = Modifier.fillMaxSize()
-            ) { previewView ->
-                val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
-                cameraProviderFuture.addListener({
-                    val cameraProvider = cameraProviderFuture.get()
-                    val preview = CameraXPreview.Builder().build().also {
-                        it.setSurfaceProvider(previewView.surfaceProvider)
-                    }
-
-                    try {
-                        cameraProvider.unbindAll()
-                        cameraProvider.bindToLifecycle(
-                            lifecycleOwner,
-                            CameraSelector.DEFAULT_BACK_CAMERA,
-                            preview,
-                            imageCapture
-                        )
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                    }
-                }, cameraExecutor)
+            Canvas(modifier = Modifier.matchParentSize()) {
+                val strokeWidth = 4.dp.toPx()
+                val length = 40.dp.toPx()
+                val w = size.width
+                val h = size.height
+                val color = Blue
+                drawLine(color, Offset(0f, 0f), Offset(length, 0f), strokeWidth)
+                drawLine(color, Offset(0f, 0f), Offset(0f, length), strokeWidth)
+                drawLine(color, Offset(w, 0f), Offset(w - length, 0f), strokeWidth)
+                drawLine(color, Offset(w, 0f), Offset(w, length), strokeWidth)
+                drawLine(color, Offset(0f, h), Offset(0f, h - length), strokeWidth)
+                drawLine(color, Offset(0f, h), Offset(length, h), strokeWidth)
+                drawLine(color, Offset(w, h), Offset(w - length, h), strokeWidth)
+                drawLine(color, Offset(w, h), Offset(w, h - length), strokeWidth)
             }
+            Text(
+                "문서를 이 영역에 맞춰주세요.",
+                color = TextSecondary,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Medium,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.align(Alignment.Center)
+            )
+        }
 
-            // 프레임 오버레이
+        // 로딩 인디케이터
+        if (isLoading) {
             Box(
                 modifier = Modifier
-                    .align(Alignment.TopCenter)
-                    .padding(top = 48.dp)
-                    .size(width = 320.dp, height = 520.dp)
+                    .fillMaxSize()
+                    .background(ColorPalette.DarkBackground.copy(alpha = 0.5f)),
+                contentAlignment = Alignment.Center
             ) {
-                Canvas(modifier = Modifier.matchParentSize()) {
-                    val strokeWidth = 4.dp.toPx()
-                    val length = 40.dp.toPx()
-                    val w = size.width
-                    val h = size.height
-                    val color = Blue
-                    drawLine(color, Offset(0f, 0f), Offset(length, 0f), strokeWidth)
-                    drawLine(color, Offset(0f, 0f), Offset(0f, length), strokeWidth)
-                    drawLine(color, Offset(w, 0f), Offset(w - length, 0f), strokeWidth)
-                    drawLine(color, Offset(w, 0f), Offset(w, length), strokeWidth)
-                    drawLine(color, Offset(0f, h), Offset(0f, h - length), strokeWidth)
-                    drawLine(color, Offset(0f, h), Offset(length, h), strokeWidth)
-                    drawLine(color, Offset(w, h), Offset(w - length, h), strokeWidth)
-                    drawLine(color, Offset(w, h), Offset(w, h - length), strokeWidth)
-                }
-                Text(
-                    "문서를 이 영역에 맞춰주세요.",
-                    color = TextSecondary,
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Medium,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.align(Alignment.Center)
+                CircularProgressIndicator(
+                    color = ColorPalette.Blue
                 )
             }
-
-            // 촬영 버튼
-            Button(
-                onClick = {
-                    takePhoto(
-                        imageCapture = imageCapture,
-                        outputDirectory = context.getExternalFilesDir(android.os.Environment.DIRECTORY_PICTURES)!!,
-                        executor = cameraExecutor,
-                        onImageCaptured = { uri ->
-                            viewModel.processImage(uri)
-                        },
-                        onError = { /* 에러 처리 */ }
-                    )
-                },
-                shape = CircleShape,
-                colors = ButtonDefaults.buttonColors(containerColor = Blue),
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(bottom = 48.dp)
-                    .size(72.dp)
-                    .clip(CircleShape)
-            ) {}
         }
+
+        // 촬영 버튼
+        Button(
+            onClick = {
+                takePhoto(
+                    imageCapture = imageCapture,
+                    outputDirectory = context.getExternalFilesDir(android.os.Environment.DIRECTORY_PICTURES)!!,
+                    executor = cameraExecutor,
+                    onImageCaptured = { uri ->
+                        viewModel.processImage(uri)
+                    },
+                    onError = { /* 에러 처리 */ }
+                )
+            },
+            shape = CircleShape,
+            colors = ButtonDefaults.buttonColors(containerColor = ColorPalette.Blue),
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(bottom = 48.dp)
+                .size(72.dp)
+                .clip(CircleShape)
+        ) {}
     }
 }
 
@@ -191,10 +206,7 @@ private fun takePhoto(
 
 @Composable
 fun OcrResultScreen(
-    results: List<OcrResult>,
-    onUpdateResult: (Int, OcrResult) -> Unit,
-    onEdit: () -> Unit,
-    onConfirm: () -> Unit
+    results: List<OcrResult>
 ) {
     Column(
         modifier = Modifier
@@ -241,7 +253,7 @@ fun OcrResultScreen(
                     color = MaterialTheme.colorScheme.outline
                 )
 
-                results.forEachIndexed { index, result ->
+                results.forEach { result ->
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -262,24 +274,6 @@ fun OcrResultScreen(
                         )
                     }
                 }
-            }
-        }
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Button(
-                onClick = onEdit,
-                modifier = Modifier.weight(1f).padding(end = 8.dp)
-            ) {
-                Text("수정")
-            }
-            Button(
-                onClick = onConfirm,
-                modifier = Modifier.weight(1f).padding(start = 8.dp)
-            ) {
-                Text("확인")
             }
         }
     }
