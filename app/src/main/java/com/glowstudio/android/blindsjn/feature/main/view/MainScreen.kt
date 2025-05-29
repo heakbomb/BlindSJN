@@ -117,7 +117,7 @@ fun MainScreen(
                     composable("paymanagement") {
                         PayManagementScreen(
                             onNavigateToSalesManagement = { results, totalAmount ->
-                                navController.navigate("paymanagement")
+                                navController.navigate("ocr")
                             }
                         )
                     }

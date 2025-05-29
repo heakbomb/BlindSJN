@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import kotlinx.coroutines.async
 
 private const val TAG = "PayManagementViewModel"
 
@@ -64,9 +65,9 @@ class PayManagementViewModel(
 
     init {
         loadData()
-        loadWeeklySales()
+        // loadWeeklySales()  // 주간 데이터 로드 주석 처리
         loadMonthlyGoal()
-        loadDailyAverage()
+        // loadDailyAverage() // 일간 평균 데이터 로드 주석 처리
         loadFixedCost()
     }
 
@@ -118,32 +119,29 @@ class PayManagementViewModel(
                     else -> "day"
                 }
 
-                // 매출 요약 데이터 로드
+                // 핵심 API 호출만 유지
                 val summaryResult = repository.getSalesSummary(dateStr)
                 if (summaryResult.status == "success") {
                     _salesSummary.value = summaryResult
+                    // 월간 진행률 업데이트는 매출 요약 데이터를 사용
+                    updateMonthlyProgress(summaryResult)
                 } else {
                     _error.value = summaryResult.message
                 }
 
-                // 매출 비교 데이터 로드
+                // 비교 데이터 API 호출 주석 처리
+                /*
                 val comparisonResult = repository.getSalesComparison(dateStr)
                 if (comparisonResult.status == "success") {
                     _salesComparison.value = comparisonResult
                 } else {
                     _error.value = comparisonResult.message
                 }
+                */
 
-                // 인기 상품 데이터 로드
-                val topItemsResult = repository.getTopItems(dateStr, periodForApi)
-                if (topItemsResult.status == "success") {
-                    _topItems.value = topItemsResult
-                } else {
-                    _error.value = topItemsResult.message
-                }
+                // 인기 상품 데이터는 추후 구현 예정
+                _topItems.value = null
 
-                // 월간 목표 진행률 업데이트
-                updateMonthlyProgress()
             } catch (e: Exception) {
                 _error.value = e.message
             } finally {
@@ -152,34 +150,19 @@ class PayManagementViewModel(
         }
     }
 
-    private fun updateMonthlyProgress() {
+    private fun updateMonthlyProgress(summaryResult: SalesSummaryResponse) {
         viewModelScope.launch {
             try {
-                val today = LocalDate.now()
-                val startOfMonth = today.withDayOfMonth(1)
-                val endOfMonth = today.withDayOfMonth(today.lengthOfMonth())
-                
-                var totalMonthlySales = 0.0
-                var currentDate = startOfMonth
-                
-                while (!currentDate.isAfter(endOfMonth)) {
-                    if (!currentDate.isAfter(today)) {
-                        val dateStr = currentDate.format(DateTimeFormatter.ISO_DATE)
-                        val response = repository.getSalesSummary(dateStr)
-                        if (response.status == "success" && response.summary != null) {
-                            totalMonthlySales += response.summary.totalSales
-                        }
-                    }
-                    currentDate = currentDate.plusDays(1)
+                if (summaryResult.summary != null) {
+                    _monthlyProgress.value = summaryResult.summary.totalSales
                 }
-                
-                _monthlyProgress.value = totalMonthlySales
             } catch (e: Exception) {
                 Log.e(TAG, "월간 진행률 업데이트 실패", e)
             }
         }
     }
 
+    /*
     private fun loadWeeklySales() {
         viewModelScope.launch {
             try {
@@ -187,19 +170,22 @@ class PayManagementViewModel(
                 val startOfWeek = today.minusDays(today.dayOfWeek.value.toLong() - 1)
                 val weeklySales = mutableListOf<Double>()
                 
-                for (i in 0..6) {
-                    val currentDate = startOfWeek.plusDays(i.toLong())
-                    if (!currentDate.isAfter(today)) {
+                // 한 번의 API 호출로 주간 데이터를 가져오도록 수정
+                val dateStr = today.format(DateTimeFormatter.ISO_DATE)
+                val response = repository.getSalesSummary(dateStr)
+                
+                if (response.status == "success" && response.data != null) {
+                    // 주간 데이터 처리
+                    val salesData = response.data
+                    for (i in 0..6) {
+                        val currentDate = startOfWeek.plusDays(i.toLong())
                         val dateStr = currentDate.format(DateTimeFormatter.ISO_DATE)
-                        val response = repository.getSalesSummary(dateStr)
-                        if (response.status == "success" && response.summary != null) {
-                            weeklySales.add(response.summary.totalSales)
-                        } else {
-                            weeklySales.add(0.0)
-                        }
-                    } else {
-                        weeklySales.add(0.0)
+                        val daySales = salesData.find { it.date == dateStr }
+                        weeklySales.add(daySales?.totalSalesAmount ?: 0.0)
                     }
+                } else {
+                    // 데이터가 없는 경우 0으로 채움
+                    repeat(7) { weeklySales.add(0.0) }
                 }
                 
                 _weeklySales.value = weeklySales
@@ -209,6 +195,7 @@ class PayManagementViewModel(
             }
         }
     }
+    */
 
     private fun loadMonthlyGoal() {
         _monthlyGoal.value = repository.getMonthlyGoal()
@@ -218,65 +205,63 @@ class PayManagementViewModel(
         _fixedCost.value = repository.getFixedCost()
     }
 
+    /*
     private fun loadDailyAverage() {
         viewModelScope.launch {
             try {
                 val today = LocalDate.now()
                 val dayOfWeek = today.dayOfWeek.value
                 
-                val startOfMonth = today.withDayOfMonth(1)
-                val endOfMonth = today.withDayOfMonth(today.lengthOfMonth())
-                var totalSales = 0.0
-                var count = 0
+                // 한 번의 API 호출로 일간 평균 데이터를 가져오도록 수정
+                val dateStr = today.format(DateTimeFormatter.ISO_DATE)
+                val response = repository.getSalesSummary(dateStr)
                 
-                var currentDate = startOfMonth
-                while (!currentDate.isAfter(endOfMonth)) {
-                    if (currentDate.dayOfWeek.value == dayOfWeek && !currentDate.isAfter(today)) {
-                        val dateStr = currentDate.format(DateTimeFormatter.ISO_DATE)
-                        val response = repository.getSalesSummary(dateStr)
-                        if (response.status == "success" && response.summary != null) {
-                            totalSales += response.summary.totalSales
-                            count++
-                        }
+                if (response.status == "success" && response.data != null) {
+                    val salesData = response.data
+                    
+                    // 현재 요일의 평균 계산
+                    val currentDaySales = salesData.filter { 
+                        LocalDate.parse(it.date).dayOfWeek.value == dayOfWeek 
+                    }.map { it.totalSalesAmount }
+                    
+                    _dailyAverage.value = if (currentDaySales.isNotEmpty()) {
+                        currentDaySales.average()
+                    } else {
+                        0.0
                     }
-                    currentDate = currentDate.plusDays(1)
-                }
-                
-                _dailyAverage.value = if (count > 0) totalSales / count else 0.0
-                
-                // 다른 요일 평균과 비교
-                var otherDaysTotal = 0.0
-                var otherDaysCount = 0
-                currentDate = startOfMonth
-                
-                while (!currentDate.isAfter(endOfMonth)) {
-                    if (currentDate.dayOfWeek.value != dayOfWeek && !currentDate.isAfter(today)) {
-                        val dateStr = currentDate.format(DateTimeFormatter.ISO_DATE)
-                        val response = repository.getSalesSummary(dateStr)
-                        if (response.status == "success" && response.summary != null) {
-                            otherDaysTotal += response.summary.totalSales
-                            otherDaysCount++
-                        }
+                    
+                    // 다른 요일의 평균 계산
+                    val otherDaysSales = salesData.filter { 
+                        LocalDate.parse(it.date).dayOfWeek.value != dayOfWeek 
+                    }.map { it.totalSalesAmount }
+                    
+                    val otherDaysAverage = if (otherDaysSales.isNotEmpty()) {
+                        otherDaysSales.average()
+                    } else {
+                        0.0
                     }
-                    currentDate = currentDate.plusDays(1)
-                }
-                
-                val otherDaysAverage = if (otherDaysCount > 0) otherDaysTotal / otherDaysCount else 0.0
-                _dailyComparison.value = if (otherDaysAverage > 0) {
-                    ((_dailyAverage.value - otherDaysAverage) / otherDaysAverage) * 100
+                    
+                    // 비교율 계산
+                    _dailyComparison.value = if (otherDaysAverage > 0) {
+                        ((_dailyAverage.value - otherDaysAverage) / otherDaysAverage) * 100
+                    } else {
+                        0.0
+                    }
                 } else {
-                    0.0
+                    _dailyAverage.value = 0.0
+                    _dailyComparison.value = 0.0
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "일간 평균 데이터 로드 실패", e)
             }
         }
     }
+    */
 
     fun refresh() {
         loadData()
-        loadWeeklySales()
-        loadDailyAverage()
+        // loadWeeklySales()  // 주간 데이터 로드 주석 처리
+        // loadDailyAverage() // 일간 평균 데이터 로드 주석 처리
     }
 
     companion object {
