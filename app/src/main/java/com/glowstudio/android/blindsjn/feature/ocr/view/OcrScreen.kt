@@ -1,11 +1,6 @@
 package com.glowstudio.android.blindsjn.feature.ocr.view
 
-import android.content.ContentValues
-import android.net.Uri
-import android.os.Build
-import android.provider.MediaStore
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
+import android.graphics.BitmapFactory
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -25,8 +20,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.glowstudio.android.blindsjn.ui.theme.*
 import com.glowstudio.android.blindsjn.feature.ocr.viewmodel.OcrViewModel
-import java.text.SimpleDateFormat
-import java.util.*
+import com.glowstudio.android.blindsjn.feature.ocr.camera.CameraPreview
+import com.glowstudio.android.blindsjn.feature.ocr.camera.OcrCameraManager
 
 @Composable
 fun OcrScreen(
@@ -34,44 +29,26 @@ fun OcrScreen(
 ) {
     val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsState()
-    
-    // Create a temporary file URI for the camera
-    val imageUri = remember {
-        val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
-        val contentValues = ContentValues().apply {
-            put(MediaStore.MediaColumns.DISPLAY_NAME, "OCR_$timestamp.jpg")
-            put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg")
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                put(MediaStore.MediaColumns.RELATIVE_PATH, "Pictures/BlindSJN")
-                put(MediaStore.MediaColumns.IS_PENDING, 1)
-            }
-        }
-        
-        context.contentResolver.insert(
-            MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-            contentValues
-        )
-    }
+    var cameraManager by remember { mutableStateOf<OcrCameraManager?>(null) }
 
-    val cameraLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.TakePicture()
-    ) { success ->
-        if (success && imageUri != null) {
-            viewModel.processImage(imageUri, context)
-        }
-    }
-
-    val verticalPadding = 48.dp
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(BackgroundWhite)
     ) {
-        // 상단에 프레임
+        // Camera Preview as background
+        CameraPreview(
+            modifier = Modifier.fillMaxSize(),
+            onCameraReady = { manager ->
+                cameraManager = manager
+            }
+        )
+
+        // Frame overlay
         Box(
             modifier = Modifier
                 .align(Alignment.TopCenter)
-                .padding(top = verticalPadding)
+                .padding(top = 48.dp)
                 .size(width = 320.dp, height = 520.dp)
         ) {
             Canvas(modifier = Modifier.matchParentSize()) {
@@ -99,30 +76,31 @@ fun OcrScreen(
             )
         }
 
-        // 하단에 버튼
+        // Capture button
         Button(
             onClick = {
-                imageUri?.let { uri ->
-                    cameraLauncher.launch(uri)
+                cameraManager?.captureImage { imageBytes ->
+                    val bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
+                    viewModel.processImage(bitmap)
                 }
             },
             shape = CircleShape,
             colors = ButtonDefaults.buttonColors(containerColor = Blue),
             modifier = Modifier
                 .align(Alignment.BottomCenter)
-                .padding(bottom = verticalPadding)
+                .padding(bottom = 48.dp)
                 .size(72.dp)
                 .clip(CircleShape)
         ) {}
 
-        // Show loading indicator when processing
+        // Loading indicator
         if (uiState.isLoading) {
             CircularProgressIndicator(
                 modifier = Modifier.align(Alignment.Center)
             )
         }
 
-        // Show error message if any
+        // Error message
         uiState.error?.let { error ->
             Text(
                 text = error,

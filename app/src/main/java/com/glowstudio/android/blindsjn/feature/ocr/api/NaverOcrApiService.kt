@@ -6,7 +6,7 @@ import retrofit2.http.Body
 import retrofit2.http.POST
 
 interface NaverOcrApiService {
-    @POST("v1/ocr")
+    @POST("document/receipt")
     suspend fun performOcr(
         @Body request: OcrRequest
     ): OcrResponse
