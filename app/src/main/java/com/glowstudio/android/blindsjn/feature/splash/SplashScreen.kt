@@ -13,6 +13,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.PlayerView
 import kotlinx.coroutines.delay
 
@@ -52,6 +53,8 @@ fun SplashScreen(
             factory = { context ->
                 PlayerView(context).apply {
                     player = exoPlayer
+                    useController = false  // 컨트롤러 숨기기
+                    resizeMode = AspectRatioFrameLayout.RESIZE_MODE_ZOOM  // 화면 전체 채우기
                 }
             },
             modifier = Modifier.fillMaxSize()

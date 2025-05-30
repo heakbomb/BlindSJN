@@ -1,0 +1,183 @@
+Index: app/src/main/java/com/glowstudio/android/blindsjn/feature/main/view/MainScreen.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.glowstudio.android.blindsjn.feature.main.view\n\nimport androidx.compose.foundation.layout.*\nimport androidx.compose.material3.*\nimport androidx.compose.runtime.*\nimport androidx.compose.ui.Modifier\nimport androidx.lifecycle.viewmodel.compose.viewModel\nimport androidx.navigation.compose.rememberNavController\nimport androidx.navigation.compose.currentBackStackEntryAsState\nimport com.glowstudio.android.blindsjn.ui.navigation.mainNavGraph\nimport com.glowstudio.android.blindsjn.feature.main.viewmodel.TopBarViewModel\nimport com.glowstudio.android.blindsjn.feature.main.viewmodel.NavigationViewModel\nimport androidx.compose.foundation.layout.Box\nimport androidx.compose.ui.tooling.preview.Preview\nimport com.glowstudio.android.blindsjn.feature.board.view.BoardScreen\nimport com.glowstudio.android.blindsjn.feature.board.view.BoardDetailScreen\nimport com.glowstudio.android.blindsjn.feature.board.view.WritePostScreen\nimport com.glowstudio.android.blindsjn.feature.board.view.PostDetailScreen\nimport com.glowstudio.android.blindsjn.feature.home.view.HomeScreen\nimport com.glowstudio.android.blindsjn.feature.profile.ProfileScreen\nimport com.glowstudio.android.blindsjn.feature.calendar.MessageScreen\nimport com.glowstudio.android.blindsjn.ui.screens.AddScheduleScreen\nimport androidx.navigation.compose.NavHost\nimport androidx.navigation.compose.composable\nimport androidx.navigation.NavType\nimport androidx.navigation.navArgument\nimport java.net.URLDecoder\nimport com.google.gson.Gson\nimport com.glowstudio.android.blindsjn.ui.theme.BlindSJNTheme\nimport com.glowstudio.android.blindsjn.feature.home.view.NewsDetailScreen\nimport com.glowstudio.android.blindsjn.data.model.Article\nimport com.glowstudio.android.blindsjn.data.network.Network\nimport com.glowstudio.android.blindsjn.feature.paymanagement.repository.PayManagementApi\nimport com.glowstudio.android.blindsjn.feature.paymanagement.repository.PayManagementRepository\nimport com.glowstudio.android.blindsjn.feature.paymanagement.viewmodel.PayManagementViewModel\nimport com.glowstudio.android.blindsjn.feature.paymanagement.view.PayManagementScreen\nimport com.glowstudio.android.blindsjn.feature.paymanagement.view.OcrScreen\nimport androidx.compose.ui.platform.LocalContext\nimport com.glowstudio.android.blindsjn.feature.foodcost.view.FoodCostScreen\nimport com.glowstudio.android.blindsjn.feature.foodcost.RegisterRecipeScreen\nimport com.glowstudio.android.blindsjn.feature.foodcost.RegisterIngredientScreen\nimport com.glowstudio.android.blindsjn.feature.foodcost.view.RecipeListScreen\nimport com.glowstudio.android.blindsjn.feature.foodcost.view.EditRecipeScreen\nimport com.glowstudio.android.blindsjn.feature.foodcost.view.IngredientListScreen\nimport com.glowstudio.android.blindsjn.feature.main.model.NavigationState\nimport com.glowstudio.android.blindsjn.feature.main.viewmodel.BottomBarViewModel\nimport com.glowstudio.android.blindsjn.feature.certification.BusinessCertificationScreen\nimport com.glowstudio.android.blindsjn.feature.home.NewsListScreen\nimport com.glowstudio.android.blindsjn.feature.home.view.NewsMainScreen\n\n/**\n * 메인 스크린: 상단바, 하단 네비게이션 바, 내부 컨텐츠(AppNavHost)를 포함하여 전체 화면 전환을 관리합니다.\n */\n\n@Composable\nfun MainScreen(\n    topBarViewModel: TopBarViewModel = viewModel(),\n    navigationViewModel: NavigationViewModel = viewModel(),\n    bottomBarViewModel: BottomBarViewModel = viewModel()\n) {\n    val context = LocalContext.current\n    val payManagementViewModel = remember {\n        val api = Network.payManagementApiService\n        val repository = PayManagementRepository(api, context)\n        PayManagementViewModel(repository)\n    }\n\n    // 하나의 NavController 생성\n    val navController = rememberNavController()\n    // TopBarViewModel에서 상단바 상태를 관찰\n    val topBarState by topBarViewModel.topBarState.collectAsState()\n    \n    // 현재 라우트 변경 감지\n    val navBackStackEntry by navController.currentBackStackEntryAsState()\n    val currentRoute = navBackStackEntry?.destination?.route\n\n    // 라우트가 변경될 때마다 TopBar 상태 업데이트\n    LaunchedEffect(currentRoute) {\n        when (currentRoute) {\n            \"home\", \"board\", \"paymanagement\", \"foodcoast\", \"message\", \"profile\" -> {\n                topBarViewModel.setMainBar()\n                bottomBarViewModel.showBottomBar()\n            }\n            else -> {\n                val title = when {\n                    currentRoute?.startsWith(\"postDetail/\") == true -> \"게시글\"\n                    currentRoute?.startsWith(\"boardDetail/\") == true -> \"게시판\"\n                    currentRoute?.startsWith(\"editRecipe/\") == true -> \"레시피 수정\"\n                    currentRoute?.startsWith(\"news_main/\") == true -> \"뉴스 메인\"\n                    currentRoute?.startsWith(\"news_detail/\") == true -> \"뉴스 상세\"\n                    else -> \"\"\n                }\n                topBarViewModel.setDetailBar(\n                    title = title,\n                    onBackClick = { navController.navigateUp() }\n                )\n                bottomBarViewModel.hideBottomBar()\n            }\n        }\n    }\n\n    val bottomBarRoutes = NavigationState().items.map { it.route }\n    val isBottomBarVisible by bottomBarViewModel.isBottomBarVisible.collectAsState()\n\n    Scaffold(\n        // 상단바: TopBarViewModel의 상태를 기반으로 동적으로 업데이트됨\n        topBar = {\n            TopBar(state = topBarState)\n        },\n        // 하단 네비게이션 바\n        bottomBar = {\n            if (isBottomBarVisible) {\n                BottomNavigationBar(\n                    navController = navController,\n                    viewModel = navigationViewModel\n                )\n            }\n        },\n        // 내부 컨텐츠: NavHost에 navController와 TopBarViewModel 전달\n        content = { paddingValues ->\n            // paddingValues에 추가 top padding(예: 16.dp)을 더해 상단바와의 여백을 확보합니다.\n            Box(modifier = Modifier.padding(paddingValues)) {\n                NavHost(\n                    navController = navController,\n                    startDestination = \"home\"\n                ) {\n                    composable(\"home\") { HomeScreen(navController) }\n                    composable(\"board\") { BoardScreen(navController) }\n                    composable(\"paymanagement\") {\n                        PayManagementScreen(\n                            viewModel = payManagementViewModel,\n                            onNavigateToFoodCost = { navController.navigate(\"foodcoast\") },\n                            onNavigateToSalesInput = { /* TODO: Implement Sales Input navigation */ },\n                            onNavigateToOcr = { navController.navigate(\"ocr\") }\n                        )\n                    }\n                    composable(\"message\") { MessageScreen(navController) }\n                    composable(\"profile\") { ProfileScreen(\n                        onLogoutClick = { /* ... */ },\n                        onBusinessCertificationClick = { navController.navigate(\"businessCertification\") },\n                        onProfileEditClick = { /* ... */ },\n                        onContactEditClick = { /* ... */ }\n                    ) }\n                    composable(\"foodcoast\") {\n                        FoodCostScreen(\n                            onRecipeListClick = { navController.navigate(\"recipeList\") },\n                            onRegisterRecipeClick = { navController.navigate(\"registerRecipe\") },\n                            onIngredientListClick = { navController.navigate(\"ingredientList\") },\n                            onRegisterIngredientClick = { navController.navigate(\"registerIngredient\") },\n                            onNavigateToPayManagement = { navController.navigate(\"paymanagement\") },\n                            onNavigateToFoodCost = { navController.navigate(\"foodcoast\") }\n                        )\n                    }\n                    composable(\"recipeList\") {\n                        RecipeListScreen(\n                            onEditRecipeClick = { recipeName -> navController.navigate(\"editRecipe/$recipeName\") },\n                            onRegisterRecipeClick = { navController.navigate(\"registerRecipe\") }\n                        )\n                    }\n                    composable(\"editRecipe/{recipeName}\") { backStackEntry ->\n                        val recipeName = backStackEntry.arguments?.getString(\"recipeName\") ?: \"\"\n                        EditRecipeScreen(\n                            recipeName = recipeName,\n                            onEditIngredientClick = { /* TODO: 재료 수정 화면으로 이동 */ },\n                            onSaveClick = { navController.popBackStack() }\n                        )\n                    }\n                    composable(\"ingredientList\") {\n                        IngredientListScreen(\n                            onEditIngredientClick = { /* TODO: 재료 수정 화면으로 이동 */ },\n                            onRegisterIngredientClick = { navController.navigate(\"registerIngredient\") }\n                        )\n                    }\n                    composable(\"registerIngredient\") { RegisterIngredientScreen() }\n                    composable(\"registerRecipe\") { RegisterRecipeScreen() }\n                    composable(\"boardDetail/{title}\") { backStackEntry ->\n                        val encodedTitle = backStackEntry.arguments?.getString(\"title\") ?: \"\"\n                        val title = URLDecoder.decode(encodedTitle, \"UTF-8\")\n                        BoardDetailScreen(navController, title)\n                    }\n                    composable(\n                        route = \"writePost/{category}/{tags}\",\n                        arguments = listOf(\n                            navArgument(\"category\") {\n                                type = NavType.StringType\n                                defaultValue = \"\"\n                            },\n                            navArgument(\"tags\") {\n                                type = NavType.StringType\n                                nullable = true\n                                defaultValue = null\n                            }\n                        )\n                    ) { backStackEntry ->\n                        val category = backStackEntry.arguments?.getString(\"category\") ?: \"\"\n                        val tags = backStackEntry.arguments?.getString(\"tags\")\n                        WritePostScreen(navController, category, tags)\n                    }\n                    composable(\n                        route = \"postDetail/{postId}\",\n                        arguments = listOf(\n                            navArgument(\"postId\") {\n                                type = NavType.StringType\n                            }\n                        )\n                    ) { backStackEntry ->\n                        val postId = backStackEntry.arguments?.getString(\"postId\") ?: \"\"\n                        PostDetailScreen(navController, postId)\n                    }\n                    composable(\"addSchedule\") {\n                        AddScheduleScreen(\n                            onCancel = { navController.navigateUp() },\n                            onSave = { schedule ->\n                                // TODO: 일정 저장 로직 구현\n                                navController.navigateUp()\n                            }\n                        )\n                    }\n                    composable(\"news_detail/{articleJson}\") { backStackEntry ->\n                        val articleJson = backStackEntry.arguments?.getString(\"articleJson\") ?: \"\"\n                        val article = Gson().fromJson(articleJson, Article::class.java)\n                        NewsDetailScreen(\n                            title = article.title ?: \"\",\n                            content = article.content,\n                            description = article.description,\n                            imageUrl = article.urlToImage,\n                            link = article.link\n                        )\n                    }\n                    composable(\n                        route = \"news_list/{topic}\",\n                        arguments = listOf(\n                            navArgument(\"topic\") {\n                                type = NavType.StringType\n                                defaultValue = \"자영업\"\n                            }\n                        )\n                    ) { backStackEntry ->\n                        val topic = backStackEntry.arguments?.getString(\"topic\") ?: \"자영업\"\n                        NewsListScreen(navController = navController, selectedTopic = topic)\n                    }\n                    composable(\"businessCertification\") {\n                        BusinessCertificationScreen(\n                            onConfirm = { /* TODO: 인증 성공 처리 */ },\n                            onDismiss = { navController.navigateUp() }\n                        )\n                    }\n                    composable(\"ocr\") {\n                        OcrScreen(\n                            onCaptureClick = { /* TODO: 카메라 캡처 구현 */ }\n                        )\n                    }\n                }\n            }\n        }\n    )\n}\n\n@Preview(showBackground = true)\n@Composable\nfun MainScreenPreview() {\n    BlindSJNTheme {\n        MainScreen()\n    }\n}\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/glowstudio/android/blindsjn/feature/main/view/MainScreen.kt b/app/src/main/java/com/glowstudio/android/blindsjn/feature/main/view/MainScreen.kt
+--- a/app/src/main/java/com/glowstudio/android/blindsjn/feature/main/view/MainScreen.kt	(revision aabf7fde899c9b19e48d4ee0c589f9789ce5f4c9)
++++ b/app/src/main/java/com/glowstudio/android/blindsjn/feature/main/view/MainScreen.kt	(date 1748594604686)
+@@ -7,7 +7,6 @@
+ import androidx.lifecycle.viewmodel.compose.viewModel
+ import androidx.navigation.compose.rememberNavController
+ import androidx.navigation.compose.currentBackStackEntryAsState
+-import com.glowstudio.android.blindsjn.ui.navigation.mainNavGraph
+ import com.glowstudio.android.blindsjn.feature.main.viewmodel.TopBarViewModel
+ import com.glowstudio.android.blindsjn.feature.main.viewmodel.NavigationViewModel
+ import androidx.compose.foundation.layout.Box
+@@ -30,11 +29,10 @@
+ import com.glowstudio.android.blindsjn.feature.home.view.NewsDetailScreen
+ import com.glowstudio.android.blindsjn.data.model.Article
+ import com.glowstudio.android.blindsjn.data.network.Network
+-import com.glowstudio.android.blindsjn.feature.paymanagement.repository.PayManagementApi
+ import com.glowstudio.android.blindsjn.feature.paymanagement.repository.PayManagementRepository
+ import com.glowstudio.android.blindsjn.feature.paymanagement.viewmodel.PayManagementViewModel
+ import com.glowstudio.android.blindsjn.feature.paymanagement.view.PayManagementScreen
+-import com.glowstudio.android.blindsjn.feature.paymanagement.view.OcrScreen
++import com.glowstudio.android.blindsjn.feature.ocr.view.OcrScreen
+ import androidx.compose.ui.platform.LocalContext
+ import com.glowstudio.android.blindsjn.feature.foodcost.view.FoodCostScreen
+ import com.glowstudio.android.blindsjn.feature.foodcost.RegisterRecipeScreen
+@@ -46,7 +44,6 @@
+ import com.glowstudio.android.blindsjn.feature.main.viewmodel.BottomBarViewModel
+ import com.glowstudio.android.blindsjn.feature.certification.BusinessCertificationScreen
+ import com.glowstudio.android.blindsjn.feature.home.NewsListScreen
+-import com.glowstudio.android.blindsjn.feature.home.view.NewsMainScreen
+ 
+ /**
+  * 메인 스크린: 상단바, 하단 네비게이션 바, 내부 컨텐츠(AppNavHost)를 포함하여 전체 화면 전환을 관리합니다.
+Index: app/src/main/java/com/glowstudio/android/blindsjn/feature/ocr/view/OcrScreen.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.glowstudio.android.blindsjn.feature.ocr.view\n\nimport androidx.compose.foundation.Canvas\nimport androidx.compose.foundation.background\nimport androidx.compose.foundation.layout.*\nimport androidx.compose.foundation.shape.CircleShape\nimport androidx.compose.material3.*\nimport androidx.compose.runtime.Composable\nimport androidx.compose.ui.Alignment\nimport androidx.compose.ui.Modifier\nimport androidx.compose.ui.draw.clip\nimport androidx.compose.ui.geometry.Offset\nimport androidx.compose.ui.graphics.Color\nimport androidx.compose.ui.text.font.FontWeight\nimport androidx.compose.ui.text.style.TextAlign\nimport androidx.compose.ui.unit.dp\nimport androidx.compose.ui.unit.sp\nimport androidx.compose.ui.tooling.preview.Preview\nimport androidx.navigation.NavController\nimport com.glowstudio.android.blindsjn.feature.ocr.viewmodel.OcrViewModel\nimport com.glowstudio.android.blindsjn.ui.theme.*\n\n@Composable\nfun OcrScreen(\n    navController: NavController,\n    viewModel: OcrViewModel\n) {\n    val verticalPadding = 48.dp\n    Box(\n        modifier = Modifier\n            .fillMaxSize()\n            .background(BackgroundWhite)\n    ) {\n        // 상단에 프레임\n        Box(\n            modifier = Modifier\n                .align(Alignment.TopCenter)\n                .padding(top = verticalPadding)\n                .size(width = 320.dp, height = 520.dp)\n        ) {\n            Canvas(modifier = Modifier.matchParentSize()) {\n                val strokeWidth = 4.dp.toPx()\n                val length = 40.dp.toPx()\n                val w = size.width\n                val h = size.height\n                val color = Blue\n                drawLine(color, Offset(0f, 0f), Offset(length, 0f), strokeWidth)\n                drawLine(color, Offset(0f, 0f), Offset(0f, length), strokeWidth)\n                drawLine(color, Offset(w, 0f), Offset(w - length, 0f), strokeWidth)\n                drawLine(color, Offset(w, 0f), Offset(w, length), strokeWidth)\n                drawLine(color, Offset(0f, h), Offset(0f, h - length), strokeWidth)\n                drawLine(color, Offset(0f, h), Offset(length, h), strokeWidth)\n                drawLine(color, Offset(w, h), Offset(w - length, h), strokeWidth)\n                drawLine(color, Offset(w, h), Offset(w, h - length), strokeWidth)\n            }\n            Text(\n                \"문서를 이 영역에 맞춰주세요.\",\n                color = TextSecondary,\n                fontSize = 18.sp,\n                fontWeight = FontWeight.Medium,\n                textAlign = TextAlign.Center,\n                modifier = Modifier.align(Alignment.Center)\n            )\n        }\n        // 하단에 버튼\n        Button(\n            onClick = { /* TODO: Implement capture */ },\n            shape = CircleShape,\n            colors = ButtonDefaults.buttonColors(containerColor = Blue),\n            modifier = Modifier\n                .align(Alignment.BottomCenter)\n                .padding(bottom = verticalPadding)\n                .size(72.dp)\n                .clip(CircleShape)\n        ) {}\n    }\n}\n\n@Preview(showBackground = true)\n@Composable\nfun OcrScreenPreview() {\n    BlindSJNTheme {\n        OcrScreen(navController = NavController(null), viewModel = OcrViewModel(null))\n    }\n} 
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/glowstudio/android/blindsjn/feature/ocr/view/OcrScreen.kt b/app/src/main/java/com/glowstudio/android/blindsjn/feature/ocr/view/OcrScreen.kt
+--- a/app/src/main/java/com/glowstudio/android/blindsjn/feature/ocr/view/OcrScreen.kt	(revision aabf7fde899c9b19e48d4ee0c589f9789ce5f4c9)
++++ b/app/src/main/java/com/glowstudio/android/blindsjn/feature/ocr/view/OcrScreen.kt	(date 1748594604654)
+@@ -10,20 +10,16 @@
+ import androidx.compose.ui.Modifier
+ import androidx.compose.ui.draw.clip
+ import androidx.compose.ui.geometry.Offset
+-import androidx.compose.ui.graphics.Color
+ import androidx.compose.ui.text.font.FontWeight
+ import androidx.compose.ui.text.style.TextAlign
+ import androidx.compose.ui.unit.dp
+ import androidx.compose.ui.unit.sp
+ import androidx.compose.ui.tooling.preview.Preview
+-import androidx.navigation.NavController
+-import com.glowstudio.android.blindsjn.feature.ocr.viewmodel.OcrViewModel
+ import com.glowstudio.android.blindsjn.ui.theme.*
+ 
+ @Composable
+ fun OcrScreen(
+-    navController: NavController,
+-    viewModel: OcrViewModel
++    onCaptureClick: () -> Unit = {}
+ ) {
+     val verticalPadding = 48.dp
+     Box(
+@@ -64,7 +60,7 @@
+         }
+         // 하단에 버튼
+         Button(
+-            onClick = { /* TODO: Implement capture */ },
++            onClick = onCaptureClick,
+             shape = CircleShape,
+             colors = ButtonDefaults.buttonColors(containerColor = Blue),
+             modifier = Modifier
+@@ -80,6 +76,7 @@
+ @Composable
+ fun OcrScreenPreview() {
+     BlindSJNTheme {
+-        OcrScreen(navController = NavController(null), viewModel = OcrViewModel(null))
++        OcrScreen()
+     }
+-} 
+\ No newline at end of file
++}
++
+Index: app/src/main/java/com/glowstudio/android/blindsjn/feature/paymanagement/view/OcrScreen.kt
+===================================================================
+diff --git a/app/src/main/java/com/glowstudio/android/blindsjn/feature/paymanagement/view/OcrScreen.kt b/app/src/main/java/com/glowstudio/android/blindsjn/feature/paymanagement/view/OcrScreen.kt
+deleted file mode 100644
+--- a/app/src/main/java/com/glowstudio/android/blindsjn/feature/paymanagement/view/OcrScreen.kt	(revision aabf7fde899c9b19e48d4ee0c589f9789ce5f4c9)
++++ /dev/null	(revision aabf7fde899c9b19e48d4ee0c589f9789ce5f4c9)
+@@ -1,85 +0,0 @@
+-package com.glowstudio.android.blindsjn.feature.paymanagement.view
+-
+-import androidx.compose.foundation.Canvas
+-import androidx.compose.foundation.background
+-import androidx.compose.foundation.layout.*
+-import androidx.compose.foundation.shape.CircleShape
+-import androidx.compose.foundation.shape.RoundedCornerShape
+-import androidx.compose.material3.*
+-import androidx.compose.runtime.Composable
+-import androidx.compose.ui.Alignment
+-import androidx.compose.ui.Modifier
+-import androidx.compose.ui.draw.clip
+-import androidx.compose.ui.geometry.Offset
+-import androidx.compose.ui.graphics.Color
+-import androidx.compose.ui.graphics.drawscope.Stroke
+-import androidx.compose.ui.text.font.FontWeight
+-import androidx.compose.ui.text.style.TextAlign
+-import androidx.compose.ui.unit.dp
+-import androidx.compose.ui.unit.sp
+-import androidx.compose.ui.tooling.preview.Preview
+-import com.glowstudio.android.blindsjn.ui.theme.*
+-
+-@Composable
+-fun OcrScreen(
+-    onCaptureClick: () -> Unit = {}
+-) {
+-    val verticalPadding = 48.dp
+-    Box(
+-        modifier = Modifier
+-            .fillMaxSize()
+-            .background(BackgroundWhite)
+-    ) {
+-        // 상단에 프레임
+-        Box(
+-            modifier = Modifier
+-                .align(Alignment.TopCenter)
+-                .padding(top = verticalPadding)
+-                .size(width = 320.dp, height = 520.dp)
+-        ) {
+-            Canvas(modifier = Modifier.matchParentSize()) {
+-                val strokeWidth = 4.dp.toPx()
+-                val length = 40.dp.toPx()
+-                val w = size.width
+-                val h = size.height
+-                val color = Blue
+-                drawLine(color, Offset(0f, 0f), Offset(length, 0f), strokeWidth)
+-                drawLine(color, Offset(0f, 0f), Offset(0f, length), strokeWidth)
+-                drawLine(color, Offset(w, 0f), Offset(w - length, 0f), strokeWidth)
+-                drawLine(color, Offset(w, 0f), Offset(w, length), strokeWidth)
+-                drawLine(color, Offset(0f, h), Offset(0f, h - length), strokeWidth)
+-                drawLine(color, Offset(0f, h), Offset(length, h), strokeWidth)
+-                drawLine(color, Offset(w, h), Offset(w - length, h), strokeWidth)
+-                drawLine(color, Offset(w, h), Offset(w, h - length), strokeWidth)
+-            }
+-            Text(
+-                "문서를 이 영역에 맞춰주세요.",
+-                color = TextSecondary,
+-                fontSize = 18.sp,
+-                fontWeight = FontWeight.Medium,
+-                textAlign = TextAlign.Center,
+-                modifier = Modifier.align(Alignment.Center)
+-            )
+-        }
+-        // 하단에 버튼
+-        Button(
+-            onClick = onCaptureClick,
+-            shape = CircleShape,
+-            colors = ButtonDefaults.buttonColors(containerColor = Blue),
+-            modifier = Modifier
+-                .align(Alignment.BottomCenter)
+-                .padding(bottom = verticalPadding)
+-                .size(72.dp)
+-                .clip(CircleShape)
+-        ) {}
+-    }
+-}
+-
+-@Preview(showBackground = true)
+-@Composable
+-fun OcrScreenPreview() {
+-    BlindSJNTheme {
+-        OcrScreen()
+-    }
+-}
+-
