@@ -1,10 +1,12 @@
 package com.glowstudio.android.blindsjn
 
+import android.Manifest
 import android.os.Bundle
 import android.webkit.WebView
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -20,8 +22,18 @@ import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+    private val requestPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        // 권한이 거부되더라도 앱은 계속 실행됩니다
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        
+        // 앱 시작 시 카메라 권한 요청
+        requestPermissionLauncher.launch(Manifest.permission.CAMERA)
+        
         enableEdgeToEdge()
         
         // WebView Variations 서비스 비활성화
@@ -42,13 +54,9 @@ class MainActivity : ComponentActivity() {
                                 showSplash = false
                             }
                         )
-                    }
-                        else {
+                    } else {
                         val navController = rememberNavController()
-                        val topBarViewModel: TopBarViewModel = viewModel()
-                        AppNavHost(
-                            navController = navController
-                        )
+                        AppNavHost(navController = navController)
                     }
                 }
             }

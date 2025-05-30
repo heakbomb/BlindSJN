@@ -243,9 +243,7 @@ fun MainScreen(
                         )
                     }
                     composable("ocr") {
-                        OcrScreen(
-                            onCaptureClick = { /* TODO: 카메라 캡처 구현 */ }
-                        )
+                        OcrScreen()
                     }
                 }
             }
