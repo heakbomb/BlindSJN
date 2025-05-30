@@ -24,6 +24,7 @@ class OcrCameraManager(private val context: Context) {
 
     private var imageReader: ImageReader? = null
     private var onImageCaptured: ((ByteArray) -> Unit)? = null
+    private var previewSurface: Surface? = null
 
     init {
         imageReader = ImageReader.newInstance(
@@ -41,6 +42,10 @@ class OcrCameraManager(private val context: Context) {
                 }
             }, cameraHandler)
         }
+    }
+
+    fun setPreviewSurface(surface: Surface) {
+        previewSurface = surface
     }
 
     fun openCamera(cameraId: String) {
@@ -74,14 +79,22 @@ class OcrCameraManager(private val context: Context) {
 
     private fun createCaptureSession() {
         val surfaces = mutableListOf<Surface>()
+        previewSurface?.let { surfaces.add(it) }
         imageReader?.surface?.let { surfaces.add(it) }
+
+        if (surfaces.isEmpty()) {
+            _cameraState.value = CameraState.Error("No surfaces available for preview")
+            return
+        }
 
         cameraDevice?.createCaptureSession(surfaces, object : CameraCaptureSession.StateCallback() {
             override fun onConfigured(session: CameraCaptureSession) {
                 captureSession = session
                 try {
                     val requestBuilder = cameraDevice?.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW)
-                    requestBuilder?.addTarget(surfaces[0])
+                    surfaces.forEach { surface ->
+                        requestBuilder?.addTarget(surface)
+                    }
                     session.setRepeatingRequest(requestBuilder?.build()!!, null, cameraHandler)
                 } catch (e: CameraAccessException) {
                     _cameraState.value = CameraState.Error("Failed to start camera preview: ${e.message}")

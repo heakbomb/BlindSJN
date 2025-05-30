@@ -22,6 +22,7 @@ fun CameraPreview(
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     val cameraManager = remember { OcrCameraManager(context) }
+    var surfaceView: SurfaceView? = null
 
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
@@ -34,7 +35,13 @@ fun CameraPreview(
                         val facing = characteristics.get(android.hardware.camera2.CameraCharacteristics.LENS_FACING)
                         facing == android.hardware.camera2.CameraCharacteristics.LENS_FACING_BACK
                     }
-                    cameraId?.let { cameraManager.openCamera(it) }
+                    cameraId?.let { 
+                        surfaceView?.holder?.surface?.let { surface ->
+                            cameraManager.setPreviewSurface(surface)
+                            cameraManager.openCamera(it)
+                            onCameraReady(cameraManager)
+                        }
+                    }
                 }
                 Lifecycle.Event.ON_PAUSE -> {
                     cameraManager.closeCamera()
@@ -57,6 +64,19 @@ fun CameraPreview(
                     ViewGroup.LayoutParams.MATCH_PARENT,
                     ViewGroup.LayoutParams.MATCH_PARENT
                 )
+                holder.addCallback(object : android.view.SurfaceHolder.Callback {
+                    override fun surfaceCreated(holder: android.view.SurfaceHolder) {
+                        surfaceView = this@apply
+                    }
+
+                    override fun surfaceChanged(holder: android.view.SurfaceHolder, format: Int, width: Int, height: Int) {
+                        // Surface size changed
+                    }
+
+                    override fun surfaceDestroyed(holder: android.view.SurfaceHolder) {
+                        surfaceView = null
+                    }
+                })
             }
         },
         modifier = modifier

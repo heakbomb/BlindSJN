@@ -18,21 +18,22 @@ import com.glowstudio.android.blindsjn.ui.navigation.AppNavHost
 import com.glowstudio.android.blindsjn.feature.main.viewmodel.TopBarViewModel
 import com.glowstudio.android.blindsjn.ui.theme.BlindSJNTheme
 import com.glowstudio.android.blindsjn.feature.splash.SplashScreen
-import dagger.hilt.android.AndroidEntryPoint
+import com.glowstudio.android.blindsjn.data.network.PermissionManager
 
-@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted ->
-        // 권한이 거부되더라도 앱은 계속 실행됩니다
+        PermissionManager.saveCameraPermission(this, isGranted)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         
         // 앱 시작 시 카메라 권한 요청
-        requestPermissionLauncher.launch(Manifest.permission.CAMERA)
+        if (!PermissionManager.hasCameraPermission.value) {
+            requestPermissionLauncher.launch(Manifest.permission.CAMERA)
+        }
         
         enableEdgeToEdge()
         
