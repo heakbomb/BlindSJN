@@ -77,9 +77,22 @@ fun DailySalesBottomSheet(
                     delivery_sales_amount = delivery
                 )
                 viewModel.saveDailySales(req)
-                onDismiss()
             },
             isLoading = saveState is DailySalesSaveState.Loading
         )
+
+        // 저장 상태에 따른 처리
+        LaunchedEffect(saveState) {
+            when (saveState) {
+                is DailySalesSaveState.Success -> {
+                    onSaved() // 저장 성공 시 콜백 호출
+                    onDismiss() // 바텀시트 닫기
+                }
+                is DailySalesSaveState.Error -> {
+                    // 에러 처리 (필요한 경우)
+                }
+                else -> {}
+            }
+        }
     }
 } 
