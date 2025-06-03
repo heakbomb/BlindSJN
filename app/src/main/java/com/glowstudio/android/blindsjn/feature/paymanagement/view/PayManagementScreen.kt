@@ -367,7 +367,12 @@ fun PayManagementScreen(
                                     
                                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                         // 금액 라벨 (compact)
-                                        val compactValue = if (isFuture) "-" else if (value >= 10000) "${(value / 10000).toInt()}만" else value.toInt().toString()
+                                        val compactValue = when {
+                                            isFuture -> "-"
+                                            value == 0.0 -> "0원" // 데이터가 0일 때 "0원" 표시
+                                            value >= 10000 -> "${(value / 10000).toInt()}만"
+                                            else -> value.toInt().toString()
+                                        }
                                         Text(
                                             compactValue,
                                             fontSize = 11.sp,
@@ -752,7 +757,11 @@ fun PayManagementScreen(
                 ) {
                     DailySalesBottomSheet(
                         onDismiss = { showBottomSheet = false },
-                        onSaved = { showBottomSheet = false }
+                        onSaved = { 
+                            showBottomSheet = false
+                            // 데이터 갱신
+                            viewModel.refresh()
+                        }
                     )
                 }
             }

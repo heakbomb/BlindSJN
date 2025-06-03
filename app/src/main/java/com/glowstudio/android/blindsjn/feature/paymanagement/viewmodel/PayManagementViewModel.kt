@@ -6,6 +6,8 @@ import androidx.lifecycle.viewModelScope
 import com.glowstudio.android.blindsjn.feature.paymanagement.model.SalesSummaryResponse
 import com.glowstudio.android.blindsjn.feature.paymanagement.model.SalesComparisonResponse
 import com.glowstudio.android.blindsjn.feature.paymanagement.model.TopItemsResponse
+import com.glowstudio.android.blindsjn.feature.paymanagement.model.SalesComparison
+import com.glowstudio.android.blindsjn.feature.paymanagement.model.Summary
 import com.glowstudio.android.blindsjn.feature.paymanagement.repository.PayManagementRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -102,7 +104,7 @@ class PayManagementViewModel(
         _fixedCost.value = cost
     }
 
-    private fun loadData() {
+    fun loadData() {
         viewModelScope.launch {
             Log.d(TAG, "데이터 로드 시작. Period: ${_selectedPeriod.value}")
             try {
@@ -141,11 +143,24 @@ class PayManagementViewModel(
 
                 // 매출 요약 데이터 로드
                 val summaryResponse = repository.getSalesSummary(today.format(DateTimeFormatter.ISO_DATE))
-                if (summaryResponse.status == "success") {
+                if (summaryResponse.status == "success" && summaryResponse.summary != null) {
                     _salesSummary.value = summaryResponse
                 } else {
-                    _error.value = summaryResponse.message ?: "매출 요약 데이터를 불러오는데 실패했습니다."
-                    _salesSummary.value = null
+                    // 데이터가 없는 경우 0으로 초기화
+                    _salesSummary.value = SalesSummaryResponse(
+                        status = "success",
+                        message = null,
+                        period = "day",
+                        date = today.format(DateTimeFormatter.ISO_DATE),
+                        requestedDate = today.format(DateTimeFormatter.ISO_DATE),
+                        actualDate = today.format(DateTimeFormatter.ISO_DATE),
+                        data = null,
+                        summary = Summary(
+                            totalSales = 0.0,
+                            totalMargin = 0.0,
+                            marginRate = 0.0
+                        )
+                    )
                 }
 
                 // 매출 비교 데이터 로드
@@ -153,7 +168,38 @@ class PayManagementViewModel(
                 if (comparisonResponse.status == "success") {
                     _salesComparison.value = comparisonResponse
                 } else {
-                    _salesComparison.value = null
+                    // 데이터가 없는 경우 0으로 초기화
+                    _salesComparison.value = SalesComparisonResponse(
+                        status = "success",
+                        message = null,
+                        date = today.format(DateTimeFormatter.ISO_DATE),
+                        comparisons = mapOf(
+                            "day" to SalesComparison(
+                                currentSales = 0.0,
+                                previousSales = 0.0,
+                                differenceRate = 0.0,
+                                isIncrease = false
+                            ),
+                            "week" to SalesComparison(
+                                currentSales = 0.0,
+                                previousSales = 0.0,
+                                differenceRate = 0.0,
+                                isIncrease = false
+                            ),
+                            "month" to SalesComparison(
+                                currentSales = 0.0,
+                                previousSales = 0.0,
+                                differenceRate = 0.0,
+                                isIncrease = false
+                            ),
+                            "year" to SalesComparison(
+                                currentSales = 0.0,
+                                previousSales = 0.0,
+                                differenceRate = 0.0,
+                                isIncrease = false
+                            )
+                        )
+                    )
                 }
 
                 // TOP 3 메뉴 데이터 로드
@@ -161,7 +207,6 @@ class PayManagementViewModel(
                 if (topItemsResponse.status == "success") {
                     _topItems.value = topItemsResponse
                 } else {
-                    _error.value = topItemsResponse.message ?: "TOP 3 메뉴 데이터를 불러오는데 실패했습니다."
                     _topItems.value = null
                 }
 
@@ -178,7 +223,7 @@ class PayManagementViewModel(
         }
     }
 
-    private fun loadWeeklySales() {
+    fun loadWeeklySales() {
         viewModelScope.launch {
             try {
                 val today = LocalDate.now()
@@ -191,26 +236,39 @@ class PayManagementViewModel(
                     // 현재 요일 이후의 미래 날짜는 매출을 0으로 설정
                     if (date.isAfter(today)) {
                         weeklyData.add(0.0)
+                        Log.d(TAG, "${date.format(DateTimeFormatter.ISO_DATE)}: 미래 날짜, 매출 0")
                         continue
                     }
                     
                     val dateStr = date.format(DateTimeFormatter.ISO_DATE)
-                    val response = repository.getSalesSummary(dateStr)
-                    if (response.status == "success" && response.summary != null) {
-                        weeklyData.add(response.summary.totalSales)
-                    } else {
+                    try {
+                        val response = repository.getSalesSummary(dateStr)
+                        if (response.status == "success" && response.summary != null) {
+                            weeklyData.add(response.summary.totalSales)
+                            Log.d(TAG, "${dateStr}: 데이터 로드 성공, 매출: ${response.summary.totalSales}")
+                        } else {
+                            // 응답은 성공이나 summary가 없거나, 응답 자체가 실패인 경우
+                            weeklyData.add(0.0)
+                            Log.d(TAG, "${dateStr}: 데이터 없음 또는 로드 실패, 매출 0. 상태: ${response.status}, 메시지: ${response.message}")
+                        }
+                    } catch (e: Exception) {
+                        // API 호출 중 예외 발생 시 0으로 처리
                         weeklyData.add(0.0)
+                        Log.e(TAG, "${dateStr}: API 호출 중 예외 발생", e)
                     }
                 }
                 _weeklySales.value = weeklyData
                 
-                // 주간 평균 매출 계산 (미래 날짜 제외)
+                // 주간 평균 매출 계산 (미래 날짜와 데이터가 없는 날짜 제외)
                 val validSales = weeklyData.filter { it > 0 }
                 _weeklyAverage.value = if (validSales.isNotEmpty()) {
                     validSales.average()
                 } else {
                     0.0
                 }
+
+                Log.d(TAG, "주간 매출 데이터 로드 완료: $weeklyData")
+                Log.d(TAG, "주간 평균 매출: ${_weeklyAverage.value}")
             } catch (e: Exception) {
                 Log.e(TAG, "주간 매출 데이터 로드 중 오류 발생", e)
                 _weeklySales.value = List(7) { 0.0 }
@@ -219,11 +277,11 @@ class PayManagementViewModel(
         }
     }
 
-    private fun loadMonthlyGoal() {
+    fun loadMonthlyGoal() {
         _monthlyGoal.value = repository.getMonthlyGoal()
     }
 
-    private fun loadDailyAverage() {
+    fun loadDailyAverage() {
         viewModelScope.launch {
             try {
                 val today = LocalDate.now()
@@ -248,32 +306,20 @@ class PayManagementViewModel(
                     currentDate = currentDate.plusDays(1)
                 }
                 
-                // 평균 계산
                 _dailyAverage.value = if (count > 0) totalSales / count else 0.0
                 
-                // 다른 요일 평균과 비교
-                var otherDaysTotal = 0.0
-                var otherDaysCount = 0
-                currentDate = startOfMonth
-                while (!currentDate.isAfter(endOfMonth)) {
-                    if (currentDate.dayOfWeek.value != dayOfWeek && !currentDate.isAfter(today)) {
-                        val dateStr = currentDate.format(DateTimeFormatter.ISO_DATE)
-                        val response = repository.getSalesSummary(dateStr)
-                        if (response.status == "success" && response.summary != null) {
-                            otherDaysTotal += response.summary.totalSales
-                            otherDaysCount++
-                        }
+                // 오늘의 매출과 평균 비교
+                val todayResponse = repository.getSalesSummary(today.format(DateTimeFormatter.ISO_DATE))
+                if (todayResponse.status == "success" && todayResponse.summary != null) {
+                    val todaySales = todayResponse.summary.totalSales
+                    _dailyComparison.value = if (_dailyAverage.value > 0) {
+                        ((todaySales - _dailyAverage.value) / _dailyAverage.value) * 100
+                    } else {
+                        0.0
                     }
-                    currentDate = currentDate.plusDays(1)
                 }
-                
-                val otherDaysAverage = if (otherDaysCount > 0) otherDaysTotal / otherDaysCount else 0.0
-                _dailyComparison.value = if (otherDaysAverage > 0) {
-                    ((_dailyAverage.value - otherDaysAverage) / otherDaysAverage) * 100
-                } else 0.0
-                
             } catch (e: Exception) {
-                Log.e(TAG, "요일별 평균 매출 계산 중 오류 발생", e)
+                Log.e(TAG, "일일 평균 매출 데이터 로드 중 오류 발생", e)
                 _dailyAverage.value = 0.0
                 _dailyComparison.value = 0.0
             }
@@ -287,6 +333,8 @@ class PayManagementViewModel(
     fun refresh() {
         loadData()
         loadWeeklySales()
+        loadMonthlyGoal()
         loadDailyAverage()
+        loadFixedCost()
     }
 } 
