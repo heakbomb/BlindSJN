@@ -32,36 +32,57 @@ fun isNetworkAvailable(context: Context): Boolean {
     return capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
 }
 
+// 응답 인터셉터 클래스
+class ResponseInterceptor : Interceptor {
+    override fun intercept(chain: Interceptor.Chain): okhttp3.Response {
+        val response = chain.proceed(chain.request())
+        try {
+            val responseBody = response.body?.string()
+            
+            // Extract JSON from response if it contains HTML warnings
+            val jsonResponse = responseBody?.let { body ->
+                val jsonStart = body.indexOf('{')
+                val jsonEnd = body.lastIndexOf('}')
+                if (jsonStart >= 0 && jsonEnd > jsonStart) {
+                    body.substring(jsonStart, jsonEnd + 1)
+                } else {
+                    body
+                }
+            } ?: "{}"
+
+            // Create new response with cleaned body
+            return response.newBuilder()
+                .body(ResponseBody.create(response.body?.contentType(), jsonResponse))
+                .build()
+        } catch (e: Exception) {
+            // 오류 발생 시 원본 응답 반환
+            return response
+        }
+    }
+}
+
+// POST 메소드 인터셉터 클래스
+class PostMethodInterceptor : Interceptor {
+    override fun intercept(chain: Interceptor.Chain): okhttp3.Response {
+        val original = chain.request()
+        val request = original.newBuilder()
+            .header("Content-Type", "application/json")
+            .method(original.method, original.body)
+            .build()
+        return chain.proceed(request)
+    }
+}
+
 object Network {
     private const val BASE_URL = "http://wonrdc.iptime.org/"
     private const val TIMEOUT_SECONDS = 30L
-
-    private val responseInterceptor = Interceptor { chain ->
-        val response = chain.proceed(chain.request())
-        val responseBody = response.body?.string()
-        
-        // Extract JSON from response if it contains HTML warnings
-        val jsonResponse = responseBody?.let { body ->
-            val jsonStart = body.indexOf('{')
-            val jsonEnd = body.lastIndexOf('}')
-            if (jsonStart >= 0 && jsonEnd > jsonStart) {
-                body.substring(jsonStart, jsonEnd + 1)
-            } else {
-                body
-            }
-        } ?: "{}"
-
-        // Create new response with cleaned body
-        response.newBuilder()
-            .body(ResponseBody.create(response.body?.contentType(), jsonResponse))
-            .build()
-    }
 
     private val okHttpClient = OkHttpClient.Builder()
         .addInterceptor(HttpLoggingInterceptor().apply {
             level = HttpLoggingInterceptor.Level.BODY
         })
-        .addInterceptor(responseInterceptor)
+        .addInterceptor(ResponseInterceptor())
+        .addInterceptor(PostMethodInterceptor())
         .connectTimeout(TIMEOUT_SECONDS, TimeUnit.SECONDS)
         .readTimeout(TIMEOUT_SECONDS, TimeUnit.SECONDS)
         .writeTimeout(TIMEOUT_SECONDS, TimeUnit.SECONDS)
